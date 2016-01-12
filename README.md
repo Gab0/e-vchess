@@ -30,7 +30,8 @@ Of course you can just run the engine with these parameters to play, but it's a 
 
 
 ## TODO:
--> E_Vchess engine understands most chess rules, but castling still fails.
+-> E_Vchess engine understands most chess rules, but castling still fails [fixed].
+
 -> Better evolutionary approach on the machines, probably using DEAP module.
 
  
