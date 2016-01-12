@@ -26,7 +26,7 @@ You can then play against the machines you evolved:
 
 $xboard -fcp '[full path to engine] -MD [full path to machine dir] --showinfo'
 
-Of course you can just run the engine with these parameters to play, but it's a shitty way to play.
+Of course you can just run the engine with these parameters to play, but it's a shitty way.
 
 
 ## TODO:
