@@ -330,11 +330,15 @@ float scoremod (int DEEP, int method) {
     
     float modifier = 0;
     float helper = 0;
-    if (method>2) method = 0;
     
-    if (method == 0) modifier = 2*((DEEP+param_deviationcalc)/param_DEEP);
+    if (method>3) method = 0;
     
-    if (method == 1) {
+    
+    if (method == 0) modifier = 1;
+    
+    if (method == 1) modifier = 2*((DEEP+param_deviationcalc)/param_DEEP);
+    
+    if (method == 2) {
         modifier = -power(DEEP,2)+param_DEEP*DEEP+2*param_DEEP;
         
 
@@ -346,7 +350,7 @@ float scoremod (int DEEP, int method) {
     }
     
     
-    if (method == 2) {
+    if (method == 3) {
 
         modifier = param_TIMEweight[param_DEEP-DEEP];
         

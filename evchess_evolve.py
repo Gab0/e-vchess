@@ -88,9 +88,9 @@ class parameter():
         else: bLIM = 0
 
                 
-        if self.LIM:
+        if self.LIM != None:
             if value > self.LIM: value = random.uniform(bLIM ,LIM)
-        if self.bLIM:
+        if self.bLIM != None:
             if value < self.bLIM: value = random.uniform(bLIM, LIM)
 
 

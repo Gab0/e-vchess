@@ -39,7 +39,7 @@ class Application(Frame):
         self.looplimit = 0
 
         #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 9 for each GB on your machine.
-        TABLECOUNT = 24 
+        TABLECOUNT = 60
         #number of tables to be shown on each row of machines.
         TABLEonROW = 12
 
