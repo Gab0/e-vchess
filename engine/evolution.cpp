@@ -4,6 +4,15 @@
 #include "ev_chess.h"
 
 
+
+
+
+unsigned long long rndseed(){
+    unsigned int lo,hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((unsigned long long)hi << 32) | lo;
+}
+
 int loadmachine (int verbose, char *dir) {
   
     
@@ -42,7 +51,7 @@ int loadmachine (int verbose, char *dir) {
        
        
        fp = fopen(filename, "r");
-        srand ( time(NULL) );
+        srand ( rndseed() );
        Nchosenmachine = rand() % Nmachines;
 
        Vb printf("number of machines on list: %i    (%ith was chosen)\n", Nmachines,Nchosenmachine);

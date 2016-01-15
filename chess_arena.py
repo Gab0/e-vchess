@@ -29,7 +29,6 @@ evchessARGS = [evchessP, "-MD", machineDIR]
 COLOR = {0: 'WHITE', 1: 'BLACK'}
 TABLEBOARD = []
 
-SHRINKLOOP = 0
 
 class Application(Frame):
 
@@ -39,8 +38,8 @@ class Application(Frame):
         self.Cycle = False
         self.looplimit = 0
 
-        #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 12 for each GB on your machine.
-        TABLECOUNT = 72 
+        #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 9 for each GB on your machine.
+        TABLECOUNT = 24 
         #number of tables to be shown on each row of machines.
         TABLEonROW = 12
 
@@ -48,7 +47,7 @@ class Application(Frame):
         k=0
         j=0
         for i in range(TABLECOUNT):
-            TABLEBOARD.append(table(master=root))
+            TABLEBOARD.append(table(self, master=root))
             TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
             k+=1
             if k == TABLEonROW:
@@ -98,12 +97,7 @@ class Application(Frame):
             TIME = time()-TIME
             if i % 10 == 0:
                 system('clear')
-            global SHRINKLOOP
-            if SHRINKLOOP>0:
-                self.looplimit-=3
-                self.killunused()
-                
-                SHRINKLOOP = 0
+
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             if (i % 5000 == 0) and (i != 0):
@@ -116,7 +110,8 @@ class Application(Frame):
                     if TABLEBOARD[t].online == 1:
                         TABLEBOARD[t].readmove()
                     else:
-                        threading.Thread(TABLEBOARD[t].newmatch()).start()
+                        TABLEBOARD[t].newmatch_thread(0)
+
             i+=1
             if i > 100000: i=0
             sleep(SLEEPTIME)
@@ -124,12 +119,13 @@ class Application(Frame):
 
     def killcycle(self):
         self.Cycle = False
-        self.Cycle.kill()
+        self.CYCLE.join(0)
+        self.CYCLE=None
         self.menubar.entryconfigure(1, label='cycle thru')#self.cycle["text"] = "cycle thru"
-        self.menubar.entryconfigure(1, command=self.gocycle)#self.cycle["command"] = self.gocycle
+        self.menubar.entryconfigure(1, command=self.startcycle)#self.cycle["command"] = self.gocycle
 
     def setlooplimit(self, limit):
-        if self.Cycle == True: return
+        #if self.Cycle == True: return
 
         self.looplimit = limit
         for i in range(len(TABLEBOARD)):
@@ -179,17 +175,23 @@ class Application(Frame):
 
 
 
-
+    def shrinkloop(self):
+        self.looplimit-=3
+        self.killunused()
 
 
 
         
 class table(Frame):
-    def __init__(self, master=None):
+    def __init__(self, arena, master=None):
         Frame.__init__(self, master)
         self.board = chess.Board()
         self.online = 0
         self.movelist=[]
+
+
+        self.arena = arena
+
         
         self.consec_failure=0
   
@@ -204,25 +206,47 @@ class table(Frame):
         self.flagged_toend = 0
         self.setWidgets()
         #self.newmatch()
+
+        self.startThread = None
+
+        self.initialize=0
+    def newmatch_thread(self, kill):
+        if not kill:
+            if (self.startThread) and (self.initialize == 0):
+                self.startThread.join(0)
+                self.startThread = None
+            else:
+                self.startThread = threading.Thread(target=self.newmatch)
+                self.startThread.start()
+        else:
+            if self.startThread:
+                self.startThread.join(0)
+                self.startThread = None
+
+                
     def newmatch(self):
+        if self.initialize: return
+
         
         self.MACHINE = []
         self.rounds_played=0
         
+        self.initialize = 1
+
+        
         try:
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
-            sleep(1)
+
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
         except OSError:
-            global SHRINKLOOP
-            SHRINKLOOP=1
+            self.arena.shrinkloop()
             for M in self.MACHINE:
                 M.kill()
             return -1
 
+        sleep(3)
 
-
-        
+        self.Maximize["background"] = "grey"
         self.MACnames = ['zero','zero']
 
         flags = fcntl(self.MACHINE[0].stdout, F_GETFL) # get current p.stdout flags
@@ -237,7 +261,7 @@ class table(Frame):
         #self.Pout(self.Wmachine.stdout.readlines())
         #self.Pout(self.Bmachine.stdout.readlines())
         
-        sleep(1)
+        #sleep(1)
         try:
             self.MACHINE[0].stdout.flush()
             
@@ -249,7 +273,7 @@ class table(Frame):
                     if "line > " in line.decode('utf-8'):
                         self.MACnames[i] = line.decode('utf-8')[6:-1] 
 
-                    
+            sleep(2)            
             self.MACHINE[1].stdout.readlines()
 
 
@@ -270,7 +294,7 @@ class table(Frame):
         self.online = 1
         self.turn = 0        
 
-        
+        self.initialize=0
         
         self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
         self.visor.delete('1.0', END)
@@ -384,7 +408,7 @@ class table(Frame):
 
         self.setlimit["text"] = "off"
         self.online = 0
-        
+        self.Maximize["background"] = "light grey"
 
     def sendresult(self, result):
         print("game ends @ " + str(self.number))
@@ -476,8 +500,7 @@ class table(Frame):
             try:
                 CHK = check_output(['ps', '-p', PID, '-o', 'rss']).decode('utf-8','ignore')
             except OSError:
-                global SHRINKLOOP
-                SHRINKLOOP=1
+                self.arena.shrinkloop()
                 return
             #print('checking process %s,' % PID)
             #print(CHK)

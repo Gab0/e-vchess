@@ -233,7 +233,7 @@ class machine ():
         self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=0, LIM=9))
         self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 12, bLIM=12, INCR=3))
         self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
-        self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=2))
+        self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
         self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 20))
         self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21.25))
         self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.9, LIM=7, bLIM=-7))
