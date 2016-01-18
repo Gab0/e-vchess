@@ -6,7 +6,7 @@ After many cycles in the arena_array, machines will have their win/draw/lose rat
 
 
 ## Dependencies:
-pychess
+python-chess
 
 ## Instructions:
  Unpack all and build the chess engine. You can play against it using it's default parameters,  by running it alone or using a chess GUI like Xboard:
