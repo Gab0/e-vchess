@@ -566,10 +566,11 @@ void move_pc(struct board *tg_board, struct move *movement) {
     if(from[0]==0) cP = 1;
     
     if (cP > -1){
-        if(from[1]==0) {tg_board->castle[cP][0] = 0; movement->lostcastle=1;}
-        if(from[1]==4) {tg_board->castle[cP][1] = 0; movement->lostcastle=2;}
-        if(from[1]==7) {tg_board->castle[cP][2] = 0; movement->lostcastle=3;}
-       
+        if (tg_board->squares[to[0]][to[1]] == pieces[cP][5]) {
+        if(from[1]==0 && tg_board->castle[cP][0] == 1) {tg_board->castle[cP][0] = 0; movement->lostcastle=1;}
+        if(from[1]==4 && tg_board->castle[cP][1] == 1) {tg_board->castle[cP][1] = 0; movement->lostcastle=2;}
+        if(from[1]==7 && tg_board->castle[cP][2] == 1) {tg_board->castle[cP][2] = 0; movement->lostcastle=3;}
+        }
         }
     
 }

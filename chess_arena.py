@@ -24,11 +24,14 @@ machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
 evchessARGS = [evchessP, "-MD", machineDIR]
 
 
-
+NOGUI = 0
 
 COLOR = {0: 'WHITE', 1: 'BLACK'}
 TABLEBOARD = []
 
+
+if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
+    NOGUI = 1
 
 class Application(Frame):
 
@@ -364,7 +367,7 @@ class table(Frame):
                     if self.board.is_checkmate():
                         self.sendresult(self.turn)
                         return
-                    if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_threefold_repetition() or self.board.can_claim_fifty_moves():
+                    if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves(): #or self.board.can_claim_threefold_repetition() 
                         self.sendresult(0.5)
                         return
                     
@@ -383,6 +386,14 @@ class table(Frame):
                     self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + L[1])
                     self.log(L[0],L[1])
                     self.log(str(self.board),0)
+                    self.log('printing internal board >>>>',0)
+                    
+                    self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
+                    self.MACHINE[self.turn].stdin.flush()
+                    sleep(1)
+                    self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
+                                                 
+
                     self.endgame()
         if SUCCESS==0:
             self.consec_failure+=1
@@ -405,6 +416,7 @@ class table(Frame):
         self.flagged_toend=0
         for machine in self.MACHINE:
             machine.kill()
+            self.MACHINE = []
 
         self.setlimit["text"] = "off"
         self.online = 0
@@ -496,7 +508,10 @@ class table(Frame):
 
     def check_engine_health(self):
         for M in range(len(self.MACHINE)):
-            PID = str(self.MACHINE[M].pid)
+            try:
+                PID = str(self.MACHINE[M].pid)
+            except IndexError:
+                return
             try:
                 CHK = check_output(['ps', '-p', PID, '-o', 'rss']).decode('utf-8','ignore')
             except OSError:
@@ -536,17 +551,19 @@ class table(Frame):
             self.visible = 1
 
 
-
+    #def log_wrongmove(self):
         
-root = Tk()
-root.wm_title("e-vchess arenaArray")
-root.grid_columnconfigure(8, weight=1)
-root.grid_rowconfigure(4, weight=1)
-app = Application(master=root)
-app.grid(sticky=NSEW)
+if not NOGUI:
+        
+    root = Tk()
+    root.wm_title("e-vchess arenaArray")
+    root.grid_columnconfigure(8, weight=1)
+    root.grid_rowconfigure(4, weight=1)
+    app = Application(master=root)
+    app.grid(sticky=NSEW)
 
-root.resizable(False, False)
-root.mainloop()
+    root.resizable(False, False)
+    root.mainloop()
 
 
 
