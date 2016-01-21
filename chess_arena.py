@@ -1,3 +1,4 @@
+
 #!/bin/python
 import chess
 import shlex
@@ -17,6 +18,9 @@ from evchess_evolve import *
 
 from random import randrange
 
+from psutil import *
+
+
 # path to e-vchess executable and the directory where machines are stored, respectively.
 evchessP = "/home/gabs/NetBeansProjects/CppApplication_1/dist/Release/GNU-Linux/e-vchess"
 machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
@@ -24,14 +28,14 @@ machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
 evchessARGS = [evchessP, "-MD", machineDIR]
 
 
-NOGUI = 0
+GUI = 1
 
 COLOR = {0: 'WHITE', 1: 'BLACK'}
 TABLEBOARD = []
 
 
 if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
-    NOGUI = 1
+    GUI = 0
 
 class Application(Frame):
 
@@ -41,8 +45,8 @@ class Application(Frame):
         self.Cycle = False
         self.looplimit = 0
 
-        #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 9 for each GB on your machine.
-        TABLECOUNT = 60
+        #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 8 for each GB on your machine.
+        TABLECOUNT = 48
         #number of tables to be shown on each row of machines.
         TABLEonROW = 12
 
@@ -50,8 +54,8 @@ class Application(Frame):
         k=0
         j=0
         for i in range(TABLECOUNT):
-            TABLEBOARD.append(table(self, master=root))
-            TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
+            TABLEBOARD.append(table(self, master=master))
+            if GUI: TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
             k+=1
             if k == TABLEonROW:
                 k=0
@@ -64,7 +68,7 @@ class Application(Frame):
         self.menubar.add_command(label="Kill 'em All", command = self.killemall)
         self.menubar.add_command(label='show/hide ALL', command = self.showhideall)
 
-        master.config(menu=self.menubar)
+        if GUI: master.config(menu=self.menubar)
         self.showhide_ = 0
 
 
@@ -87,12 +91,15 @@ class Application(Frame):
         self.CYCLE.start()
         
     def gocycle(self):
-        SLEEPTIME = 8 - self.looplimit/2
-        if SLEEPTIME < 0: SLEEPTIME = 0.3
+        SLEEPTIME = 16 - self.looplimit/3
+        if SLEEPTIME < 0: SLEEPTIME = 0.9
         i=0
         self.Cycle = True
-        self.menubar.entryconfigure(1, label='stop cycle')
-        self.menubar.entryconfigure(1, command=self.killcycle)
+        
+        if GUI:
+            self.menubar.entryconfigure(1, label='stop cycle')
+            self.menubar.entryconfigure(1, command=self.killcycle)
+            
         TIME = time()
         TABLEBOARD[0].log("STARTING CYCLE", str(strftime("%d/%b - %H:%M:%S")))
 
@@ -114,7 +121,9 @@ class Application(Frame):
                         TABLEBOARD[t].readmove()
                     else:
                         TABLEBOARD[t].newmatch_thread(0)
-
+                        
+            if i == 0:
+                sleep(6)
             i+=1
             if i > 100000: i=0
             sleep(SLEEPTIME)
@@ -127,15 +136,20 @@ class Application(Frame):
         self.menubar.entryconfigure(1, label='cycle thru')#self.cycle["text"] = "cycle thru"
         self.menubar.entryconfigure(1, command=self.startcycle)#self.cycle["command"] = self.gocycle
 
+        
+
     def setlooplimit(self, limit):
         #if self.Cycle == True: return
 
         self.looplimit = limit
-        for i in range(len(TABLEBOARD)):
-            if i <= self.looplimit:
-                TABLEBOARD[i].setlimit["background"] = "green"
-            else:
-                TABLEBOARD[i].setlimit["background"] = "brown"
+        if GUI:
+            for i in range(len(TABLEBOARD)):
+                if i <= self.looplimit:
+                    TABLEBOARD[i].setlimit["background"] = "green"
+                else:
+                    TABLEBOARD[i].setlimit["background"] = "brown"
+
+                    
 
     def killemall(self):
         for table in TABLEBOARD:
@@ -187,13 +201,14 @@ class Application(Frame):
         
 class table(Frame):
     def __init__(self, arena, master=None):
-        Frame.__init__(self, master)
+        if GUI: Frame.__init__(self, master)
         self.board = chess.Board()
         self.online = 0
         self.movelist=[]
 
 
         self.arena = arena
+
 
         
         self.consec_failure=0
@@ -207,7 +222,7 @@ class table(Frame):
         #TABLEBOARD.append(self)
 
         self.flagged_toend = 0
-        self.setWidgets()
+        if GUI: self.setWidgets()
         #self.newmatch()
 
         self.startThread = None
@@ -229,9 +244,12 @@ class table(Frame):
                 
     def newmatch(self):
         if self.initialize: return
+        if virtual_memory()[2] > 95: return
 
         
         self.MACHINE = []
+        self.MACcontent = []
+        
         self.rounds_played=0
         
         self.initialize = 1
@@ -247,9 +265,9 @@ class table(Frame):
                 M.kill()
             return -1
 
-        sleep(3)
+        sleep(4)
 
-        self.Maximize["background"] = "grey"
+        if GUI: self.Maximize["background"] = "grey"
         self.MACnames = ['zero','zero']
 
         flags = fcntl(self.MACHINE[0].stdout, F_GETFL) # get current p.stdout flags
@@ -265,21 +283,24 @@ class table(Frame):
         #self.Pout(self.Bmachine.stdout.readlines())
         
         #sleep(1)
+        self.startuplog = []
         try:
-            self.MACHINE[0].stdout.flush()
+            #self.startuplog.append(self.MACHINE[1].stdout.read())
+            #self.startuplog.append(self.MACHINE[0].stdout.read())
+            #self.MACHINE[0].stdout.flush()
             
-            self.MACHINE[1].stdout.flush()
+            #self.MACHINE[1].stdout.flush()
 
             for i in [0,1]:
                 for line in self.MACHINE[i].stdout.readlines():
                     #print(line.decode('utf-8'))
                     if "line > " in line.decode('utf-8'):
-                        self.MACnames[i] = line.decode('utf-8')[6:-1] 
+                        self.MACnames[i] = line.decode('utf-8')[7:-1] 
 
-            sleep(2)            
-            self.MACHINE[1].stdout.readlines()
+            sleep(1)            
 
 
+            
             self.MACHINE[1].stdin.write(bytearray('new\n','utf-8'))
             self.MACHINE[1].stdin.flush()
             
@@ -287,23 +308,34 @@ class table(Frame):
             self.MACHINE[0].stdin.write(bytearray('black\nwhite\n','utf-8'))
             self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
             self.MACHINE[0].stdin.flush()
+            
 
         except BrokenPipeError:
             print("broken pipe @ "+str(self.number) + " while starting.")
             self.log("broken pipe", "setup.")
+            
+            if (self.startuplog[0]): self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
+            if (self.startuplog[1]): self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+            self.initialize = 0
             return
 
         
         self.online = 1
         self.turn = 0        
 
+
+        for NAME in self.MACnames: self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
+
+
+
         self.initialize=0
-        
-        self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
-        self.visor.delete('1.0', END)
-        self.visor.insert('1.0', self.board)
-        self.switch["command"]
-        self.setlimit["text"] = "0"
+
+        if GUI:
+            self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
+            self.visor.delete('1.0', END)
+            self.visor.insert('1.0', self.board)
+            self.switch["command"]
+            self.setlimit["text"] = "0"
 
     def Pout(self, readobj):
         for line in readobj:
@@ -316,14 +348,19 @@ class table(Frame):
             return
         
         print(COLOR[self.turn] + " @  table " + str(self.number))
-        self.setlimit["background"] = "white"
-        self.Maximize["background"] = 'black'
+        
+        if GUI:
+            self.setlimit["background"] = "white"
+            self.Maximize["background"] = "black"
+            
         self.movelist = []
 
 
 
 
-        if self.rounds_played %17 == 0: self.check_engine_health()
+        if (self.rounds_played % 17 == 0) and (self.rounds_played>3):
+            print('chk')
+            self.check_engine_health()
 
 
         
@@ -333,6 +370,11 @@ class table(Frame):
             print("broken pipe @ "+str(self.number) + " while gaming.")
             self.log("broken pipe", self.number)
             self.endgame()
+            return
+        except IndexError:
+            self.log("read of move with unintialized machines.", self.number)
+            self.turnoff()
+            return
 
         SUCCESS = 0   
         for line in self.MACHINE[self.turn].stdout.readlines():
@@ -349,7 +391,7 @@ class table(Frame):
                 if L[1] in self.movelist:
                     SUCCESS=1
                     self.consec_failure=0
-                    self.setlimit["text"] = "0"
+                    if GUI: self.setlimit["text"] = "0"
                     
                     print("move done " + L[1] + "\n")
 
@@ -362,7 +404,7 @@ class table(Frame):
                         print("BOARD.PUSH ERROR!.")
                         self.endgame()
                         
-                    self.Vrefresh()
+                    if GUI: self.Vrefresh()
                     
                     if self.board.is_checkmate():
                         self.sendresult(self.turn)
@@ -380,13 +422,14 @@ class table(Frame):
                     except BrokenPipeError:
                         print("broken pipe @ " + str(self.number) + " while receiving move.")
                         self.log("broken pipe while receiving move.", self.number)
-                        self.endgame()
+                        self.turnoff()
+                        return
                 else:
                     print("error! illegal move! "+ L[1])
                     self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + L[1])
                     self.log(L[0],L[1])
                     self.log(str(self.board),0)
-                    self.log('printing internal board >>>>',0)
+                    self.log('engine internal board >>>>',0)
                     
                     self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
                     self.MACHINE[self.turn].stdin.flush()
@@ -394,22 +437,25 @@ class table(Frame):
                     self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
                                                  
 
-                    self.endgame()
+                    self.turnoff()
+                    return
         if SUCCESS==0:
             self.consec_failure+=1
-            self.setlimit["text"] = str(self.consec_failure)
+            if GUI:
+                self.setlimit["text"] = str(self.consec_failure)
             
             if self.consec_failure > 14:
                 print("restarting due to inactivity.")
                 self.consec_failure = 0
                 
-                self.endgame()
-
-        if self.number <= app.looplimit:
-            self.setlimit["background"] = "green"
-            self.Maximize['background'] = "grey"
-        else: self.setlimit["background"] = "red"
-            
+                self.turnoff()
+                
+        if GUI:
+            if self.number <= app.looplimit:
+                self.setlimit["background"] = "green"
+                self.Maximize['background'] = "grey"
+            else: self.setlimit["background"] = "red"
+                
 
         
     def endgame(self):
@@ -418,24 +464,32 @@ class table(Frame):
             machine.kill()
             self.MACHINE = []
 
-        self.setlimit["text"] = "off"
+
         self.online = 0
-        self.Maximize["background"] = "light grey"
+        if GUI:
+            self.setlimit["text"] = "off"        
+            self.Maximize["background"] = "light grey"
 
     def sendresult(self, result):
         print("game ends @ " + str(self.number))
+
+        self.sendELO(result)
+        
         if result==1:
             result = '0-1'
-            self.visor.insert('10.1', 'checkmate. black wins')
+            if GUI: self.visor.insert('10.1', 'checkmate. black wins')
             self.log('checkmate', self.MACnames[1])
+            
         if result ==0:
             result = '1-0'
-            self.visor.insert('10.1', 'checkmate. white wins')
+            if GUI: self.visor.insert('10.1', 'checkmate. white wins')
             self.log('checkmate', self.MACnames[0])
+            
         if result == 0.5:
             result = '1/2-1/2'
-            self.visor.insert('10.1', 'draw.')
+            if GUI: self.visor.insert('10.1', 'draw.')
             self.log('draw', '1/2')
+            
 
         for MAC in self.MACHINE:    
             MAC.stdin.write(bytearray('result '+ result + '\n', 'utf-8'))
@@ -476,16 +530,20 @@ class table(Frame):
         
     def turnon(self):
         self.newmatch()
-        self.switch["text"] = "on"
-        self.switch["command"] = self.turnoff
+        
+        if GUI:
+            self.switch["text"] = "on"
+            self.switch["command"] = self.turnoff
         
     def turnoff(self):
         self.endgame()
-        self.switch["text"] = "off"
-        self.switch["command"] = self.turnon
-        self.Mnames["text"] = "idle"
-        self.Maximize["background"] = "light grey"
-        self.visor.delete('1.0',END)
+        
+        if GUI:
+            self.switch["text"] = "off"
+            self.switch["command"] = self.turnon
+            self.Mnames["text"] = "idle"
+            self.Maximize["background"] = "light grey"
+            self.visor.delete('1.0',END)
 
         
     def Vrefresh(self):
@@ -509,21 +567,21 @@ class table(Frame):
     def check_engine_health(self):
         for M in range(len(self.MACHINE)):
             try:
-                PID = str(self.MACHINE[M].pid)
+                PID = self.MACHINE[M].pid
             except IndexError:
                 return
-            try:
-                CHK = check_output(['ps', '-p', PID, '-o', 'rss']).decode('utf-8','ignore')
-            except OSError:
-                self.arena.shrinkloop()
-                return
+
+            MEMUSAGE = Process(pid=PID).memory_info()
+
+
             #print('checking process %s,' % PID)
             #print(CHK)
             #self.log('checking process', CHK)
-            if int(CHK[CHK.find('\n')+1:-1]) > 333000:
+            if MEMUSAGE[0] > 256000000:
                 print('terminating table, memory limit overriden by %s' % self.MACnames[M])
                 self.log('terminating table, memory limit overriden by ', self.MACnames[M])
-                self.endgame()
+                self.arena.shrinkloop()
+                self.turnoff()
             
 
 
@@ -552,8 +610,43 @@ class table(Frame):
 
 
     #def log_wrongmove(self):
+
+
+    def sendELO(self, winner):
+        if winner == 0.5: return
+        ELO = []
+        index = []
+        for C in range(len(self.MACcontent)):
+            for L in range(len(self.MACcontent[C])):
+                if 'stat_elo' in self.MACcontent[C][L].split(' = ')[0]:
+                    ELO.append(int(self.MACcontent[C][L].split(' = ')[1][:-1]))
+                    index.append(L)
+        if len(ELO) == 2:
+            DIF = ELO[winner] - ELO[1-winner]
+
+            DIF = 32 - round(DIF/8)
+
+
+            ELO[winner] += DIF
+            ELO[1-winner] -= DIF
+
+            
+
+            for C in range(len(self.MACcontent)):
+                self.MACcontent[C][index[C]] = "stat_elo = %i\n"  % ELO[C]
+                F = open('machines/%s' % self.MACnames[C], 'w')
+                for line in self.MACcontent[C]:
+                    F.write(line)
+                F.close()
+
+
+
+            
+
+            print(ELO)
+                               
         
-if not NOGUI:
+if GUI:
         
     root = Tk()
     root.wm_title("e-vchess arenaArray")
@@ -565,5 +658,4 @@ if not NOGUI:
     root.resizable(False, False)
     root.mainloop()
 
-
-
+else: app = Application()

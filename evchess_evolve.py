@@ -15,7 +15,9 @@ class parameter():
         self.marks_dumpable = dumpable
         
         self.Cparam = 50
-        
+
+        self.stdvalue = value
+     
         self.value = value
         self.dumpedvalue = 0
 
@@ -25,34 +27,35 @@ class parameter():
         self.INCR = INCR
         
     def read(self, split_line):
+        try:
+            if split_line[0] == self.name:
+                
 
-        if split_line[0] == self.name:
-            
+                if self.marks_dumpable:
+                    self.value = int(split_line[2])
+                    self.dumpedvalue = int(split_line[3])
 
-            if self.marks_dumpable:
-                self.value = int(split_line[2])
-                self.dumpedvalue = int(split_line[3])
+                elif type(self.value) == int:
+                    self.value = int(float(split_line[2]))
 
-            elif type(self.value) == int:
-                self.value = int(float(split_line[2]))
+                elif type(self.value) == float:
+                    self.value = round(float(split_line[2]),3)
 
-            elif type(self.value) == float:
-                self.value = round(float(split_line[2]),3)
+                elif type(self.value) == list:
 
-            elif type(self.value) == list:
+                    if type(self.value[0]) == int:
+                        self.value = []
+                        for z in range(2, len(split_line)):
+                            self.value.append(int(split_line[z]))
 
-                if type(self.value[0]) == int:
-                    self.value = []
-                    for z in range(2, len(split_line)):
-                        self.value.append(int(split_line[z]))
+                            
+                    if type(self.value[0]) == float:
+                        self.value = []
+                        for z in range(2, len(split_line)):
+                            self.value.append(float(split_line[z]))
 
-                        
-                if type(self.value[0]) == float:
-                    self.value = []
-                    for z in range(2, len(split_line)):
-                        self.value.append(float(split_line[z]))
-
-
+        except ValueError:
+            print('fail to read %s.' % self.name)
 
         
     def write(self):
@@ -87,11 +90,17 @@ class parameter():
         if self.bLIM: bLIM = self.bLIM
         else: bLIM = 0
 
+
+        if type(self.stdvalue) == list:
+            stdvalue = self.stdvalue[0]
+        else: stdvalue = self.stdvalue
+
+        
                 
         if self.LIM != None:
-            if value > self.LIM: value = random.uniform(bLIM ,LIM)
+            if value > LIM: value = random.uniform(stdvalue ,LIM)
         if self.bLIM != None:
-            if value < self.bLIM: value = random.uniform(bLIM, LIM)
+            if value < bLIM: value = random.uniform(bLIM, stdvalue)
 
 
         if self.alwaysPOSITIVE: value = abs(value)
@@ -216,21 +225,21 @@ class machine ():
         self.wasmodified = 0
 
 
+        self.TPARAMETERS = []
         self.PARAMETERS = []
 
+        self.TPARAMETERS.append(parameter("stat_games", 1, 0, 0))
+        self.TPARAMETERS.append(parameter("stat_wins", 1, 0, 0))
+        self.TPARAMETERS.append(parameter("stat_draws", 1, 0, 0))
+        self.TPARAMETERS.append(parameter("stat_loss", 1, 0, 0))
+        self.TPARAMETERS.append(parameter("stat_K", 1, 0, 0))
 
-        self.PARAMETERS.append(parameter("stat_games", 1, 0, 0))
-        self.PARAMETERS.append(parameter("stat_wins", 1, 0, 0))
-        self.PARAMETERS.append(parameter("stat_draws", 1, 0, 0))
-        self.PARAMETERS.append(parameter("stat_loss", 1, 0, 0))
-        self.PARAMETERS.append(parameter("stat_K", 1, 0, 0))
-
-
+        self.TPARAMETERS.append(parameter("stat_elo", 0,0,1000))
         
 
         self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10))
-        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=0, LIM=3))
-        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=0, LIM=9))
+        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=4))
+        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=6))
         self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 12, bLIM=12, INCR=3))
         self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
         self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
@@ -239,7 +248,7 @@ class machine ():
         self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.9, LIM=7, bLIM=-7))
         self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 12))
         
-        self.PARAMETERS.append(parameter("param_pvalues", 0, 30, [100,500,300,300,900,2000], INCR=50))
+        self.PARAMETERS.append(parameter("param_pvalues", 0, 30, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500))
         self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
 
 
@@ -260,17 +269,17 @@ class machine ():
         self.dumped_K = 0   
 
     def read(self, split_line):
-        for parameter in self.PARAMETERS:
+        for parameter in self.TPARAMETERS+self.PARAMETERS:
             if len(split_line) < 2:
                 if split_line[0] == 'W':
-                    self.PARAMETERS[1].value +=1
-                    self.PARAMETERS[0].value +=1
+                    self.TPARAMETERS[1].value +=1
+                    self.TPARAMETERS[0].value +=1
                 elif split_line[0] == 'L':
-                    self.PARAMETERS[3].value +=1
-                    self.PARAMETERS[0].value +=1
+                    self.TPARAMETERS[3].value +=1
+                    self.TPARAMETERS[0].value +=1
                 elif split_line[0] == 'D':
-                    self.PARAMETERS[2].value +=1
-                    self.PARAMETERS[0].value +=1
+                    self.TPARAMETERS[2].value +=1
+                    self.TPARAMETERS[0].value +=1
                     
             if parameter.name == split_line[0]:
                 parameter.read(split_line)
@@ -280,7 +289,7 @@ class machine ():
             
     def write(self):
         Fo = open(Fdir+'/'+self.filename, "w+")
-        for parameter in self.PARAMETERS:
+        for parameter in self.PARAMETERS+self.TPARAMETERS:
             Fo.write(parameter.write())
             Fo.write('\n')
 
@@ -363,7 +372,7 @@ def mutatemachines(AGR, population):
 
 
     for i in range(len(population)):
-            eMOD = 50-population[i].PARAMETERS[1].value + population[i].PARAMETERS[2].value/2 /(population[i].PARAMETERS[0].value+1)
+            eMOD = 50-population[i].TPARAMETERS[1].value + population[i].TPARAMETERS[2].value/2 /(population[i].TPARAMETERS[0].value+1)
 
             population[i].mutate(eMOD, AGR)
                 
@@ -529,9 +538,9 @@ def creategoodhybrids(population):
 def select_best_inds(population):
     TOP = []
     for IND in range(len(population)):
-        if population[IND].PARAMETERS[0].value > 0:
-            if population[IND].PARAMETERS[1].value / population[IND].PARAMETERS[0].value > 0.5:
-                if population[IND].PARAMETERS[7].value > 1:
+        if population[IND].TPARAMETERS[0].value > 0:
+            if population[IND].TPARAMETERS[1].value / population[IND].TPARAMETERS[0].value > 0.5:
+                if population[IND].TPARAMETERS[7].value > 1:
                     if not population[IND].onTOP:
                         TOP.append(IND)
 

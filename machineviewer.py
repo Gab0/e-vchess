@@ -26,26 +26,28 @@ class Application(Frame):
         self.marker["text"] = self.N+1
 
 
-        self.VIEW_wins["text"] = self.machines[self.N].PARAMETERS[1].value
+        self.VIEW_wins["text"] = self.machines[self.N].TPARAMETERS[1].value
         
-        self.VIEW_loss["text"] = self.machines[self.N].PARAMETERS[3].value
+        self.VIEW_loss["text"] = self.machines[self.N].TPARAMETERS[3].value
 
-        self.VIEW_games["text"] = self.machines[self.N].PARAMETERS[0].value
+        self.VIEW_games["text"] = self.machines[self.N].TPARAMETERS[0].value
 
-        self.VIEW_draws["text"] = self.machines[self.N].PARAMETERS[2].value
+        self.VIEW_draws["text"] = self.machines[self.N].TPARAMETERS[2].value
+
+        self.VIEW_elo["text"] = self.machines[self.N].TPARAMETERS[5].value
 
         self.macname["text"] = self.machines[self.N].filename
 
-        self.viewK["text"] = str(self.machines[self.N].PARAMETERS[4].value)
+        self.viewK["text"] = str(self.machines[self.N].TPARAMETERS[4].value)
 
-        self.winrate["text"] = str(round(self.machines[self.N].PARAMETERS[1].value/(self.machines[self.N].PARAMETERS[0].value+1)*100, 3)) + "%"
-        self.drawrate["text"] = str(round(self.machines[self.N].PARAMETERS[2].value/(self.machines[self.N].PARAMETERS[0].value+1)*100, 3)) + "%"
+        self.winrate["text"] = str(round(self.machines[self.N].TPARAMETERS[1].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
+        self.drawrate["text"] = str(round(self.machines[self.N].TPARAMETERS[2].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
 
 
         self.paramNAMES = []
         for VW in range(len(self.paramVIEWER)):
             
-            self.paramVIEWER[VW][1]['text'] = self.machines[self.N].PARAMETERS[VW+5].value
+            self.paramVIEWER[VW][1]['text'] = self.machines[self.N].PARAMETERS[VW].value
             
 
             
@@ -143,24 +145,26 @@ class Application(Frame):
 
         
         self.VIEW_wins = Button(self)
-        self.VIEW_wins["text"] = self.machines[self.N].stat_wins
         self.VIEW_wins["fg"] = "green"
         self.VIEW_wins.grid(column=0,row=9)
 
         self.VIEW_loss = Button(self)
-        self.VIEW_loss["text"] = self.machines[self.N].stat_loss
         self.VIEW_loss["fg"] = "red"
         self.VIEW_loss.grid(column=2,row=9)
 
         self.VIEW_draws = Button(self)
-        self.VIEW_draws["text"] = self.machines[self.N].stat_draws
+
         
         self.VIEW_draws.grid(column=1,row=8)
         
         self.VIEW_games = Button(self)
-        self.VIEW_games["text"] = self.machines[self.N].stat_games
+
         self.VIEW_games["fg"] = "grey"
         self.VIEW_games.grid(column=1,row=10)
+
+
+        self.VIEW_elo = Button(self)
+        self.VIEW_elo.grid(column=1, row=7)
 
         self.macname = Button(self)
         self.macname["text"] = self.machines[self.N].filename
@@ -218,7 +222,7 @@ class Application(Frame):
         self.paramNAMES = []
         for i in range(11):
             self.paramVIEWER.append([Label(self), Button(self)])
-            self.paramNAMES.append(self.machines[self.N].PARAMETERS[i+5].name)
+            self.paramNAMES.append(self.machines[self.N].PARAMETERS[i].name)
             
             self.paramVIEWER[i][0]["text"] = self.paramNAMES[i]
             self.paramVIEWER[i][1]['command'] = self.show_attr_dump(self.paramNAMES[i])
@@ -249,7 +253,10 @@ class Application(Frame):
     def clearscores(self):
         if self.W == 1:
             for individual in self.machines:
-                
+                for param in individual.TPARAMETERS:
+                    param.value = 0
+                    if param.name == "stat_elo":
+                        param.value = 1000
                 individual.stat_draws=0
                 individual.stat_wins=0
                 individual.stat_games=0
