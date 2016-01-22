@@ -7,9 +7,13 @@ After many cycles in the arena_array, machines will have their win/draw/lose rat
  Now the machineviewer.py script can manipulate these machines, cloning the best, deleting the worst, and mutating the rest. Now another arena cycle can begin.
 
 ##Usage:
- Create a population of 256 individuals using machineviewer.py.
- Run chess_arena.py for ten thousand cycles, on a 20-tabled session, then look at the population on the Machineviewer.
 
+ 1) Create a population of 256 individuals using machineviewer.py.
+ 2) Run chess_arena.py for ten thousand cycles, on a 20-tabled session, then look at the population on the Machineviewer.
+ 3) Send some machines on the 1200's or 1300's ELO to the top machines.
+ 3) Run xboard or other chess interface, loading the engine with --TOP arg.
+ 4) If you can't win, try to understand this repo and contribute to it. If you can, run 30k more cycles of chess_arena and try again.
+ 
 ##Dependencies:
 
 chess_arena.py requires the following python modules:

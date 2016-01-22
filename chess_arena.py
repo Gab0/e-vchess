@@ -246,7 +246,7 @@ class table(Frame):
         if not kill:
             if (self.startThread) and(self.initialize == 0):
                 self.startThread.join()
-                self.startThread._Thread__delete()
+                
             else:
                 try:
                     self.startThread = threading.Thread(target=self.newmatch)
