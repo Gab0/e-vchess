@@ -493,7 +493,7 @@ def deltheworst_clonethebest(population, action):
         if population[k].PARAMETERS[0].value == 0:
             POP_SCORETABLE.append(-1)
             continue
-        SCORE = population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
+        SCORE = population[k].TPARAMETERS[5].value#population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
 
             
         POP_SCORETABLE.append(SCORE)
@@ -506,7 +506,7 @@ def deltheworst_clonethebest(population, action):
         if action == -1:
             for k in range(len(POP_SCORETABLE)):
                 if (POP_SCORETABLE[k] > -1):
-                    if (POP_SCORETABLE[k] < MEDIUMSCORE/3):
+                    if (POP_SCORETABLE[k] < 850):
                         print('subject deleted. ' + population[k].filename)
                         os.remove(Fdir+'/'+population[k].filename)
                         population[k] = 0

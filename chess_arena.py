@@ -12,6 +12,7 @@ from os import O_NONBLOCK, read, system
 from tkinter import *
 
 import threading
+
 import sys
 
 from evchess_evolve import *
@@ -20,6 +21,7 @@ from random import randrange
 
 from psutil import *
 
+import gc
 
 # path to e-vchess executable and the directory where machines are stored, respectively.
 evchessP = "/home/gabs/NetBeansProjects/CppApplication_1/dist/Release/GNU-Linux/e-vchess"
@@ -37,6 +39,11 @@ TABLEBOARD = []
 if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
     GUI = 0
 
+
+
+
+
+
 class Application(Frame):
 
     def __init__(self, master=None):
@@ -46,9 +53,10 @@ class Application(Frame):
         self.looplimit = 0
 
         #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 8 for each GB on your machine.
-        TABLECOUNT = 48
+        #for very long runs, the number of simultaneous engines (two per table) should be multiplied by the maximum engine size allowed(std 120mb), so 20 tables should occupy 6gb of ram.
+        TABLECOUNT = 16
         #number of tables to be shown on each row of machines.
-        TABLEonROW = 12
+        TABLEonROW = 8
 
         self.TIME = time()
         k=0
@@ -91,8 +99,8 @@ class Application(Frame):
         self.CYCLE.start()
         
     def gocycle(self):
-        SLEEPTIME = 16 - self.looplimit/3
-        if SLEEPTIME < 0: SLEEPTIME = 0.9
+        SLEEPTIME = 1.3
+        if SLEEPTIME < 1: SLEEPTIME = 1.3
         i=0
         self.Cycle = True
         
@@ -116,15 +124,21 @@ class Application(Frame):
             
             print("ROUND " + str(i) + " t= " + str(TIME) + " >>>>>>>>>>")
             for t in range (self.looplimit+1):
+                if virtual_memory()[2] > 91: self.memorylimit=1
+                else: self.memorylimit=0
+                
                 if self.Cycle:
                     if TABLEBOARD[t].online == 1:
                         TABLEBOARD[t].readmove()
                     else:
-                        TABLEBOARD[t].newmatch_thread(0)
-                        
+                        if not self.memorylimit:
+                            TABLEBOARD[t].newmatch_thread(0)
+                            if virtual_memory()[2] > 92: self.memorylimit=1
             if i == 0:
                 sleep(6)
             i+=1
+
+            if i % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
             if i > 100000: i=0
             sleep(SLEEPTIME)
         return
@@ -165,8 +179,8 @@ class Application(Frame):
     def routine_pop_management(self):
         population = loadmachines()
 
-        for individual in population:
-            dump_all_paramstat(individual)
+        #for individual in population:
+            #dump_all_paramstat(individual)
         
         population = deltheworst_clonethebest(population, -1)
         population = deltheworst_clonethebest(population, 1)
@@ -230,21 +244,25 @@ class table(Frame):
         self.initialize=0
     def newmatch_thread(self, kill):
         if not kill:
-            if (self.startThread) and (self.initialize == 0):
-                self.startThread.join(0)
-                self.startThread = None
+            if (self.startThread) and(self.initialize == 0):
+                self.startThread.join()
+                self.startThread._Thread__delete()
             else:
-                self.startThread = threading.Thread(target=self.newmatch)
-                self.startThread.start()
+                try:
+                    self.startThread = threading.Thread(target=self.newmatch)
+                    self.startThread.start()
+                except RuntimeError:
+                    print()
         else:
             if self.startThread:
-                self.startThread.join(0)
+                self.startThread.join()
+                
                 self.startThread = None
 
                 
     def newmatch(self):
         if self.initialize: return
-        if virtual_memory()[2] > 95: return
+        
 
         
         self.MACHINE = []
@@ -337,6 +355,12 @@ class table(Frame):
             self.switch["command"]
             self.setlimit["text"] = "0"
 
+            
+
+        self.startThread = None
+        
+
+        
     def Pout(self, readobj):
         for line in readobj:
             print(line.decode('utf-8'))
@@ -346,7 +370,7 @@ class table(Frame):
         if self.flagged_toend == 1:
             self.endgame()
             return
-        
+        if self.initialize==1: return
         print(COLOR[self.turn] + " @  table " + str(self.number))
         
         if GUI:
@@ -362,7 +386,7 @@ class table(Frame):
             print('chk')
             self.check_engine_health()
 
-
+        
         
         try:
             self.MACHINE[self.turn].stdout.flush()
@@ -375,7 +399,7 @@ class table(Frame):
             self.log("read of move with unintialized machines.", self.number)
             self.turnoff()
             return
-
+        
         SUCCESS = 0   
         for line in self.MACHINE[self.turn].stdout.readlines():
             #print(line.decode('utf-8'))
@@ -461,7 +485,8 @@ class table(Frame):
     def endgame(self):
         self.flagged_toend=0
         for machine in self.MACHINE:
-            machine.kill()
+            machine.terminate()
+            call(['kill', '-9', str(machine.pid)])
             self.MACHINE = []
 
 
@@ -577,10 +602,10 @@ class table(Frame):
             #print('checking process %s,' % PID)
             #print(CHK)
             #self.log('checking process', CHK)
-            if MEMUSAGE[0] > 256000000:
+            if MEMUSAGE[0] > 110000000:
                 print('terminating table, memory limit overriden by %s' % self.MACnames[M])
                 self.log('terminating table, memory limit overriden by ', self.MACnames[M])
-                self.arena.shrinkloop()
+                
                 self.turnoff()
             
 
@@ -613,7 +638,7 @@ class table(Frame):
 
 
     def sendELO(self, winner):
-        if winner == 0.5: return
+        
         ELO = []
         index = []
         for C in range(len(self.MACcontent)):
@@ -622,10 +647,17 @@ class table(Frame):
                     ELO.append(int(self.MACcontent[C][L].split(' = ')[1][:-1]))
                     index.append(L)
         if len(ELO) == 2:
+            if winner == 0.5:
+                winner = 0
+                base = 0
+            else: base = 32
+                
+                
             DIF = ELO[winner] - ELO[1-winner]
 
-            DIF = 32 - round(DIF/8)
+            DIF = -round(DIF/16)
 
+            DIF += base
 
             ELO[winner] += DIF
             ELO[1-winner] -= DIF

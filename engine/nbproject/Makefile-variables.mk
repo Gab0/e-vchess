@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU-Linux
-CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=e-vchess
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/e-vchess
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
-CND_PACKAGE_NAME_Debug=cppapplication1.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/cppapplication1.tar
+CND_PLATFORM_Release=GNU-Linux
+CND_ARTIFACT_DIR_Release=
+CND_ARTIFACT_NAME_Release=e-vchess
+CND_ARTIFACT_PATH_Release=e-vchess
+CND_PACKAGE_DIR_Release=package
+CND_PACKAGE_NAME_Release=cppapplication1.tar
+CND_PACKAGE_PATH_Release=cppapplication1.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux
-CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
+CND_ARTIFACT_DIR_Release=
 CND_ARTIFACT_NAME_Release=e-vchess
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/e-vchess
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
+CND_ARTIFACT_PATH_Release=e-vchess
+CND_PACKAGE_DIR_Release=package
 CND_PACKAGE_NAME_Release=cppapplication1.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/cppapplication1.tar
+CND_PACKAGE_PATH_Release=cppapplication1.tar
 #
 # include compiler specific variables
 #
