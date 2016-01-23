@@ -499,14 +499,14 @@ def deltheworst_clonethebest(population, action):
         POP_SCORETABLE.append(SCORE)
         MEDIUMSCORE += SCORE
         VALIDPOP += 1
-
+    
     if VALIDPOP > 0:    
         MEDIUMSCORE = MEDIUMSCORE/VALIDPOP
-
+        print('mediumscore = %i' % MEDIUMSCORE)
         if action == -1:
             for k in range(len(POP_SCORETABLE)):
                 if (POP_SCORETABLE[k] > -1):
-                    if (POP_SCORETABLE[k] < 850):
+                    if (POP_SCORETABLE[k] < MEDIUMSCORE*0.9):
                         print('subject deleted. ' + population[k].filename)
                         os.remove(Fdir+'/'+population[k].filename)
                         population[k] = 0
@@ -520,7 +520,7 @@ def deltheworst_clonethebest(population, action):
         elif action == 1:
             NEWINDS = []
             for k in range(len(POP_SCORETABLE)):
-                if (POP_SCORETABLE[k] > MEDIUMSCORE*1.3):
+                if (POP_SCORETABLE[k] > MEDIUMSCORE*1.1):
                     print('subject cloned. ' + population[k].filename)
                     NEWINDS.append(population[k])
                     NEWINDS[-1].filename = str(random.randrange(0,10000)) + '.mac'

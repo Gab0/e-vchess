@@ -485,8 +485,9 @@ class table(Frame):
     def endgame(self):
         self.flagged_toend=0
         for machine in self.MACHINE:
-            machine.terminate()
+            #print('killing %s' % machine.pid)
             call(['kill', '-9', str(machine.pid)])
+            machine.terminate()
             self.MACHINE = []
 
 
@@ -521,7 +522,7 @@ class table(Frame):
             MAC.stdin.flush()
         self.online = 0
         
-        #self.endgame()
+        self.turnoff()
         
     def setWidgets(self):
         self.visor = Text(self, height=10,width=16, borderwidth=4, relief=GROOVE)
@@ -602,7 +603,7 @@ class table(Frame):
             #print('checking process %s,' % PID)
             #print(CHK)
             #self.log('checking process', CHK)
-            if MEMUSAGE[0] > 110000000:
+            if MEMUSAGE[0] > 150000000:
                 print('terminating table, memory limit overriden by %s' % self.MACnames[M])
                 self.log('terminating table, memory limit overriden by ', self.MACnames[M])
                 
