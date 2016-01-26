@@ -18,17 +18,18 @@ char *infoAUX = (char *)malloc(256 * sizeof(char));
 
 //variable params for intelligent evolution (standards initialized);
 int pvalues[6] = {100,500,300,300,900,2000};
-int eval_randomness = 285;
-int param_aperture = 7;
-float param_seekmiddle = -2.75;
-int param_DEEP = 5;
-int param_seekpieces = 12;
-float param_deviationcalc = 1.6;
-int param_evalmethod = 2;
-int param_seekatk = 20;
+float eval_randomness = 60;
+float param_aperture = 4;
+float param_seekmiddle = 23;
+float param_DEEP = 5;
+float param_seekpieces = 12;
+float param_deviationcalc = 0;
+float param_evalmethod = 0;
+float param_seekatk = 24;
 float param_TIMEweight[10] = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-float param_presumeOPPaggro = -4.9;
-float param_pawnrankMOD = 0;
+float param_presumeOPPaggro = -3.0;
+float param_pawnrankMOD = 20;
+float param_parallelcheck = 3.5;
 /*//////variable params for intelligent evolution*/
 
 int i;
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
     
     
     
-    if (toloadmachine) loadmachine(1, machinepath);
+    if (toloadmachine) loadmachine(0, machinepath);
     
     
     char testfehn[128] = "rn1qkbnr/ppp1pppp/3p4/8/3P2b1/4PN2/PPP1BPPP/RNBQK2R w KQkq - 5 5";

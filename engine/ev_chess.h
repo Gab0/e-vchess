@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
+#include <stdbool.h>    
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -89,17 +89,18 @@ extern char *infoAUX;
 
 /*variable params for intelligent evolution*/
 extern int pvalues[6];
-extern int eval_randomness;
-extern int param_aperture;
+extern float eval_randomness;
+extern float param_aperture;
 extern float param_seekmiddle;
-extern int param_DEEP;
-extern int param_seekpieces;
+extern float param_DEEP;
+extern float param_seekpieces;
 extern float param_deviationcalc;
-extern int param_evalmethod;
-extern int param_seekatk;
+extern float param_evalmethod;
+extern float param_seekatk;
 extern float param_TIMEweight[10];
 extern float param_presumeOPPaggro;
 extern float param_pawnrankMOD;
+extern float param_parallelcheck;
 /*//////variable params for intelligent evolution*/
 
 
@@ -179,4 +180,5 @@ float scoremod (int DEEP, int method);
 int loadmachine (int verbose, char *dir);
 int applyresult (int result);
 int countpieces (void);
+void readparam(float *Tparameter, char *keyword, char *line, int verbose);
 #endif	/* BOARD_H */

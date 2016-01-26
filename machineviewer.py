@@ -198,7 +198,12 @@ class Application(Frame):
         self.popmenu.add_separator()
         self.popmenu.add_command(label="DUMP Stats", command = self.TOdumpstats)
         self.popmenu.add_separator()
-        self.popmenu.add_command(label="Populate 16", command = self.TOpopulate)
+        self.popmenu.add_command(label="Populate 16", command = lambda: self.TOpopulate(16))
+        self.popmenu.add_command(label="Populate 128", command = lambda: self.TOpopulate(128))
+        self.popmenu.add_command(label="Populate 256", command = lambda: self.TOpopulate(256))
+        self.popmenu.add_separator()
+        self.popmenu.add_command(label="Create 4 Hybrid", command = lambda: self.TOcreatehybrid(4))
+        self.popmenu.add_command(label="Create 16 Hybrids", command = lambda: self.TOcreatehybrid(16))
         self.popmenu.add_separator()
         self.popmenu.add_command(label="Routine Procedure", command = self.TOroutineprocedures)
         self.popmenu.add_command(label="send best to TOP", command = self.TOautotop)
@@ -287,8 +292,8 @@ class Application(Frame):
         setmachines(self.machines, 1)
         print('stats dumped.')
 
-    def TOpopulate(self):
-        self.machines = populate(self.machines, 16)
+    def TOpopulate(self, NUM):
+        self.machines = populate(self.machines, NUM)
         print('created 16 standard postmutated individuals.')
 
 
@@ -297,7 +302,6 @@ class Application(Frame):
         self.TOdeltheworst()
         self.TOclonethebest()
         self.savemac()
-
     def TOcleardump(self):
         if os.path.isfile(self.DIR + "/paramstats.xml"):
             os.remove(self.DIR + "/paramstats.xml")
@@ -310,7 +314,11 @@ class Application(Frame):
             self.sendtobest(IND)
             
 
-
+    def TOcreatehybrid(self, NUM):
+        for i in range(NUM):
+            CHILD = create_hybrid(self.machines)            
+            if CHILD: self.machines.append(CHILD)
+        self.savemac
 
     def renew_VIEWDUMP_canvas(self, alreadyexists):
         if alreadyexists==1:
@@ -327,7 +335,12 @@ class Application(Frame):
     def abort_machines(self):
         MARKED = []
         for X in range(len(self.machines)):
+            if len(str(self.machines[X].filename)) > 7:
+                print(self.machines[X].filename + ' aborted.')
+                MARKED.append(X)
+                break
             for i in range(3):
+                
                 if self.machines[X].PARAMETERS[i].value < 0:
                     print(self.machines[X].filename + ' aborted.')
                     MARKED.append(X)

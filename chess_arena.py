@@ -1,4 +1,3 @@
-
 #!/bin/python
 import chess
 import shlex
@@ -47,21 +46,23 @@ if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
 class Application(Frame):
 
     def __init__(self, master=None):
-        Frame.__init__(self, master)
+        if GUI:
+            #self = Frame()
+            Frame.__init__(self, master)
 
         self.Cycle = False
         self.looplimit = 0
 
         #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 8 for each GB on your machine.
-        #for very long runs, the number of simultaneous engines (two per table) should be multiplied by the maximum engine size allowed(std 120mb), so 20 tables should occupy 6gb of ram.
-        TABLECOUNT = 16
+        #for very long runs, the number of simultaneous engines (two per table) should be multiplied by the maximum engine size allowed(std 160mb), so 16 tables should occupy 2.5gb of ram.
+        self.TABLECOUNT = 32
         #number of tables to be shown on each row of machines.
         TABLEonROW = 8
 
         self.TIME = time()
         k=0
         j=0
-        for i in range(TABLECOUNT):
+        for i in range(self.TABLECOUNT):
             TABLEBOARD.append(table(self, master=master))
             if GUI: TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
             k+=1
@@ -80,14 +81,14 @@ class Application(Frame):
         self.showhide_ = 0
 
 
-
+        self.move_read_reliability = 0
 
         #self.config(menu=self.menubar)
         self.setlooplimit(0)
 
 
         if (len(sys.argv) > 0) and ('--go' in sys.argv):
-            self.setlooplimit(TABLECOUNT-1)
+            self.setlooplimit(self.TABLECOUNT-1)
             self.startcycle()
 
 
@@ -99,7 +100,7 @@ class Application(Frame):
         self.CYCLE.start()
         
     def gocycle(self):
-        SLEEPTIME = 1.3
+        SLEEPTIME = 2.3
         if SLEEPTIME < 1: SLEEPTIME = 1.3
         i=0
         self.Cycle = True
@@ -109,22 +110,23 @@ class Application(Frame):
             self.menubar.entryconfigure(1, command=self.killcycle)
             
         TIME = time()
-        TABLEBOARD[0].log("STARTING CYCLE", str(strftime("%d/%b - %H:%M:%S")))
-
+        TABLEBOARD[0].log("\n\n\nSTARTING CYCLE", str(strftime("%d/%b - %H:%M:%S")))
+        
         while self.Cycle:
             TIME = time()-TIME
             if i % 10 == 0:
                 system('clear')
-
+                if self.move_read_reliability/self.TABLECOUNT < 0.5: SLEEPTIME += 0.1
+                if self.move_read_reliability/self.TABLECOUNT > 0.85: SLEEPTIME -= 0.1
 
             #each N rounds, do maintenance management in order to get best evolving performance.
-            if (i % 5000 == 0) and (i != 0):
+            if (i % 2500 == 0) and (i != 0):
                 self.routine_pop_management()
             
-            
-            print("ROUND " + str(i) + " t= " + str(TIME) + " >>>>>>>>>>")
+            self.move_read_reliability = 0
+            print("ROUND " + str(i) + " T=" + str(round(TIME)) + " S=" +str(SLEEPTIME) + " >>>>>>>>>>")
             for t in range (self.looplimit+1):
-                if virtual_memory()[2] > 91: self.memorylimit=1
+                if virtual_memory()[2] > 92: self.memorylimit=1
                 else: self.memorylimit=0
                 
                 if self.Cycle:
@@ -132,13 +134,14 @@ class Application(Frame):
                         TABLEBOARD[t].readmove()
                     else:
                         if not self.memorylimit:
+                            
                             TABLEBOARD[t].newmatch_thread(0)
                             if virtual_memory()[2] > 92: self.memorylimit=1
             if i == 0:
                 sleep(6)
             i+=1
 
-            if i % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
+            #if i % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
             if i > 100000: i=0
             sleep(SLEEPTIME)
         return
@@ -183,10 +186,13 @@ class Application(Frame):
             #dump_all_paramstat(individual)
         
         population = deltheworst_clonethebest(population, -1)
-        population = deltheworst_clonethebest(population, 1)
+        #population = deltheworst_clonethebest(population, 1)
+        for k in range(16):
+            CHILD = create_hybrid(population)
+            if CHILD: population.append(CHILD)
         mutatemachines(3, population)
 
-        setmachines(population,1)
+        setmachines(population, 1)
 
         print('routine management done.')
         TABLEBOARD[0].log('routine management done.',0)
@@ -243,14 +249,17 @@ class table(Frame):
 
         self.initialize=0
     def newmatch_thread(self, kill):
+        if not (self.startThread) and (self.initialize == 1): self.initialize = 0
+        
         if not kill:
-            if (self.startThread) and(self.initialize == 0):
+            if (self.startThread) and (self.initialize == 0):
                 self.startThread.join()
                 
             else:
                 try:
-                    self.startThread = threading.Thread(target=self.newmatch)
-                    self.startThread.start()
+                    if not (self.startThread) and (self.online==0):
+                        self.startThread = threading.Thread(target=self.newmatch)
+                        self.startThread.start()
                 except RuntimeError:
                     print()
         else:
@@ -261,7 +270,7 @@ class table(Frame):
 
                 
     def newmatch(self):
-        if self.initialize: return
+        #if self.initialize: return
         
 
         
@@ -300,7 +309,7 @@ class table(Frame):
         #self.Pout(self.Wmachine.stdout.readlines())
         #self.Pout(self.Bmachine.stdout.readlines())
         
-        #sleep(1)
+        sleep(1)
         self.startuplog = []
         try:
             #self.startuplog.append(self.MACHINE[1].stdout.read())
@@ -312,8 +321,8 @@ class table(Frame):
             for i in [0,1]:
                 for line in self.MACHINE[i].stdout.readlines():
                     #print(line.decode('utf-8'))
-                    if "line > " in line.decode('utf-8'):
-                        self.MACnames[i] = line.decode('utf-8')[7:-1] 
+                    if "MACname > " in line.decode('utf-8'):
+                        self.MACnames[i] = line.decode('utf-8')[10:-1] 
 
             sleep(1)            
 
@@ -371,6 +380,12 @@ class table(Frame):
             self.endgame()
             return
         if self.initialize==1: return
+        if len(self.MACHINE) < 2:
+            print('machine breakdown @ %i' % self.number)
+            self.endgame()
+            return
+
+        
         print(COLOR[self.turn] + " @  table " + str(self.number))
         
         if GUI:
@@ -414,6 +429,7 @@ class table(Frame):
 
                 if L[1] in self.movelist:
                     SUCCESS=1
+                    self.arena.move_read_reliability += 1
                     self.consec_failure=0
                     if GUI: self.setlimit["text"] = "0"
                     
@@ -458,8 +474,10 @@ class table(Frame):
                     self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
                     self.MACHINE[self.turn].stdin.flush()
                     sleep(1)
-                    self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
-                                                 
+                    try:
+                        self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
+                    except AttributeError:
+                        pass
 
                     self.turnoff()
                     return
@@ -492,6 +510,7 @@ class table(Frame):
 
 
         self.online = 0
+        self.initialize = 0
         if GUI:
             self.setlimit["text"] = "off"        
             self.Maximize["background"] = "light grey"
@@ -555,7 +574,7 @@ class table(Frame):
         
         
     def turnon(self):
-        self.newmatch()
+        self.newmatch_thread(0)
         
         if GUI:
             self.switch["text"] = "on"

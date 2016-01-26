@@ -26,7 +26,7 @@ int loadmachine (int verbose, char *dir) {
        
        char *filename = (char *) malloc(64);
        
-       
+       int V = verbose;
        
        int Nmachines = 0;
        int Nchosenmachine = 0 ;
@@ -40,7 +40,7 @@ int loadmachine (int verbose, char *dir) {
 
        
        
-       printf("ok  %s\n,", filename);
+       printf("ok  %s\n", filename);
        
        
        fp = fopen(filename, "r");
@@ -62,7 +62,7 @@ int loadmachine (int verbose, char *dir) {
        
        fclose(fp);
        
-       Vb printf("line > %s   /len > %i\n",line,len);
+       printf("MACname > %s\n",line);
        strtok(line, "\n");
        sprintf(filename, "%s/%s", dir, line);
        
@@ -94,7 +94,7 @@ int loadmachine (int verbose, char *dir) {
                       
            }
            
-           if (strstr(line, "param_DEEP") != NULL) {
+        /*   if (strstr(line, "param_DEEP") != NULL) {
                reading = strtok(line, " ");
                reading = strtok(NULL, " ");
                reading = strtok(NULL, " ");
@@ -163,7 +163,26 @@ int loadmachine (int verbose, char *dir) {
                reading = strtok(NULL, " ");
                reading = strtok(NULL, " ");
                param_pawnrankMOD = atof(reading);
-               Vb printf("param_pawnrankMOD is %f\n", param_pawnrankMOD);}  
+               Vb printf("param_pawnrankMOD is %f\n", param_pawnrankMOD);}  */
+           
+           
+        readparam(&param_DEEP, (char*)("param_DEEP"), line, V);
+        readparam(&param_deviationcalc, (char*)("param_deviationcalc"), line, V);
+        readparam(&eval_randomness, (char*)("eval_randomness"), line, V);
+        readparam(&param_aperture, (char*)("param_aperture"), line, V);
+        readparam(&param_seekpieces, (char*)("param_seekpieces"), line, V);
+        readparam(&param_seekmiddle, (char*)("param_seekmiddle"), line, V);
+        readparam(&param_seekatk, (char*)("param_seekatk"), line, V);
+        readparam(&param_evalmethod, (char*)("param_evalmethod"), line, V);
+        readparam(&param_presumeOPPaggro, (char*)("param_presumeOPPaggro"), line, V);
+        readparam(&param_pawnrankMOD, (char*)("param_pawnrankMOD"), line, V);
+        readparam(&param_parallelcheck, (char*)("param_parallelcheck"), line, V);
+        
+                
+           
+           
+           
+           
            
            printf(".\n");
            
@@ -244,4 +263,23 @@ int countpieces(void) {
     }
     
     return Tvalue;
+}
+
+void readparam(float *Tparameter, char *keyword, char *line, int verbose) {
+    char *reading = (char *) malloc(64);
+    
+               if (strstr(line, keyword) != NULL) {
+               reading = strtok(line, " ");
+               reading = strtok(NULL, " ");
+               reading = strtok(NULL, " ");
+               float parameter = (float)(atof(reading));
+               Vb printf("%s is %f\n", keyword, parameter);
+               Tparameter = &parameter;}  
+    
+   
+    
+    
+    
+    reading = NULL;
+    
 }

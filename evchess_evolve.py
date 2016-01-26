@@ -9,7 +9,7 @@ Fdir = "/home/gabs/Desktop/e-vchess/machines"
 
 
 class parameter():
-    def __init__(self, name, dumpable, Cparam, value, aP=0, LIM = None, bLIM = None, INCR = 1):
+    def __init__(self, name, dumpable, Cparam, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
         
         self.name = name
         self.marks_dumpable = dumpable
@@ -25,8 +25,12 @@ class parameter():
         self.LIM = LIM
         self.bLIM = bLIM
         self.INCR = INCR
+
+        self.locked=locked
+        
         
     def read(self, split_line):
+        if self.locked: return
         try:
             if split_line[0] == self.name:
                 
@@ -121,7 +125,7 @@ class parameter():
 
     
     def mutate(self, eMOD, AGR):
-        if self.marks_dumpable > 0:
+        if (self.marks_dumpable) or (self.locked):
             return
 
         if self.name == 'param_TIMEweight':
@@ -237,7 +241,7 @@ class machine ():
         self.TPARAMETERS.append(parameter("stat_elo", 0,0,1000))
         
 
-        self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10))
+        self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10, bLIM=1))
         self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=4))
         self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=6))
         self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 12, bLIM=12, INCR=3))
@@ -247,8 +251,9 @@ class machine ():
         self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21.25))
         self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.9, LIM=7, bLIM=-7))
         self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 12))
+        self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 2,LIM=21, bLIM=0))
         
-        self.PARAMETERS.append(parameter("param_pvalues", 0, 30, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500))
+        self.PARAMETERS.append(parameter("param_pvalues", 0, 5, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500, locked=1))
         self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
 
 
@@ -506,7 +511,7 @@ def deltheworst_clonethebest(population, action):
         if action == -1:
             for k in range(len(POP_SCORETABLE)):
                 if (POP_SCORETABLE[k] > -1):
-                    if (POP_SCORETABLE[k] < MEDIUMSCORE*0.9):
+                    if (POP_SCORETABLE[k] < MEDIUMSCORE*0.9) and (POP_SCORETABLE[k] < 1000):
                         print('subject deleted. ' + population[k].filename)
                         os.remove(Fdir+'/'+population[k].filename)
                         population[k] = 0
@@ -531,8 +536,24 @@ def deltheworst_clonethebest(population, action):
 
     return population
 
-def creategoodhybrids(population):
-    print('TBD')
+def create_hybrid(population):
+    K = random.randrange(len(population))
+    K_ = range(population[K].TPARAMETERS[5].value-20,  population[K].TPARAMETERS[5].value+20) 
+    for I in range(len(population)):
+        if population[I].TPARAMETERS[5].value in K_:
+            if random.randrange(100) < 60:
+                CHILD = (machine(str(random.randrange(0,6489))+".mac"))
+
+                for P in range(len(population[I].PARAMETERS)):
+                    chance = random.randrange(100)
+                    
+                    if chance < 50:
+                        CHILD.PARAMETERS[P].value = population[I].PARAMETERS[P].value
+                    else:
+                        CHILD.PARAMETERS[P].value = population[K].PARAMETERS[P].value
+                print('new hybrid created. son of %i & %i' % (I,K))
+                return CHILD                
+    
 
 
 def select_best_inds(population):
@@ -546,5 +567,6 @@ def select_best_inds(population):
 
     return TOP
 
-
+#def crossover_reproduction(population):
+    
 #setmachines(loadmachines(),1)

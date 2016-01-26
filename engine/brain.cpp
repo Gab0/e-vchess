@@ -13,7 +13,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
     int score=0;
     
-    char *INDEX=" ";
+    char *INDEX=(char *)(" ");
     
     
     legal_moves(&board, PL, 0); 
@@ -37,8 +37,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      
 
      /* printing info to xboard; format is: ply score time nodes pv*/
-     snprintf(output, strlen(infoAUX)+32, "%i %i 0 0 %c%c%c%c %s\n", DEEP, score, 
-     showmovebuff.from[0], showmovebuff.from[1], showmovebuff.to[0],showmovebuff.to[1], infoAUX);
+     snprintf(output, strlen(infoAUX)+32, "%i %i 0 0 %c%c%c%c\n", DEEP, score, 
+     showmovebuff.from[0], showmovebuff.from[1], showmovebuff.to[0],showmovebuff.to[1]);
         write(1, output, strlen(output));      
      
         
@@ -77,9 +77,11 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     
     int i = 0;
     int j = 0;
-    int sausage = rand() % eval_randomness;
-    sausage = sausage-eval_randomness/2;
+    int chaos = rand() % (int)(eval_randomness);
+  
     int deadpiece = 0;
+    int parallelchecks = 0;
+    
     
     if (PL!=machineplays) {
         int param_seekpieces = param_seekpieces * param_presumeOPPaggro;
@@ -90,28 +92,43 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     if (move->casualty != 'x'){
         deadpiece=getindex(move->casualty,pieces[1-PL],6);
         score = score + (pvalues[deadpiece]*param_seekpieces);
-        
-        
     }
+    
+    if (move->promoteto != 0) score = score + (pvalues[4])*param_seekpieces;
     attackers_defenders(evalboard, PL);
 
+    
+        
     
     
     for (i=0;i<evalboard->kad;i++) {
            
          j = getindex(evalboard->defenders[i][0],pieces[1-PL],6);
          score = score + (pvalues[j])+param_seekatk;
+         
+         if (evalboard->defenders[i][0] == pieces[1-PL][5]) {
+             parallelchecks++;
+         }
+         
+         
     }
     
-    score = score+sausage;
+    if (param_parallelcheck) score = score + (parallelchecks) * param_parallelcheck;
+        
+    
+    
+    
+    
+    
+    
+    score = score+chaos;
 
     
     
     for (i=0;i<8;i++) for (j=0;j<8;j++) 
         if (is_in(evalboard->squares[i][j],pieces[PL],6)) {
 
-            score = score + (-power(j,2)+7*j-5)*param_seekmiddle;
-            score = score + (-power(i,2)+7*i-5)*param_seekmiddle;
+     score = score + ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5))*param_seekmiddle;
             
             if (is_in(evalboard->squares[i][j], pieces[PL],1)){
                 if (PL) score = score + i * param_pawnrankMOD;
@@ -134,7 +151,8 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     
 }
 
-int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore, struct move *move, char *INDEX) {
+int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
+                  struct move *move, char *INDEX) {
 
     int i=0;
     
@@ -180,7 +198,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore, struct mo
     
     
     
-    if (chainscore<-5000) {free(_board);free(nextINDEX);return chainscore;}
+    if (chainscore<-5000) {freeboard(_board);free(nextINDEX);return chainscore;}
 
      
      if (_board->k == 0) {
@@ -197,7 +215,8 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore, struct mo
          
   
          free(nextINDEX);
-         free(_board);
+         freeboard(_board);
+         
 
    return score;
          
@@ -352,7 +371,7 @@ float scoremod (int DEEP, int method) {
     
     if (method == 3) {
 
-        modifier = param_TIMEweight[param_DEEP-DEEP];
+        modifier = param_TIMEweight[(int)(param_DEEP-DEEP)];
         
     }
     
