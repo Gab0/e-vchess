@@ -97,7 +97,9 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     if (move->promoteto != 0) score = score + (pvalues[4])*param_seekpieces;
     attackers_defenders(evalboard, PL);
 
-    
+    //for (i=0;i<8;i++) for (j=0;j<8;j++) {
+    //    if is_in(evalboard->squares[i][j], pieces[PL], 6)
+    //}
         
     
     
@@ -112,6 +114,11 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
          
          
     }
+    
+    
+    
+    
+    
     
     if (param_parallelcheck) score = score + (parallelchecks) * param_parallelcheck;
         

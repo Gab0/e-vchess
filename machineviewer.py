@@ -67,6 +67,42 @@ class Application(Frame):
         self.show_machine()
 
 
+    def scrollbestmachines(self, ceiling, direction):
+        if ceiling: ceiling = self.machines[self.N].TPARAMETERS[5].value
+        else: ceiling = 66666
+
+        VECTOR = True
+        Z = 0
+        index = 0
+        
+        if direction < 0:
+            VECTOR = False
+            Z = self.machines[self.N].TPARAMETERS[5].value
+            while Z < ceiling:
+                index = random.randrange(len(self.machines))
+                Z = self.machines[index].TPARAMETERS[5].value
+        
+        
+
+        for M in range(len(self.machines)):
+            candidate = self.machines[M].TPARAMETERS[5].value
+            
+            if (((candidate > Z) and (candidate < ceiling) and (VECTOR)) or
+               ((candidate < Z) and (candidate > ceiling) and not (VECTOR))):
+                Z = self.machines[M].TPARAMETERS[5].value
+                index = M
+
+
+
+
+
+
+
+
+        self.N=index
+        self.show_machine()
+                
+
     def savemac(self):
         setmachines(self.machines, 1)
         self.show_machine()
@@ -164,7 +200,23 @@ class Application(Frame):
 
 
         self.VIEW_elo = Button(self)
+        self.VIEW_elo["command"] = lambda: self.scrollbestmachines(0,0)
         self.VIEW_elo.grid(column=1, row=7)
+
+        self.scroll_eloL = Button(self)
+        self.scroll_eloL["text"] = '<<'
+        self.scroll_eloL["fg"] = 'red'
+        self.scroll_eloL["command"] = lambda: self.scrollbestmachines(1,-1)
+        self.scroll_eloL.grid(column=0, row=7)
+
+        self.scroll_eloR = Button(self)
+        self.scroll_eloR["text"] = '>>'
+        self.scroll_eloR["fg"] = 'red'
+        self.scroll_eloR["command"] = lambda: self.scrollbestmachines(1,1)
+        self.scroll_eloR.grid(column=2, row=7)        
+
+
+
 
         self.macname = Button(self)
         self.macname["text"] = self.machines[self.N].filename
@@ -204,6 +256,8 @@ class Application(Frame):
         self.popmenu.add_separator()
         self.popmenu.add_command(label="Create 4 Hybrid", command = lambda: self.TOcreatehybrid(4))
         self.popmenu.add_command(label="Create 16 Hybrids", command = lambda: self.TOcreatehybrid(16))
+        self.popmenu.add_separator()
+        self.popmenu.add_command(label="Create 16 from Template", command = lambda: self.TOpopulatetemplate(16))
         self.popmenu.add_separator()
         self.popmenu.add_command(label="Routine Procedure", command = self.TOroutineprocedures)
         self.popmenu.add_command(label="send best to TOP", command = self.TOautotop)
@@ -302,6 +356,7 @@ class Application(Frame):
         self.TOdeltheworst()
         self.TOclonethebest()
         self.savemac()
+        
     def TOcleardump(self):
         if os.path.isfile(self.DIR + "/paramstats.xml"):
             os.remove(self.DIR + "/paramstats.xml")
@@ -319,6 +374,14 @@ class Application(Frame):
             CHILD = create_hybrid(self.machines)            
             if CHILD: self.machines.append(CHILD)
         self.savemac
+
+
+    def TOpopulatetemplate(self, NUM):
+        for i in range(NUM):
+            CHILD = clone_from_template()
+            if CHILD: self.machines.append(CHILD)
+        self.savemac
+
 
     def renew_VIEWDUMP_canvas(self, alreadyexists):
         if alreadyexists==1:

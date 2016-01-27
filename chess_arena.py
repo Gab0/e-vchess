@@ -43,13 +43,11 @@ if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
 
 
 
-class Application(Frame):
+class Application():
 
-    def __init__(self, master=None):
-        if GUI:
-            #self = Frame()
-            Frame.__init__(self, master)
+    def __init__(self):
 
+        #master = self
         self.Cycle = False
         self.looplimit = 0
 
@@ -62,8 +60,13 @@ class Application(Frame):
         self.TIME = time()
         k=0
         j=0
+
+        self.root = Tk()
+
+
+        
         for i in range(self.TABLECOUNT):
-            TABLEBOARD.append(table(self, master=master))
+            TABLEBOARD.append(table(self, master=self.root))
             if GUI: TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
             k+=1
             if k == TABLEonROW:
@@ -71,13 +74,13 @@ class Application(Frame):
                 j+=1
         
       
-        self.menubar= Menu(master)
+        self.menubar= Menu(self.root)
       
         self.Ccycle = self.menubar.add_command(label='cycle thru', command = self.startcycle)
         self.menubar.add_command(label="Kill 'em All", command = self.killemall)
         self.menubar.add_command(label='show/hide ALL', command = self.showhideall)
 
-        if GUI: master.config(menu=self.menubar)
+        if GUI: self.root.config(menu=self.menubar)
         self.showhide_ = 0
 
 
@@ -91,8 +94,10 @@ class Application(Frame):
             self.setlooplimit(self.TABLECOUNT-1)
             self.startcycle()
 
-
-
+        self.Title = "arenaArray"
+        self.root.wm_title(self.Title)
+        self.root.resizable(False, False)
+        self.root.mainloop()
 
     def startcycle(self):
 
@@ -114,10 +119,11 @@ class Application(Frame):
         
         while self.Cycle:
             TIME = time()-TIME
-            if i % 10 == 0:
+            if i % 5 == 0:
                 system('clear')
                 if self.move_read_reliability/self.TABLECOUNT < 0.5: SLEEPTIME += 0.1
                 if self.move_read_reliability/self.TABLECOUNT > 0.85: SLEEPTIME -= 0.1
+                self.root.wm_title(self.Title + "T =%s" % round(SLEEPTIME,1))
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             if (i % 2500 == 0) and (i != 0):
@@ -243,7 +249,7 @@ class table(Frame):
 
         self.flagged_toend = 0
         if GUI: self.setWidgets()
-        #self.newmatch()
+
 
         self.startThread = None
 
@@ -493,7 +499,7 @@ class table(Frame):
                 self.turnoff()
                 
         if GUI:
-            if self.number <= app.looplimit:
+            if self.number <= self.arena.looplimit:
                 self.setlimit["background"] = "green"
                 self.Maximize['background'] = "grey"
             else: self.setlimit["background"] = "red"
@@ -699,15 +705,16 @@ class table(Frame):
                                
         
 if GUI:
-        
-    root = Tk()
-    root.wm_title("e-vchess arenaArray")
-    root.grid_columnconfigure(8, weight=1)
-    root.grid_rowconfigure(4, weight=1)
-    app = Application(master=root)
-    app.grid(sticky=NSEW)
+    print('good')    
+    #root = Tk()
+    #root.wm_title("e-vchess arenaArray")
+    #root.grid_columnconfigure(8, weight=1)
+    #root.grid_rowconfigure(4, weight=1)
+    #app = Application(master=root)
+    #app.grid(sticky=NSEW)
 
-    root.resizable(False, False)
-    root.mainloop()
+    #root.resizable(False, False)
+    #root.mainloop()
+    app = Application()
 
 else: app = Application()

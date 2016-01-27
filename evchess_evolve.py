@@ -242,16 +242,16 @@ class machine ():
         
 
         self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10, bLIM=1))
-        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=4))
-        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=6))
-        self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 12, bLIM=12, INCR=3))
+        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=2))
+        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=3))
+        self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 11, bLIM=12, INCR=3))
         self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
         self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
-        self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 20))
+        self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 12))
         self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21.25))
-        self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.9, LIM=7, bLIM=-7))
-        self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 12))
-        self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 2,LIM=21, bLIM=0))
+        self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.0, LIM=7, bLIM=-7))
+        self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 13))
+        self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 4,LIM=21, bLIM=0))
         
         self.PARAMETERS.append(parameter("param_pvalues", 0, 5, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500, locked=1))
         self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
@@ -451,7 +451,7 @@ def read_param_dump(parameter):
     for child in root:
         #print(child.tag)
         if child.tag == parameter:
-            print("good")
+  
             for stat in range(len(child)):
                 DUMP.append([child[stat].tag])
                 for score in child[stat]:
@@ -566,6 +566,29 @@ def select_best_inds(population):
                         TOP.append(IND)
 
     return TOP
+
+
+def clone_from_template():
+    Tpool = open('%s/top_machines/machines.list' % Fdir, 'r')
+    POOL = []
+    
+    for line in Tpool.readlines():
+        if '.mac' in line:
+            POOL.append(line[:-1])
+
+    X = random.randrange(len(POOL))
+
+    model = open('%s/top_machines/%s' % (Fdir,POOL[X]), 'r')
+
+    CHILD = machine(str(random.randrange(0,6489))+".mac")
+    for line in model.readlines():
+        CHILD.read(line)
+    CHILD.onTOP = 0
+                  
+    #for N in range(NUMBER):
+        
+
+    return CHILD
 
 #def crossover_reproduction(population):
     
