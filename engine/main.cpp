@@ -2,8 +2,7 @@
 
 
 struct board board;
-
-
+struct param Brain;
 
 char pieces[2][6] = {{'P','R','N','B','Q','K'},{'p','r','n','b','q','k'}};
 
@@ -17,19 +16,8 @@ bool loadedmachine = false;
 char *infoAUX = (char *)malloc(256 * sizeof(char));
 
 //variable params for intelligent evolution (standards initialized);
-int pvalues[6] = {100,500,300,300,900,2000};
-float eval_randomness = 60;
-float param_aperture = 4;
-float param_seekmiddle = 23;
-float param_DEEP = 5;
-float param_seekpieces = 12;
-float param_deviationcalc = 0;
-float param_evalmethod = 0;
-float param_seekatk = 24;
-float param_TIMEweight[10] = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-float param_presumeOPPaggro = -3.0;
-float param_pawnrankMOD = 20;
-float param_parallelcheck = 3.5;
+
+
 /*//////variable params for intelligent evolution*/
 
 int i;
@@ -59,6 +47,29 @@ int main(int argc, char** argv) {
     printf("id author afrogabs\n");
     printf("uci ok\n");
 
+    //brain.pvalues = {100,500,300,300,900,2000};
+    Brain.randomness = 55;
+    Brain.randomness = 60;
+    Brain.aperture = 4;
+    Brain.seekmiddle = 23;
+    Brain.DEEP = 5;
+    Brain.seekpieces = 12;
+    Brain.deviationcalc = 0;
+    Brain.evalmethod = 0;
+    Brain.seekatk = 24;
+    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
+    Brain.presumeOPPaggro = -3.0;
+    Brain.pawnrankMOD = 20;
+    Brain.parallelcheck = 3.5;
+    Brain.balanceoffense = 4;    
+    
+    
+    
+    
+    
+    
+    
+    
     
     char *inp;
 
@@ -83,12 +94,13 @@ int main(int argc, char** argv) {
     
     if (toloadmachine) loadmachine(0, machinepath);
     
+
     
     char testfehn[128] = "rn1qkbnr/ppp1pppp/3p4/8/3P2b1/4PN2/PPP1BPPP/RNBQK2R w KQkq - 5 5";
     
     
 
-    for (i=param_DEEP;i>=0;i--) printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,param_evalmethod));
+    for (i=Brain.DEEP;i>=0;i--) printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
     
     
     inp =(char *)malloc(128*sizeof(char));
@@ -204,7 +216,7 @@ void computer(int verbose) {
     struct move move;
 
     
-    if (think(&move, P , param_DEEP, 0) < 0) return;
+    if (think(&move, P , Brain.DEEP, 0) < 0) return;
     sleep(1);
     move_pc(&board, &move);
     

@@ -227,7 +227,8 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
         
         
         
-        while (onboard(aim_y,aim_x) && tg_board->squares[aim_y][aim_x] == 'x') {i++; aim_y=target[0]+i*matrix[z][0]; j++; aim_x=target[1]+j*matrix[z][1];}
+        while (onboard(aim_y,aim_x) && tg_board->squares[aim_y][aim_x] == 'x')
+     {i++; aim_y=target[0]+i*matrix[z][0]; j++; aim_x=target[1]+j*matrix[z][1];}
         
         Vb printf("checking %i%i\n", aim_y,aim_x);
         
@@ -238,15 +239,15 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
             //printf("kpos %i%i x=%i\n",aim_y,aim_x,x);
             
             
-            if (offender==1||offender==4) {if (z==2||z==4||z==6||z==8) result = 1;} else Vb printf("granted. aim=%i%i z=%i offender=%i\n", aim_y,aim_x,z,offender);
+            if (offender==1||offender==4) {if (z==2||z==4||z==6||z==8) result++;} else Vb printf("granted. aim=%i%i z=%i offender=%i\n", aim_y,aim_x,z,offender);
                     
-            if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result = 1;
+            if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result++;
             
             if (offender==5) if (i==1) result = 1;
             
-            if (offender==0) if (i==1) if (P==0) if (z==1||z==3)  result = 1;
+            if (offender==0) if (i==1) if (P==0) if (z==1||z==3)  result++;
             
-            if (offender==0) if (i==1) if (P==1) if (z==7||z==9) result = 1;
+            if (offender==0) if (i==1) if (P==1) if (z==7||z==9) result++;
               
 
             
@@ -264,13 +265,13 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
         aim_y=target[0]+horse_matrix[1][n];
         aim_x=target[1]+horse_matrix[0][z];
         
-        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result = 1;
+        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result++;
              
   
         aim_y=target[0]+horse_matrix[0][n];
         aim_x=target[1]+horse_matrix[1][z];
                 
-        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result = 1;
+        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result++;
         
 
 

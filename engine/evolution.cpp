@@ -1,6 +1,3 @@
-
-
-
 #include "ev_chess.h"
 
 
@@ -26,7 +23,7 @@ int loadmachine (int verbose, char *dir) {
        
        char *filename = (char *) malloc(64);
        
-       int V = verbose;
+       int V = 1;//verbose;
        
        int Nmachines = 0;
        int Nchosenmachine = 0 ;
@@ -88,8 +85,8 @@ int loadmachine (int verbose, char *dir) {
             
             
             for (i=0;i<6;i++) {if (!atoi(reading)) exit(0); 
-            pvalues[i] = atoi(reading); reading = strtok(NULL, " "); 
-            Vb printf("P%i worth %i /n",i,pvalues[i]);}
+            Brain.pvalues[i] = atoi(reading); reading = strtok(NULL, " "); 
+            Vb printf("P%i worth %i /n",i,Brain.pvalues[i]);}
 
                       
            }
@@ -165,23 +162,34 @@ int loadmachine (int verbose, char *dir) {
                param_pawnrankMOD = atof(reading);
                Vb printf("param_pawnrankMOD is %f\n", param_pawnrankMOD);}  */
            
-           
-        readparam(&param_DEEP, (char*)("param_DEEP"), line, V);
-        readparam(&param_deviationcalc, (char*)("param_deviationcalc"), line, V);
-        readparam(&eval_randomness, (char*)("eval_randomness"), line, V);
-        readparam(&param_aperture, (char*)("param_aperture"), line, V);
-        readparam(&param_seekpieces, (char*)("param_seekpieces"), line, V);
-        readparam(&param_seekmiddle, (char*)("param_seekmiddle"), line, V);
-        readparam(&param_seekatk, (char*)("param_seekatk"), line, V);
-        readparam(&param_evalmethod, (char*)("param_evalmethod"), line, V);
-        readparam(&param_presumeOPPaggro, (char*)("param_presumeOPPaggro"), line, V);
-        readparam(&param_pawnrankMOD, (char*)("param_pawnrankMOD"), line, V);
-        readparam(&param_parallelcheck, (char*)("param_parallelcheck"), line, V);
-        
+        if (strstr(line, "param_DEEP") != NULL)   
+            Brain.DEEP = readparam(line, V);
+        if (strstr(line, "param_deviationcalc") != NULL)
+            Brain.deviationcalc = readparam(line, V);
+        if (strstr(line, "eval_randomness") != NULL)
+            Brain.randomness = readparam(line, V);
+        if (strstr(line, "param_aperture") != NULL)
+            Brain.aperture = readparam(line, V);
+        if (strstr(line, "param_seekpieces") != NULL)
+            Brain.seekpieces = readparam(line, V);
+        if (strstr(line, "param_seekmiddle") != NULL)
+            Brain.seekmiddle = readparam(line, V);
+        if (strstr(line, "param_seekatk") != NULL)
+            Brain.seekatk = readparam(line, V);
+        if (strstr(line, "param_evalmethod") != NULL)
+            Brain.evalmethod = readparam(line, V);
+        if (strstr(line, "param_presumeOPPaggro") != NULL)
+            Brain.presumeOPPaggro = readparam(line, V);
+        if (strstr(line, "param_pawnrankMOD") != NULL)
+            Brain.pawnrankMOD = readparam(line, V);
+        if (strstr(line, "param_parallelcheck") != NULL)
+            Brain.parallelcheck = readparam(line, V);
+        if (strstr(line, "param_balanceoffense") != NULL)
+            Brain.balanceoffense = readparam(line, V);
                 
            
            
-           
+
            
            
            printf(".\n");
@@ -265,21 +273,24 @@ int countpieces(void) {
     return Tvalue;
 }
 
-void readparam(float *Tparameter, char *keyword, char *line, int verbose) {
+float readparam(char *line, int verbose) {
+    
+    //if (strstr(line, keyword) != NULL) {
     char *reading = (char *) malloc(64);
     
-               if (strstr(line, keyword) != NULL) {
+               
                reading = strtok(line, " ");
                reading = strtok(NULL, " ");
                reading = strtok(NULL, " ");
                float parameter = (float)(atof(reading));
-               Vb printf("%s is %f\n", keyword, parameter);
-               Tparameter = &parameter;}  
+               Vb printf("is %f\n",parameter);
     
    
     
     
     
     reading = NULL;
-    
+    return parameter;
+
+
 }

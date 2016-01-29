@@ -77,24 +77,24 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     
     int i = 0;
     int j = 0;
-    int chaos = rand() % (int)(eval_randomness);
+    int chaos = rand() % (int)(Brain.randomness);
   
     int deadpiece = 0;
     int parallelchecks = 0;
     
     
     if (PL!=machineplays) {
-        int param_seekpieces = param_seekpieces * param_presumeOPPaggro;
-        int param_seekatk = param_seekatk * param_presumeOPPaggro;
+        int param_seekpieces = param_seekpieces * Brain.presumeOPPaggro;
+        int param_seekatk = param_seekatk * Brain.presumeOPPaggro;
     }
 
     
     if (move->casualty != 'x'){
         deadpiece=getindex(move->casualty,pieces[1-PL],6);
-        score = score + (pvalues[deadpiece]*param_seekpieces);
+        score = score + (Brain.pvalues[deadpiece]*Brain.seekpieces);
     }
     
-    if (move->promoteto != 0) score = score + (pvalues[4])*param_seekpieces;
+    if (move->promoteto != 0) score = score + (Brain.pvalues[4])*Brain.seekpieces;
     attackers_defenders(evalboard, PL);
 
     //for (i=0;i<8;i++) for (j=0;j<8;j++) {
@@ -106,7 +106,7 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     for (i=0;i<evalboard->kad;i++) {
            
          j = getindex(evalboard->defenders[i][0],pieces[1-PL],6);
-         score = score + (pvalues[j])+param_seekatk;
+         score = score + (Brain.pvalues[j])+Brain.seekatk;
          
          if (evalboard->defenders[i][0] == pieces[1-PL][5]) {
              parallelchecks++;
@@ -120,7 +120,7 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     
     
     
-    if (param_parallelcheck) score = score + (parallelchecks) * param_parallelcheck;
+    if (Brain.parallelcheck) score = score + (parallelchecks) * Brain.parallelcheck;
         
     
     
@@ -134,12 +134,15 @@ int evaluate(struct board *evalboard, struct move *move, int PL) {
     
     for (i=0;i<8;i++) for (j=0;j<8;j++) 
         if (is_in(evalboard->squares[i][j],pieces[PL],6)) {
+            
+         score = score + (ifsquare_attacked(evalboard, i, j, PL, 0) 
+              - ifsquare_attacked(evalboard, i, j, 1-PL, 0)) * Brain.balanceoffense;      
 
-     score = score + ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5))*param_seekmiddle;
+     score = score + ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5))*Brain.seekmiddle;
             
             if (is_in(evalboard->squares[i][j], pieces[PL],1)){
-                if (PL) score = score + i * param_pawnrankMOD;
-                else score = score + (7-i) * param_pawnrankMOD;        
+                if (PL) score = score + i * Brain.pawnrankMOD;
+                else score = score + (7-i) * Brain.pawnrankMOD;        
             }
         }
         
@@ -211,7 +214,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
      if (_board->k == 0) {
          if (ifsquare_attacked(_board, findking(_board->squares, 'Y', PL), 
                  findking(_board->squares, 'X', PL), PL, 0)) {
-            score = 1300 - 50*(param_DEEP-DEEP); 
+            score = 1300 - 50*(Brain.DEEP-DEEP); 
             if (PL == machineplays) score = -score;
             
          }
@@ -231,7 +234,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
 
      score = evaluate(_board, move, PL);
      
-     score = score*scoremod(DEEP, param_evalmethod);
+     score = score*scoremod(DEEP, Brain.evalmethod);
      
      if (PL!=machineplays) score = -score;
      
@@ -274,7 +277,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
     
 
     
-    select_top(_board->evaltable, _board->k, top, param_aperture);
+    select_top(_board->evaltable, _board->k, top, Brain.aperture);
 
 
   
@@ -289,7 +292,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
     
     
          //printf("proceeding to iteration.\n");
-    for (i=0;i<param_aperture;i++) {
+    for (i=0;i<Brain.aperture;i++) {
         
          replicate_move(&movebuff, &_board->movelist[top[i]]);
          
@@ -312,7 +315,7 @@ int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore,
    score = 16900;
    if (PL!=machineplays) score = -16900;
    
-   for (i=0;i<param_aperture;i++) {
+   for (i=0;i<Brain.aperture;i++) {
        
        
     if (PL!=machineplays) if (branch_score[i] > score) {score = branch_score[i];t=i;}
@@ -362,15 +365,15 @@ float scoremod (int DEEP, int method) {
     
     if (method == 0) modifier = 1;
     
-    if (method == 1) modifier = 2*((DEEP+param_deviationcalc)/param_DEEP);
+    if (method == 1) modifier = 2*((DEEP+Brain.deviationcalc)/Brain.DEEP);
     
     if (method == 2) {
-        modifier = -power(DEEP,2)+param_DEEP*DEEP+2*param_DEEP;
+        modifier = -power(DEEP,2)+Brain.DEEP*DEEP+2*Brain.DEEP;
         
 
-    helper = param_DEEP/2;
+    helper = Brain.DEEP/2;
         
-            helper = -power(helper,2)+param_DEEP*helper+2*param_DEEP;
+            helper = -power(helper,2)+Brain.DEEP*helper+2*Brain.DEEP;
             
             modifier = modifier/(helper/1.1);
     }
@@ -378,7 +381,7 @@ float scoremod (int DEEP, int method) {
     
     if (method == 3) {
 
-        modifier = param_TIMEweight[(int)(param_DEEP-DEEP)];
+        modifier = Brain.TIMEweight[(int)(Brain.DEEP-DEEP)];
         
     }
     

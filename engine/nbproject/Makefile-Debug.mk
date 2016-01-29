@@ -15,8 +15,10 @@ NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
 CC=gcc
-CCC=g++
-CXX=g++
+CCC=/usr/bin/x86_64-w64-mingw32-g++
+#CCC=g++
+#CXX=g++
+CXX=/usr/bin/x86_64-w64-mingw32-g++
 FC=gfortran
 AS=as
 

@@ -119,11 +119,12 @@ class Application():
         
         while self.Cycle:
             TIME = time()-TIME
-            if i % 5 == 0:
+            if i % 3 == 0:
                 system('clear')
                 if self.move_read_reliability/self.TABLECOUNT < 0.5: SLEEPTIME += 0.1
-                if self.move_read_reliability/self.TABLECOUNT > 0.85: SLEEPTIME -= 0.1
-                self.root.wm_title(self.Title + "T =%s" % round(SLEEPTIME,1))
+                if (self.move_read_reliability/self.TABLECOUNT > 0.85) and (SLEEPTIME > 0.5): SLEEPTIME -= 0.1
+                SLEEPTIME = round(SLEEPTIME,1)
+                self.root.wm_title(self.Title + "  T=%s|R=%s" % (round(SLEEPTIME,1),i))
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             if (i % 2500 == 0) and (i != 0):
@@ -132,7 +133,7 @@ class Application():
             self.move_read_reliability = 0
             print("ROUND " + str(i) + " T=" + str(round(TIME)) + " S=" +str(SLEEPTIME) + " >>>>>>>>>>")
             for t in range (self.looplimit+1):
-                if virtual_memory()[2] > 92: self.memorylimit=1
+                if virtual_memory()[2] > 97: self.memorylimit=1
                 else: self.memorylimit=0
                 
                 if self.Cycle:
@@ -141,8 +142,8 @@ class Application():
                     else:
                         if not self.memorylimit:
                             
-                            TABLEBOARD[t].newmatch_thread(0)
-                            if virtual_memory()[2] > 92: self.memorylimit=1
+                            TABLEBOARD[t].newmatch_thread()
+                            if virtual_memory()[2] > 97: self.memorylimit=1
             if i == 0:
                 sleep(6)
             i+=1
@@ -254,27 +255,23 @@ class table(Frame):
         self.startThread = None
 
         self.initialize=0
-    def newmatch_thread(self, kill):
+    def newmatch_thread(self):
         if not (self.startThread) and (self.initialize == 1): self.initialize = 0
         
-        if not kill:
-            if (self.startThread) and (self.initialize == 0):
-                self.startThread.join()
-                
-            else:
-                try:
-                    if not (self.startThread) and (self.online==0):
-                        self.startThread = threading.Thread(target=self.newmatch)
-                        self.startThread.start()
-                except RuntimeError:
-                    print()
-        else:
-            if self.startThread:
-                self.startThread.join()
-                
-                self.startThread = None
 
-                
+        if (self.startThread) and (self.initialize == 0):
+            self.startThread.join()
+            self.startThread = None
+            
+        else:
+            try:
+                if not (self.startThread) and (self.online==0):
+                    self.startThread = threading.Thread(target=self.newmatch)
+                    self.startThread.start()
+            except RuntimeError:
+                print()
+
+            
     def newmatch(self):
         #if self.initialize: return
         
@@ -580,7 +577,7 @@ class table(Frame):
         
         
     def turnon(self):
-        self.newmatch_thread(0)
+        self.newmatch_thread()
         
         if GUI:
             self.switch["text"] = "on"

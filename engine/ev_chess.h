@@ -68,16 +68,36 @@ struct board;
       long long *evaltable;
    }; 
    
+struct param;
+   struct param {
+    int pvalues[6];
+    float randomness;
+    float aperture;
+    float seekmiddle;
+    float DEEP;
+    float seekpieces;
+    float deviationcalc;
+    float evalmethod;
+    float seekatk;
+    float TIMEweight[10];
+    float presumeOPPaggro;
+    float pawnrankMOD;
+    float parallelcheck;
+    float balanceoffense;
+   };
+
    
 
 using namespace std;
 
-extern char squares[8][8];
+//extern char squares[8][8];
 extern char pieces[2][6];
 
 extern bool computer_turn;
 
 extern struct board board;
+
+extern struct param Brain;
 
 extern int machineplays;
 extern bool loadedmachine;
@@ -88,19 +108,7 @@ extern bool selectTOPmachines;
 extern char *infoAUX;
 
 /*variable params for intelligent evolution*/
-extern int pvalues[6];
-extern float eval_randomness;
-extern float param_aperture;
-extern float param_seekmiddle;
-extern float param_DEEP;
-extern float param_seekpieces;
-extern float param_deviationcalc;
-extern float param_evalmethod;
-extern float param_seekatk;
-extern float param_TIMEweight[10];
-extern float param_presumeOPPaggro;
-extern float param_pawnrankMOD;
-extern float param_parallelcheck;
+
 /*//////variable params for intelligent evolution*/
 
 
@@ -180,5 +188,7 @@ float scoremod (int DEEP, int method);
 int loadmachine (int verbose, char *dir);
 int applyresult (int result);
 int countpieces (void);
-void readparam(float *Tparameter, char *keyword, char *line, int verbose);
+float readparam(char *line, int verbose);
+
+
 #endif	/* BOARD_H */

@@ -242,8 +242,8 @@ class machine ():
         
 
         self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10, bLIM=1))
-        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=2))
-        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=3))
+        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=1))
+        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=1))
         self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 11, bLIM=12, INCR=3))
         self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
         self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
@@ -252,6 +252,7 @@ class machine ():
         self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.0, LIM=7, bLIM=-7))
         self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 13))
         self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 4,LIM=21, bLIM=0))
+        self.PARAMETERS.append(parameter("param_balanceoffense", 0, 80, 3,LIM=5, bLIM=0))
         
         self.PARAMETERS.append(parameter("param_pvalues", 0, 5, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500, locked=1))
         self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
@@ -586,7 +587,7 @@ def clone_from_template():
     CHILD.onTOP = 0
                   
     #for N in range(NUMBER):
-        
+    CHILD.mutate(10,6)    
 
     return CHILD
 
