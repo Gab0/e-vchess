@@ -51,11 +51,10 @@ class Application():
         self.Cycle = False
         self.looplimit = 0
 
-        #sets the number of simultaneous chess tables to be created and played. Estimations based on your RAM: wisely set max tables in increments of 8 for each GB on your machine.
-        #for very long runs, the number of simultaneous engines (two per table) should be multiplied by the maximum engine size allowed(std 160mb), so 16 tables should occupy 2.5gb of ram.
-        self.TABLECOUNT = 32
+        #sets the number of simultaneous chess tables to be created and played.
+        self.TABLECOUNT = 72
         #number of tables to be shown on each row of machines.
-        TABLEonROW = 8
+        TABLEonROW = 12
 
         self.TIME = time()
         k=0
@@ -89,6 +88,10 @@ class Application():
         #self.config(menu=self.menubar)
         self.setlooplimit(0)
 
+        self.setcounter_illegalmove=0
+        self.setcounter_draws=0
+        self.setcounter_checkmate=0
+
 
         if (len(sys.argv) > 0) and ('--go' in sys.argv):
             self.setlooplimit(self.TABLECOUNT-1)
@@ -107,7 +110,7 @@ class Application():
     def gocycle(self):
         SLEEPTIME = 2.3
         if SLEEPTIME < 1: SLEEPTIME = 1.3
-        i=0
+        self.ROUND=0
         self.Cycle = True
         
         if GUI:
@@ -116,23 +119,30 @@ class Application():
             
         TIME = time()
         TABLEBOARD[0].log("\n\n\nSTARTING CYCLE", str(strftime("%d/%b - %H:%M:%S")))
-        
+
+        #arena/cycle main loop. Important functions and values.
         while self.Cycle:
             TIME = time()-TIME
-            if i % 3 == 0:
-                system('clear')
-                if self.move_read_reliability/self.TABLECOUNT < 0.5: SLEEPTIME += 0.1
-                if (self.move_read_reliability/self.TABLECOUNT > 0.85) and (SLEEPTIME > 0.5): SLEEPTIME -= 0.1
-                SLEEPTIME = round(SLEEPTIME,1)
-                self.root.wm_title(self.Title + "  T=%s|R=%s" % (round(SLEEPTIME,1),i))
+            TABLERESPONSE = self.move_read_reliability/self.TABLECOUNT
+    
+
+            
+            if TABLERESPONSE < 0.42: SLEEPTIME += 0.1
+            if (TABLERESPONSE > 0.81) and (SLEEPTIME > 0.5): SLEEPTIME -= 0.1
+            SLEEPTIME = round(SLEEPTIME,1)
+
+            if self.ROUND % 3 == 0:                
+                self.root.wm_title(self.Title + "  T=%s|R=%s" % (round(SLEEPTIME,1),self.ROUND))
 
             #each N rounds, do maintenance management in order to get best evolving performance.
-            if (i % 2500 == 0) and (i != 0):
+            #also prints running info to log.
+            if (self.ROUND % 3300 == 0) and (self.ROUND != 0):
+
                 self.routine_pop_management()
             
             self.move_read_reliability = 0
-            print("ROUND " + str(i) + " T=" + str(round(TIME)) + " S=" +str(SLEEPTIME) + " >>>>>>>>>>")
-            for t in range (self.looplimit+1):
+            print("ROUND %i  T=%i  S=%f  APR=%i%% >>>>>>>>" % (self.ROUND,round(TIME), SLEEPTIME, TABLERESPONSE*100))
+            for t in range(self.looplimit+1):
                 if virtual_memory()[2] > 97: self.memorylimit=1
                 else: self.memorylimit=0
                 
@@ -144,12 +154,12 @@ class Application():
                             
                             TABLEBOARD[t].newmatch_thread()
                             if virtual_memory()[2] > 97: self.memorylimit=1
-            if i == 0:
+            if self.ROUND == 0:
                 sleep(6)
-            i+=1
+            self.ROUND+=1
 
-            #if i % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
-            if i > 100000: i=0
+            #if self.ROUND % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
+            if self.ROUND > 100000: i=0
             sleep(SLEEPTIME)
         return
 
@@ -191,18 +201,22 @@ class Application():
 
         #for individual in population:
             #dump_all_paramstat(individual)
-        
-        population = deltheworst_clonethebest(population, -1)
-        #population = deltheworst_clonethebest(population, 1)
-        for k in range(16):
+
+        for k in range(8):
             CHILD = create_hybrid(population)
             if CHILD: population.append(CHILD)
-        mutatemachines(3, population)
+        
+        for k in range(4): population = deltheworst_clonethebest(population, -1)
+
+        for k in range(2): mutatemachines(3, population)
 
         setmachines(population, 1)
-
+        self.log('')
+        self.log('>>>>ROUTINE MANAGEMENT')
+        self.log("ROUND = %i. checkmate-> %i; draws-> %i; illegal moves-> %i." % (self.ROUND, self.setcounter_checkmate, self.setcounter_draws, self.setcounter_illegalmove))
+        self.log('Illegal move percentage is %f %%.' % (self.setcounter_illegalmove/(self.setcounter_checkmate+self.setcounter_draws+1)))
+        self.log('')
         print('routine management done.')
-        TABLEBOARD[0].log('routine management done.',0)
 
 
     def showhideall(self):
@@ -224,6 +238,13 @@ class Application():
         self.killunused()
 
 
+
+    def log(self, event):
+        LOG = open("log.txt", "a+")
+
+        LOG.write(event+" \n")
+        
+        LOG.close()
 
         
 class table(Frame):
@@ -256,11 +277,16 @@ class table(Frame):
 
         self.initialize=0
     def newmatch_thread(self):
-        if not (self.startThread) and (self.initialize == 1): self.initialize = 0
+
+        if (self.initialize == 0) and (self.online == 0) and (self.startThread):
+            self.startThread.join(0)
+            self.startThread = None
+            
+        elif not (self.startThread) and (self.initialize == 1): self.initialize = 0
         
 
-        if (self.startThread) and (self.initialize == 0):
-            self.startThread.join()
+        elif (self.startThread) and (self.initialize == 0):
+            self.startThread.join(0)
             self.startThread = None
             
         else:
@@ -269,7 +295,7 @@ class table(Frame):
                     self.startThread = threading.Thread(target=self.newmatch)
                     self.startThread.start()
             except RuntimeError:
-                print()
+                print('Error starting match.')
 
             
     def newmatch(self):
@@ -283,32 +309,35 @@ class table(Frame):
         self.rounds_played=0
         
         self.initialize = 1
-
+        if GUI: self.Maximize["background"] = "purple"
         
         try:
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
 
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
-        except OSError:
+        except:# OSError:
             self.arena.shrinkloop()
             for M in self.MACHINE:
                 M.kill()
+            self.initialize=0
             return -1
 
         sleep(4)
 
-        if GUI: self.Maximize["background"] = "grey"
-        self.MACnames = ['zero','zero']
-
-        flags = fcntl(self.MACHINE[0].stdout, F_GETFL) # get current p.stdout flags
-        fcntl(self.MACHINE[0].stdout, F_SETFL, flags | O_NONBLOCK)
-        fcntl(self.MACHINE[1].stdout, F_SETFL, flags | O_NONBLOCK)#fcntl(self.Bmachine.stdout, F_SETFL, flags | O_NONBLOCK) >>>>>?
-
+        try:
+            self.MACnames = ['zero','zero']
+        
+            flags = fcntl(self.MACHINE[0].stdout, F_GETFL) # get current p.stdout flags
+            fcntl(self.MACHINE[0].stdout, F_SETFL, flags | O_NONBLOCK)
+            fcntl(self.MACHINE[1].stdout, F_SETFL, flags | O_NONBLOCK)#fcntl(self.Bmachine.stdout, F_SETFL, flags | O_NONBLOCK) >>>>>?
+        except:
+            self.initialize=0
+            self.log('Uknown startup error.','')
 
         
         self.board.reset()
         
-        
+        if GUI: self.Maximize["background"] = "brown"
         #self.Pout(self.Wmachine.stdout.readlines())
         #self.Pout(self.Bmachine.stdout.readlines())
         
@@ -349,18 +378,19 @@ class table(Frame):
             self.initialize = 0
             return
 
-        
-        self.online = 1
-        self.turn = 0        
+        if GUI: self.Maximize["background"] = "brown"
+  
 
 
         for NAME in self.MACnames: self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
 
 
-
+        self.online = 1
+        self.turn = 0      
         self.initialize=0
 
         if GUI:
+            self.Maximize["background"] = "grey"
             self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
             self.visor.delete('1.0', END)
             self.visor.insert('1.0', self.board)
@@ -469,6 +499,7 @@ class table(Frame):
                         return
                 else:
                     print("error! illegal move! "+ L[1])
+                    self.arena.setcounter_illegalmove+=1
                     self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + L[1])
                     self.log(L[0],L[1])
                     self.log(str(self.board),0)
@@ -525,16 +556,19 @@ class table(Frame):
         
         if result==1:
             result = '0-1'
+            self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. black wins')
             self.log('checkmate', self.MACnames[1])
             
         if result ==0:
             result = '1-0'
+            self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. white wins')
             self.log('checkmate', self.MACnames[0])
             
         if result == 0.5:
             result = '1/2-1/2'
+            self.arena.setcounter_draws+=1
             if GUI: self.visor.insert('10.1', 'draw.')
             self.log('draw', '1/2')
             
@@ -547,7 +581,7 @@ class table(Frame):
         self.turnoff()
         
     def setWidgets(self):
-        self.visor = Text(self, height=10,width=16, borderwidth=4, relief=GROOVE)
+        self.visor = Text(self, height=10,width=16, borderwidth=4, relief=GROOVE, font=("Courier",6,'bold'))
         #self.visor.grid(column=0,row=1,rowspan=6)
 
         self.switch = Button(self)
@@ -600,7 +634,7 @@ class table(Frame):
 
 
     def setlooplimit(self):
-        app.setlooplimit(self.number)    
+        self.arena.setlooplimit(self.number)    
 
 
     def log(self, event, var):
@@ -648,7 +682,7 @@ class table(Frame):
         else:
             self.Maximize.grid_forget()
             self.Mnames.grid(row=0, column=0,columnspan=3)
-            self.visor.grid(column=0,row=1,rowspan=6)
+            self.visor.grid(column=0,row=1,rowspan=5)
             self.switch.grid(column=1,row=1, sticky=W+E)
             self.play.grid(column=1,row=2)
             self.setlimit.grid(column=1,row=3,sticky=W+E)

@@ -26,8 +26,8 @@ void pos2cord (char out[]) {
 int parse_move (struct move *target, char *s, int P) {
 
     
-    if (strstr(s,"O-O-O") != NULL) {castle(&board, 1, 1-machineplays, 0); return 1;}
-    if (strstr(s, "O-O") != NULL ) {castle(&board,1,1-machineplays,1); return 1;}
+    //if (strstr(s,"O-O-O") != NULL) {castle(&board, 1, 1-machineplays, 0); return 1;}
+    //if (strstr(s, "O-O") != NULL ) {castle(&board,1,1-machineplays,1); return 1;}
     
     if (!isalpha(s[0]) || !isalpha(s[2])) return 0;
     if (!isdigit(s[1]) || !isdigit(s[3])) return 0;
@@ -91,7 +91,7 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     
     
-    
+    //i=16 denotes a castling movement.
     if (i==16) {
         
         int I = 7 * (1-P);
@@ -112,7 +112,8 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     }
     
-    else {
+    else { 
+    
     board->movelist[board->k].from[0] = i;
     board->movelist[board->k].from[1] = j;
     
@@ -134,13 +135,13 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     
     
-    if (check_move_check(board, &board->movelist[board->k], P)) return 0;        
+    if (check_move_check(board, &board->movelist[board->k], P)) return 0;      
         
        
   
     }
      
-    //replicate_move(board->movelist[board->k],move);
+  
 
     /*printf("appending[k=%i]: ", k);*/
     /*print_movement(k,P);*/
@@ -148,6 +149,8 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
                     return 1;
 }
 
+
+//DEPRECATED FUNCTION.
 void erase_moves(struct board *tgt, int eraseall) {
     int i = 0;
     tgt->k=0;
@@ -198,7 +201,9 @@ void print_movement (struct move *move) {
     
 }
 
-int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verbose) {
+int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
+    //show_board(squares);
+    
     int i = 0;
     int j =0;
     int offender = 0;
@@ -207,7 +212,7 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
     int z=0;
     int n=0;
     
-    int result = 0;
+    long result = 0;
     
     int aim_x = 0;
     int aim_y =0;    
@@ -215,7 +220,7 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
     int matrix[10][2]= {{0,0},{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
     int horse_matrix[2][2] = {{-1,1},{-2,2}};    
     
-
+    //printf("g.\n");
     
     for(z=0;z<10;z++) {
         if (z==0||z==5) continue;
@@ -227,23 +232,23 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
         
         
         
-        while (onboard(aim_y,aim_x) && tg_board->squares[aim_y][aim_x] == 'x')
+        while (onboard(aim_y,aim_x) && squares[aim_y][aim_x] == 'x')
      {i++; aim_y=target[0]+i*matrix[z][0]; j++; aim_x=target[1]+j*matrix[z][1];}
         
         Vb printf("checking %i%i\n", aim_y,aim_x);
+
         
-        
-        if ((onboard(aim_y,aim_x)) && (is_in(tg_board->squares[aim_y][aim_x], pieces[1-P],6))) {
-            offender = getindex(tg_board->squares[aim_y][aim_x], pieces[1-P],6);
+        if (onboard(aim_y,aim_x) && is_in(squares[aim_y][aim_x], pieces[1-P],6)) {
+            offender = getindex(squares[aim_y][aim_x], pieces[1-P],6);
             Vb printf("y");
             //printf("kpos %i%i x=%i\n",aim_y,aim_x,x);
             
             
-            if (offender==1||offender==4) {if (z==2||z==4||z==6||z==8) result++;} else Vb printf("granted. aim=%i%i z=%i offender=%i\n", aim_y,aim_x,z,offender);
+            if (offender==1||offender==4) if (z==2||z==4||z==6||z==8) result++; 
                     
             if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result++;
             
-            if (offender==5) if (i==1) result = 1;
+            if (offender==5) if (i==1) result++;
             
             if (offender==0) if (i==1) if (P==0) if (z==1||z==3)  result++;
             
@@ -255,36 +260,35 @@ int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verb
         } }
     
     
-
+    //printf("b.\n");
     
     
-    for(z=0;z<2;z++) {
-    for(n=0;n<2;n++) {
+    for(z=0;z<2;z++) for(n=0;n<2;n++) {
+    
 
         
         aim_y=target[0]+horse_matrix[1][n];
         aim_x=target[1]+horse_matrix[0][z];
         
-        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result++;
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == pieces[1-P][2])) result++;
              
   
         aim_y=target[0]+horse_matrix[0][n];
         aim_x=target[1]+horse_matrix[1][z];
                 
-        if ((onboard(aim_y,aim_x)) && (tg_board->squares[aim_y][aim_x] == pieces[1-P][2])) result++;
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == pieces[1-P][2])) result++;
         
 
 
   
-    }        
+    }         
             
             
             
             
-        }    
+          
     
-    
-    
+    //printf("%i.\n",result);
     
     return result;
 }
@@ -306,21 +310,21 @@ int check_move_check (struct board *tg_board, struct move *move, int P) {
     
     move_pc(tg_board, move);
     
-    for (i=0;i<8;i++) {
-        for (j=0;j<8;j++) {
+    for (i=0;i<8;i++) for (j=0;j<8;j++){
+         
             if (tg_board->squares[i][j] == pieces[P][5]) {kpos[0]=i; kpos[1]=j;check++;}
             
         }
-    }
+    
     
     //printf("checking check kpos= %i%i\n", kpos[0],kpos[1]);
     
     
     if (check==-1) {
-        //printf("er-r [king not found].\n"); show_board(squares);
+        //printf("er-r [king not found].\n"); show_board(tg_board->squares);
         undo_move(tg_board, move);return 0;}
     
-    if (ifsquare_attacked(tg_board, kpos[0],kpos[1], P, verbose)) check = 1;
+    if (ifsquare_attacked(tg_board->squares, kpos[0],kpos[1], P, verbose)>0)check=1;
     
     
         
@@ -348,7 +352,7 @@ int fehn2board (char str[]) {
         
     
      number = fstring[z]-'0';
-        if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6)) {
+        if (is_in(fstring[z],pieces[0],6)>-1||is_in(fstring[z],pieces[1],6)) {
             board.squares[i][j] = fstring[z];
             j++;
         }
@@ -413,14 +417,14 @@ struct board *makeparallelboard (struct board *model) {
     
     
 
-    /*if (!cuda)*/ struct board *_board = (struct board *)malloc(sizeof (struct board));
+    struct board *_board = (struct board *)malloc(sizeof (struct board));
 
     //else {struct board *_board = cudaMalloc()
 
     //_board->attackers = board->attackers;
     _board->k = 0;//model->k;
     _board->kad = 0;//model->kad;
-    _board->evaltable = (long long *)malloc(128 * sizeof(long long));
+    
 
     for (i=0;i<64;i++) {
         _board->attackers[i][0] = '0';
@@ -440,24 +444,16 @@ struct board *makeparallelboard (struct board *model) {
         }
     }
     
-    for(i=0;i<3;i++) {_board->castle[0][i] = model->castle[0][i]; _board->castle[1][i] = model->castle[1][i];}
+    for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
     
     return _board;
 }
- 
+
+//LEGACY FUNCTION
 void freeboard (struct board *target) {
     
     if (target != NULL) {
 
-    //free (target->squares);
-    //free (target->movelist);
-    //free (target->defenders);
-    //free (&target->k);
-    //free (&target->kad);
-    
-    
-    //free (target->attackers);
-    free(target->evaltable);
     free (target);
     
     }
@@ -466,7 +462,7 @@ void freeboard (struct board *target) {
 
 
 
-void select_top (long long *array, int size, int target[], int quant) {
+void select_top (struct move *array, int size, int target[], int quant) {
     int i = 0;
     int qu=0;
     int win[16][2]={0};
@@ -474,15 +470,53 @@ void select_top (long long *array, int size, int target[], int quant) {
     int f_index=0;
     
     
+    if (quant < 0) {
+        quant = -quant;
+    
     for (qu=0;qu<quant;qu++) {
-        win[qu][1] = -16700;
+        win[qu][1] = 16700;
         
     for (i=0;i<size;i++) {
         if (!is_in(i,forbid,f_index+1)) {
         
 
-        if (array[i] > win[qu][1]){ 
-            win[qu][1] = array[i];
+        if (array[i].score < win[qu][1]){ 
+            win[qu][1] = array[i].score;
+            win[qu][0] = i;
+            forbid[f_index] = i;  
+            
+        }       
+        
+        }
+        
+        
+    }
+        f_index++;
+    }
+    
+
+        for (i=0;i<quant;i++) {
+        target[i] = win[i][0];
+        //target[i][1] = win[i][1];
+                
+
+    }
+                
+        
+        
+    }
+    
+    else {
+    for (qu=0;qu<quant;qu++) {
+        win[qu][1] = -16700;
+        
+    for (i=0;i<size;i++) {
+        if (!is_in(i,forbid,f_index+1)) {
+            
+        
+
+        if (array[i].score > win[qu][1]){ 
+            win[qu][1] = array[i].score;
             win[qu][0] = i;
             forbid[f_index] = i;  
             
@@ -503,7 +537,7 @@ void select_top (long long *array, int size, int target[], int quant) {
 
     }
         
-       
+    }
                
     
 }
@@ -521,6 +555,7 @@ void replicate_move(struct move *target, struct move *source) {
         target->iscastle = source->iscastle;
         target->lostcastle = source->lostcastle;
     
+        target->score = 0;
 }
 
 int power(int base, unsigned int exp) {
@@ -530,3 +565,44 @@ int power(int base, unsigned int exp) {
     return result;
  }
 
+void eval_info_move(struct move *move, int DEEP, int P) {
+    struct move showmovebuff;
+    
+    replicate_move(&showmovebuff, move);
+
+     cord2pos(showmovebuff.from);
+     cord2pos(showmovebuff.to);
+       
+            asprintf(&output, "%i %i 0 %i %c%c%c%c\n", DEEP, move->score, P, 
+              showmovebuff.from[0], showmovebuff.from[1],
+              showmovebuff.to[0], showmovebuff.to[1]);
+     write(1, output, strlen(output));   
+}
+
+void reorder_movelist(struct board *board) {
+    int i=0;
+    struct move temp;
+    
+    int Freeindex[128];
+    int bFK=0; int tFK=0;
+    
+    
+    
+    for (i=0;i<board->k;i++) {
+        if (board->movelist[i].casualty == 'x') {
+            Freeindex[tFK] = i;
+            tFK++;
+            }
+        
+        else if (tFK-bFK) {
+            
+            temp = board->movelist[Freeindex[bFK]];
+            board->movelist[Freeindex[bFK]] = board->movelist[i];
+            board->movelist[i] = temp;
+            bFK++;
+        }
+        
+        
+        
+    }
+}

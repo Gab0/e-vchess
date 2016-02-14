@@ -40,11 +40,13 @@ struct move {
     int iscastle;
     int lostcastle;
     
-    int score;
+    long score;
     
     char promoteto;
     
     char casualty;
+    
+
     
 };
 
@@ -63,16 +65,13 @@ struct board;
       int hindex;
       
       int castle[2][3];
-      
-      
-      long long *evaltable;
+
    }; 
    
 struct param;
    struct param {
     int pvalues[6];
     float randomness;
-    float aperture;
     float seekmiddle;
     float DEEP;
     float seekpieces;
@@ -84,6 +83,7 @@ struct param;
     float pawnrankMOD;
     float parallelcheck;
     float balanceoffense;
+    float cumulative;
    };
 
    
@@ -105,7 +105,7 @@ extern bool loadedmachine;
 extern bool selectTOPmachines;
 
 
-extern char *infoAUX;
+extern char *infoMOVE;
 
 /*variable params for intelligent evolution*/
 
@@ -144,9 +144,10 @@ void attackers_defenders (struct board *board,int P);
 void h_move_pc (struct board *board,char movement[][2]);
 int history_append(struct move *move);
 int history_rollback(int times);
-void castle (struct board *board, int doundo, int PL, int side);
+//void castle (struct board *board, int doundo, int PL, int side);
 int findking (char board[8][8], char YorX, int player);
 int cancastle (struct board *board, int P, int direction);
+void movement_generator(struct board *board, int limit, char direction, int i, int j, int P);
 
 /*functions from operation.cpp*/
 
@@ -156,10 +157,10 @@ int parse_move (struct move *target, char *s);
 bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
 int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P);
-void erase_moves(struct board *tgt, int eraseall);
+//void erase_moves(struct board *tgt, int eraseall);
 void print_movement (struct move *move);
 
-int ifsquare_attacked (struct board *tg_board, int TGi, int TGj, int P, int verbose); 
+int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
 int check_move_check (struct board *tg_board, struct move *move, int P);
 
 int fehn2board (char str[]);
@@ -167,17 +168,20 @@ int fehn2board (char str[]);
 int read_movelines (char txt[128], int verbose);
 int getindex (char x, char array[],int size);
 struct board *makeparallelboard (struct board *board);
-void select_top (long long *array, int size, int target[], int quant);
+void select_top (struct move *array, int size, int target[], int quant);
 void replicate_move(struct move *target, struct move *source) ;
-void freeboard (struct board *target);
+//void freeboard (struct board *target);
 int power(int base, unsigned int exp);
 
+void reorder_movelist(struct board *board); 
+
+void eval_info_move(struct move *move, int DEEP, int P);
 
 /*functions from brain.cpp*/
 
 int think (struct move *out, int PL, int DEEP, int verbose);
-int evaluate(struct board *evalboard, struct move *move, int PL);
-int thinkiterate (struct board *feed, int PL,int DEEP, int chainscore, struct move *move, char *INDEX) ;
+int evaluate(struct board *evalboard, int PL);
+long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore, int Alpha, int Beta    );
 float scoremod (int DEEP, int method);
 
 

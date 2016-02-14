@@ -8,11 +8,11 @@ After many cycles in the arena_array, machines will have their win/draw/lose rat
 
 ##Usage:
 
- 1) Create a population of 256 individuals using machineviewer.py.
- 2) Run chess_arena.py for ten thousand cycles, on a 20-tabled session, then look at the population on the Machineviewer.
- 3) Send some machines on the 1200's or 1300's ELO to the top machines.
- 3) Run xboard or other chess interface, loading the engine with --TOP arg.
- 4) If you can't win, try to understand this repo and contribute to it. If you can, run 30k more cycles of chess_arena and try again.
+ 1) Create a population of 256 individuals using machineviewer.py.<br>
+ 2) Run chess_arena.py for ten thousand cycles, on a 64-tabled session, then look at the population on the Machineviewer.<br>
+ 3) Send some machines on the 1200's or 1300's ELO to the top machines.<br>
+ 3) Run xboard or other chess interface, loading the engine with --TOP arg.<br>
+ 4) If you can't win, try to understand this repo and contribute to it. If you can, run 30k more cycles of chess_arena and try again.<br>
  
 ##Dependencies:
 
@@ -25,6 +25,5 @@ psutil
 
 -> Engine may castle without having rights (rarely happens). Need fix.
 -> Better evolutionary approach on the machines, probably using DEAP module.
--> Better memory management by chess_arena.py. It should regulate itself to use only available resources from the machine, letting the user do what he wants on the foreground.
 -> Engine can't show score for full evaluated moveline, showing only it's first move.
  

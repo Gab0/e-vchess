@@ -15,6 +15,7 @@ bool loadedmachine = false;
 
 char *infoAUX = (char *)malloc(256 * sizeof(char));
 
+char *infoMOVE = (char *) malloc(sizeof(char)*128);
 //variable params for intelligent evolution (standards initialized);
 
 
@@ -46,22 +47,40 @@ int main(int argc, char** argv) {
     printf("id name e-v dchess engine v0.3\n");
     printf("id author afrogabs\n");
     printf("uci ok\n");
-
-    //brain.pvalues = {100,500,300,300,900,2000};
+    
+    //iniatializing variables with standard values.
+    
+    //pvalues is the value of each piece in centipawns. 
+    //order is pawn-rook-knight-bishop-queen-king.
+    Brain.pvalues[0] = 100;
+    Brain.pvalues[1] = 500;
+    Brain.pvalues[2] = 300;
+    Brain.pvalues[3] = 300;
+    Brain.pvalues[4] = 900;
+    Brain.pvalues[5] = 2000;
+    
+    //randomness is the limit to the randomic small variability on the score, 
+    //in centipawns.
     Brain.randomness = 55;
-    Brain.randomness = 60;
-    Brain.aperture = 4;
+    //seekmiddle augments the score for pieces in the center of the board.
     Brain.seekmiddle = 23;
-    Brain.DEEP = 5;
-    Brain.seekpieces = 12;
+    //DEEP is the number of future moves to be evaluated.
+    //must be an even number, in order to always end in a engine move.
+    Brain.DEEP = 8;
+    //seekpieces augments the score for attacked enemy pieces.
+    Brain.seekpieces = 1;
+    
     Brain.deviationcalc = 0;
     Brain.evalmethod = 0;
-    Brain.seekatk = 24;
+    //seekatk augments the score for taken pieces.
+    Brain.seekatk = 1;
     //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    Brain.presumeOPPaggro = -3.0;
+    Brain.presumeOPPaggro = 1;
+    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
     Brain.pawnrankMOD = 20;
     Brain.parallelcheck = 3.5;
-    Brain.balanceoffense = 4;    
+    Brain.balanceoffense = 0;    
+    Brain.cumulative = 0;
     
     
     
@@ -90,7 +109,7 @@ int main(int argc, char** argv) {
     
     fflush(stdout);
     
-    
+ 
     
     if (toloadmachine) loadmachine(0, machinepath);
     
@@ -170,15 +189,13 @@ int main(int argc, char** argv) {
         printf("list [%i]:\n", board.k);
         for (i=0; i < board.k; i++) { print_movement(&board.movelist[i]);
         printf("attacker? %c.\n", board.movelist[i].casualty);}
-        fflush(stdout);
     }   
              
     if (strstr(inp, "lis1") !=NULL)  {
         legal_moves(&board,1,0);
         printf("list [%i]:\n", board.k);
         for (i=0; i < board.k; i++) { print_movement(&board.movelist[i]);
-        printf("attacker? %c.\n", &board.movelist[i].casualty);}
-         legal_moves(&board,1,0);
+        printf("attacker? %c.\n", board.movelist[i].casualty);}
     }   
            
        

@@ -109,17 +109,22 @@ class parameter():
 
         if self.alwaysPOSITIVE: value = abs(value)
 
+        if TYPE == float:
+            value = round(value, 2)
+
 
         if not value % self.INCR == 0:
-            value -= value % self.INCR
+            if random.randrange(9) < 5:
+                value -= value % self.INCR
+            else:
+                value += value % self.INCR
 
-
+        if TYPE == float:
+            value = round(value, 2)
 
         if TYPE == int:
             value = int(round(value))
 
-        if TYPE == float:
-            value = round(value, 3)
 
         return value
 
@@ -221,7 +226,22 @@ class parameter():
         #ET.dump(root)
         tree.write(Fdir + "/paramstats.xml")
 
+    def randomize(self):
+        if self.locked: return
+        if not self.LIM: MAX = 2*self.stdvalue
+        else: MAX = self.LIM
+        
+        if not self.bLIM: MIN = MAX - 2* self.stdvalue
+        else: MIN = self.bLIM
 
+        Grading = (MAX-MIN)/self.INCR
+
+        VAL = random.randrange(Grading)
+
+        self.value = VAL*self.INCR + MIN
+
+
+        
 class machine ():
 
     def __init__(self, fname):
@@ -241,21 +261,23 @@ class machine ():
         self.TPARAMETERS.append(parameter("stat_elo", 0,0,1000))
         
 
+
+        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 2, bLIM=4, LIM=10))
+
         self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10, bLIM=1))
-        self.PARAMETERS.append(parameter("param_aperture", 0, 30, 3, aP=1, bLIM=1, LIM=1))
-        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 5, aP=1, bLIM=1, LIM=1))
-        self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 11, bLIM=12, INCR=3))
-        self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
+        self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3))
+        #self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
         self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
-        self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 12))
-        self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21.25))
-        self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, -4.0, LIM=7, bLIM=-7))
-        self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 13))
+        self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 0.5, bLIM=-1, INCR=0.25, LIM=3))
+        self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21))
+        self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, 1, LIM=1.1, bLIM=1, INCR=0.1))
+        self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 33, LIM=37))
         self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 4,LIM=21, bLIM=0))
-        self.PARAMETERS.append(parameter("param_balanceoffense", 0, 80, 3,LIM=5, bLIM=0))
+        self.PARAMETERS.append(parameter("param_balanceoffense", 0, 80, 2,LIM=5, bLIM=0))
+        #self.PARAMETERS.append(parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1))
         
-        self.PARAMETERS.append(parameter("param_pvalues", 0, 5, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500, locked=1))
-        self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
+        #self.PARAMETERS.append(parameter("param_pvalues", 0, 5, [100,500,300,300,900,2000], INCR=50, bLIM=70, LIM=2500, locked=1))
+        #self.PARAMETERS.append(parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05))
 
 
  
@@ -320,7 +342,14 @@ class machine ():
             self.PARAMETERS[i].dumpedvalue = self.PARAMETERS[i].value
 
 
+    def randomize(self):
+        for parameter in self.PARAMETERS:
+            parameter.randomize
+            
 
+    def delete(self):
+        os.remove(Fdir+'/'+self.filename)
+            
 k=0
 population=[]
 
@@ -330,11 +359,10 @@ def populate(population,popsize):
     for i in range(popsize):
         NEWINDS.append(machine(str(random.randrange(0,6489))+".mac")) 
         
-    mutatemachines(7, NEWINDS)
-    mutatemachines(5, NEWINDS)
-    mutatemachines(3, NEWINDS)
+
 
     for I in NEWINDS:
+        I.randomize()
         population.append(I)
 
         
@@ -499,7 +527,7 @@ def deltheworst_clonethebest(population, action):
         if population[k].PARAMETERS[0].value == 0:
             POP_SCORETABLE.append(-1)
             continue
-        SCORE = population[k].TPARAMETERS[5].value#population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
+        SCORE = population[k].TPARAMETERS[5].value  #population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
 
             
         POP_SCORETABLE.append(SCORE)
@@ -512,7 +540,7 @@ def deltheworst_clonethebest(population, action):
         if action == -1:
             for k in range(len(POP_SCORETABLE)):
                 if (POP_SCORETABLE[k] > -1):
-                    if (POP_SCORETABLE[k] < MEDIUMSCORE*0.9) and (POP_SCORETABLE[k] < 1000):
+                    if (POP_SCORETABLE[k] < MEDIUMSCORE) and (POP_SCORETABLE[k] < 1000):
                         print('subject deleted. ' + population[k].filename)
                         os.remove(Fdir+'/'+population[k].filename)
                         population[k] = 0

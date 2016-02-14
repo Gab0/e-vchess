@@ -279,7 +279,7 @@ class Application(Frame):
 
         self.paramVIEWER = []
         self.paramNAMES = []
-        for i in range(11):
+        for i in range(len(self.machines[0].PARAMETERS)):
             self.paramVIEWER.append([Label(self), Button(self)])
             self.paramNAMES.append(self.machines[self.N].PARAMETERS[i].name)
             

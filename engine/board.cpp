@@ -60,8 +60,8 @@ void setup_board (int setup) {
    }
     
     
-    erase_moves(&board, 1);
-}
+    //erase_moves(&board, 1);
+    }
 
 void show_board (char squares[8][8]) {
     int i,j;
@@ -76,8 +76,10 @@ void show_board (char squares[8][8]) {
 }
 
 int legal_moves (struct board *board, int PL, int verbose) {
-    erase_moves(board,0);
+    //erase_moves(board,0);
     board->k=0;
+    board->kad = 0;
+    board->hindex = 0;
 
     int EP = 1-PL;
        
@@ -111,12 +113,12 @@ int legal_moves (struct board *board, int PL, int verbose) {
                 
                 
                 
-                if (is_in(board->squares[i+pawn_vector][j+1],pieces[EP],6) && onboard(i+pawn_vector,j+1)) 
+                if ((is_in(board->squares[i+pawn_vector][j+1],pieces[EP],6)) && onboard(i+pawn_vector,j+1)) 
               
                     append_move(board,i,j,pawn_vector,1,promote);
                     
                 
-                if (is_in(board->squares[i+pawn_vector][j-1],pieces[EP],6) && onboard(i+pawn_vector,j-1))
+                if ((is_in(board->squares[i+pawn_vector][j-1],pieces[EP],6)) && onboard(i+pawn_vector,j-1))
                     
                     append_move(board,i,j,pawn_vector,-1,promote);
                                        
@@ -146,69 +148,7 @@ int legal_moves (struct board *board, int PL, int verbose) {
             if (board->squares[i][j] == pieces[PL][1]) {
                /* printf("scanning tower moves\n");*/
 
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i+m_i,j,PL)) {
-    if (mpc(board->squares, i+m_i,j,PL) == 1) {
-        append_move(board,i,j,m_i,0,PL);
-        
-        break;}    
-    append_move(board,i,j,m_i,0,PL);
-    
-    m_i++;
-
-
-    }
-                
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j,PL)) {
-    if (mpc(board->squares, i-m_i,j,PL) == 1) {
-        append_move(board,i,j,-m_i,0,PL);
-        
-        break;}
-    append_move(board,i,j,-m_i,0,PL);
-    
-    m_i++;
-
-
-    }
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i,j+m_j,PL)) {
-    if (mpc(board->squares, i,j+m_j,PL) == 1) {
-        append_move(board,i,j,0,m_j,PL);
-        
-        break;}
-    append_move(board,i,j,0,m_j,PL);
-    
-    m_j++;
-
-
-    }
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i,j-m_j,PL)) {
-    if (mpc(board->squares, i,j-m_j,PL) == 1) {
-        append_move(board,i,j,0,-m_j,PL);
-        
-        break;}
-    append_move(board,i,j,0,-m_j,PL);
-    
-    m_j++;
-
-
-    }
+        movement_generator(board,0, '+', i, j, PL);
             }
             
             
@@ -233,245 +173,26 @@ while (mpc(board->squares, i,j-m_j,PL)) {
      /*bishop movements*/    
      if(board->squares[i][j] == pieces[PL][3]){
         /* printf("scanning bishop moves\n");*/
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-while (mpc(board->squares, i+m_i,j+m_j,PL)) {
-       if (mpc(board->squares, i+m_i,j+m_j,PL) == 1){
-           append_move(board,i,j,m_i,m_j,PL);
-           
-           break;}   
-    append_move(board,i,j,m_i,m_j,PL);
 
-    
-    m_i++;
-    m_j++;
-      /* printf("found!\n\n");
-       print_play(mlist[k-1]);   
-       printf("%i%i %i%i\n", i,j,i+m_i,j-m_j); 
-       */
-
-    }         
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i+m_i,j-m_j,PL)) {
-       if (mpc(board->squares, i+m_i,j-m_j,PL) == 1){
-           append_move(board,i,j,m_i,-m_j,PL);
-           
-           break;}
-    append_move(board,i,j,m_i,-m_j,PL);
-
-    
-    m_i++;
-    m_j++;
-      /* printf("found!\n\n");
-       print_play(mlist[k-1]);   
-       printf("%i%i %i%i\n", i,j,i+m_i,j-m_j); 
-       */
-
-    }                
-         
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j-m_j,PL)) {
-       if (mpc(board->squares, i-m_i,j-m_j,PL) == 1){
-           append_move(board,i,j,-m_i,-m_j,PL);
-           
-           break;} 
-    append_move(board,i,j,-m_i,-m_j,PL);
-    
-    m_i++;
-    m_j++;
-    
-
-    }         
-         
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j+m_j,PL)) {
-       if (mpc(board->squares, i-m_i,j+m_j,PL) == 1){
-           append_move(board,i,j,-m_i,m_j,PL);
-           
-           break;}
-    append_move(board,i,j,-m_i,m_j,PL);
-    
-    m_i++;
-    m_j++;
-    
-
-    }  
+         movement_generator(board,0, 'X', i, j, PL);
                 
                 
      }
  if (board->squares[i][j] == pieces[PL][4]) {
      /*printf("scanning queen moves.\n"); */          
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
 
-while (mpc(board->squares, i+m_i,j,PL)) {
-    if (mpc(board->squares, i+m_i,j,PL) == 1) {
-        append_move(board,i,j,m_i,0,PL);
-        
-        break;}    
-    append_move(board,i,j,m_i,0,PL);
-    
-    m_i++;
-
-
-    }
-                
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j,PL)) {
-    if (mpc(board->squares, i-m_i,j,PL) == 1) {
-        append_move(board,i,j,-m_i,0,PL);
-        
-        break;}
-    append_move(board,i,j,-m_i,0,PL);
-    
-    m_i++;
-
-
-    }
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i,j+m_j,PL)) {
-    if (mpc(board->squares, i,j+m_j,PL) == 1) {
-        append_move(board,i,j,0,m_j,PL);
-        
-        break;}
-    append_move(board,i,j,0,m_j,PL);
-    
-    m_j++;
-
-
-    }
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i,j-m_j,PL)) {
-    if (mpc(board->squares, i,j-m_j,PL) == 1) {
-        append_move(board,i,j,0,-m_j,PL);
-        
-        break;} 
-    append_move(board,i,j,0,-m_j,PL);
-    
-    m_j++;
-
-}
-
-   /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-while (mpc(board->squares, i+m_i,j+m_j,PL)) {
-       if (mpc(board->squares, i+m_i,j+m_j,PL) == 1){
-           append_move(board,i,j,m_i,m_j,PL);
-           
-           break;}   
-    append_move(board,i,j,m_i,m_j,PL);
-
-    
-    m_i++;
-    m_j++;
-      /* printf("found!\n\n");
-       print_play(mlist[k-1]);   
-       printf("%i%i %i%i\n", i,j,i+m_i,j-m_j); 
-       */
-
-    }         
-
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i+m_i,j-m_j,PL)) {
-       if (mpc(board->squares, i+m_i,j-m_j,PL) == 1){
-           append_move(board,i,j,m_i,-m_j,PL);
-           
-           break;}
-    append_move(board,i,j,m_i,-m_j,PL);
-
-    
-    m_i++;
-    m_j++;
-      /* printf("found!\n\n");
-       print_play(mlist[k-1]);   
-       printf("%i%i %i%i\n", i,j,i+m_i,j-m_j); 
-       */
-
-    }                
-         
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j-m_j,PL)) {
-    
-       if (mpc(board->squares, i-m_i,j-m_j,PL) == 1){
-           append_move(board,i,j,-m_i,-m_j,PL);
-           
-           break;} 
-    append_move(board,i,j,-m_i,-m_j,PL);
-    
-    m_i++;
-    m_j++;
-    
-
-    }         
-         
-  /*movement in one direction, of four*/
-                m_i = 1;
-                m_j = 1;
-
-while (mpc(board->squares, i-m_i,j+m_j,PL)) {
-
-          if (mpc(board->squares, i-m_i,j+m_j,PL) == 1){
-           append_move(board,i,j,-m_i,m_j,PL);
-           
-           break;} 
-    
-    
-    append_move(board,i,j,-m_i,m_j,PL);
-    
-    m_i++;
-    m_j++;
-    
-
-    
-    }  
+     movement_generator(board,0, '+', i, j, PL);
+     movement_generator(board,0, 'X', i, j, PL);
            
             }
             
 if (board->squares[i][j] == pieces[PL][5]){
     /*printf("scanning king moves.\n");*/
-    m_i=-1;
-    m_j=-1;
     
-    for (m_i = -1; m_i < 2; m_i++){
-        for (m_j = -1; m_j < 2; m_j++) {
-            
-            if (m_i||m_j) if (mpc(board->squares, i+m_i,j+m_j,PL)>0) append_move(board,i,j,m_i,m_j,PL);
-            //if (mpc(board->squares, i+m_i,j+m_j,PL)==2) append_move(board,i,j,m_i,m_j,PL);   
-
-            }
-        }
+     movement_generator(board,1, '+', i, j, PL);
+     movement_generator(board,1, 'X', i, j, PL);
     
-    if (board->castle[PL][1]==1 && !ifsquare_attacked(board, i, j, PL, 0)) {
+    if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, PL, 0)) {
 
         if (cancastle(board, PL,-1)) append_move(board, 16, 2, 0, 0, PL);
         
@@ -507,7 +228,8 @@ int mpc(char squares[8][8], int i, int j, int player) {
     if (onboard(i,j)) {
     if (squares[i][j] == 'x') {/*printf("mpc granted %i%i\n", i,j); */return 2;}
     
-    if (is_in(squares[i][j],pieces[enemy],6)) {/*printf("mpc granted %i%i\n", i,j); */return 1;}
+    if (is_in(squares[i][j],pieces[enemy],6))
+    {/*printf("mpc granted %i%i\n", i,j); */return 1;}
     
     
     
@@ -581,15 +303,14 @@ void undo_move(struct board *tg_board, struct move *movement) {
     char from[2] = {movement->to[0], movement->to[1]};
     
     
-      if (to[0] == 'O') {
-          castle(tg_board, 0, from[0], from[1]); 
-          tg_board->castle[from[0]][1]=1;
-          return;}  
-  
+     
+    if(movement->casualty==0) movement->casualty='x';
+    
+    
     tg_board->squares[to[0]][to[1]] = tg_board->squares[from[0]][from[1]];
     tg_board->squares[from[0]][from[1]] = movement->casualty;
  
-    if(movement->casualty==0) printf("busted!.\n");
+    
 
     
     if(movement->promoteto!=0) {
@@ -739,9 +460,9 @@ int cancastle (struct board *board, int P, int direction) {
     
     if (board->castle[P][0] && direction==-1) {
     if (board->squares[ROW][0] == pieces[P][1]  &&
-        board->squares[ROW][1]=='x' && !ifsquare_attacked(board,ROW,1,P,0) &&
-        board->squares[ROW][2]=='x' && !ifsquare_attacked(board,ROW,2,P,0) &&
-        board->squares[ROW][3]=='x' && !ifsquare_attacked(board,ROW,3,P,0)) {
+        board->squares[ROW][1]=='x' && !ifsquare_attacked(board->squares,ROW,1,P,0) &&
+        board->squares[ROW][2]=='x' && !ifsquare_attacked(board->squares,ROW,2,P,0) &&
+        board->squares[ROW][3]=='x' && !ifsquare_attacked(board->squares,ROW,3,P,0)) {
         
         
         return 1;
@@ -757,8 +478,8 @@ int cancastle (struct board *board, int P, int direction) {
     
     if (board->castle[P][2] && direction==1) {
     if (board->squares[ROW][7] == pieces[P][1] &&
-        board->squares[ROW][5]=='x' && !ifsquare_attacked(board,ROW,5,P,0) &&
-        board->squares[ROW][6]=='x' && !ifsquare_attacked(board,ROW,6,P,0)){
+        board->squares[ROW][5]=='x' && !ifsquare_attacked(board->squares,ROW,5,P,0) &&
+        board->squares[ROW][6]=='x' && !ifsquare_attacked(board->squares,ROW,6,P,0)){
         
         return 1;
     }}
@@ -768,3 +489,69 @@ int cancastle (struct board *board, int P, int direction) {
  
 }
 
+void movement_generator(struct board *board,int limit ,char direction, int i, int j, int P) {
+    int X=0, q=0;
+    int Ti=0,Tj=0;
+    
+    int matrix[4][2];
+    
+    if (direction=='X'){
+        matrix[0][0] = 1;
+        matrix[0][1] = -1;
+        matrix[1][0] = -1;
+        matrix[1][1] = 1;
+        matrix[2][0] = 1;
+        matrix[2][1] = 1;
+        matrix[3][0] = -1;
+        matrix[3][1] = -1;
+    }
+       
+    if (direction=='+') {
+        matrix[0][0] = 1;
+        matrix[0][1] = 0;
+        matrix[1][0] = -1;
+        matrix[1][1] = 0;
+        matrix[2][0] = 0;
+        matrix[2][1] = 1;
+        matrix[3][0] = 0;
+        matrix[3][1] = -1;
+    }       
+    
+    
+    
+       for (X=0;X<4;X++){
+           q=1;
+           while (q>0) {
+           Ti = i+matrix[X][0]*q;
+           Tj = j+matrix[X][1]*q;
+           
+           
+           
+           if (onboard(Ti,Tj)) {
+               if (board->squares[Ti][Tj]=='x') {
+                   append_move(board, i, j, Ti-i, Tj-j, P);
+                   q++;
+                   if (limit) q=0;
+                   
+               }
+               if (is_in(board->squares[Ti][Tj],pieces[1-P],6)){
+                   append_move(board, i, j, Ti-i, Tj-j, P);
+                   q=0;
+               }
+               else q=0;
+               
+               
+           }
+           else q=0;
+           } 
+      }
+       
+    
+    
+    
+    
+ 
+    
+    
+    
+}

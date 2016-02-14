@@ -91,85 +91,13 @@ int loadmachine (int verbose, char *dir) {
                       
            }
            
-        /*   if (strstr(line, "param_DEEP") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_DEEP = atoi(reading);
-               Vb printf("param_DEEP is %i.\n", param_DEEP);}
-           
-           if (strstr(line, "param_deviationcalc") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_deviationcalc = atof(reading);
-               Vb printf("param_deviationcalc is %f.\n", param_deviationcalc);}
-           
-           if (strstr(line, "eval_randomness") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               eval_randomness = atoi(reading);           
-               Vb printf("eval_randomness is %i.\n", eval_randomness);}
-           
-           if (strstr(line, "param_aperture") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_aperture = atoi(reading);           
-               Vb printf("eparam_aperture is %i.\n", param_aperture);}
-           
-           if (strstr(line, "param_seekpieces") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_seekpieces = atoi(reading);
-               Vb printf("param_seekpieces is %i.\n", param_seekpieces);}
-           
-           
-           if (strstr(line, "param_seekmiddle") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_seekmiddle = atof(reading);
-               Vb printf("param_seekmiddle is %f\n", param_seekmiddle);}
-           
-           if (strstr(line, "param_evalmethod") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_evalmethod = atoi(reading);
-               Vb printf("param_evalmethod is %i\n", param_evalmethod);}           
-           
-           if (strstr(line, "param_seekatk") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_seekatk = atoi(reading);
-               Vb printf("param_seekatk is %i\n", param_seekatk);}
-           
-           if (strstr(line, "param_presumeOPPaggro") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_presumeOPPaggro = atof(reading);
-               Vb printf("param_presumeOPPaggro is %f\n", param_presumeOPPaggro);}   
-
-           if (strstr(line, "param_pawnrankMOD") != NULL) {
-               reading = strtok(line, " ");
-               reading = strtok(NULL, " ");
-               reading = strtok(NULL, " ");
-               param_pawnrankMOD = atof(reading);
-               Vb printf("param_pawnrankMOD is %f\n", param_pawnrankMOD);}  */
-           
+ 
         if (strstr(line, "param_DEEP") != NULL)   
             Brain.DEEP = readparam(line, V);
         if (strstr(line, "param_deviationcalc") != NULL)
             Brain.deviationcalc = readparam(line, V);
         if (strstr(line, "eval_randomness") != NULL)
             Brain.randomness = readparam(line, V);
-        if (strstr(line, "param_aperture") != NULL)
-            Brain.aperture = readparam(line, V);
         if (strstr(line, "param_seekpieces") != NULL)
             Brain.seekpieces = readparam(line, V);
         if (strstr(line, "param_seekmiddle") != NULL)
@@ -186,6 +114,8 @@ int loadmachine (int verbose, char *dir) {
             Brain.parallelcheck = readparam(line, V);
         if (strstr(line, "param_balanceoffense") != NULL)
             Brain.balanceoffense = readparam(line, V);
+        if (strstr(line, "param_cumulative") != NULL)
+            Brain.cumulative = readparam(line, V);          
                 
            
            
@@ -257,17 +187,17 @@ int countpieces(void) {
     
     for (i=0;i<8;i++) for (j=0;j<8;j++) {
         
-        if (is_in(board.squares[i][j],pieces[machineplays],6)) {
-            piece=getindex(board.squares[i][j],pieces[machineplays],6);
-            Tvalue=Tvalue+Vpieces[piece];
-                    
-        }
+        piece = is_in(board.squares[i][j],pieces[machineplays],6);
         
-        if (is_in(board.squares[i][j],pieces[1-machineplays],6)) {
-            piece=getindex(board.squares[i][j],pieces[1-machineplays],6);
-            Tvalue=Tvalue-Vpieces[piece];
+        if (piece>-1) Tvalue=Tvalue+Vpieces[piece];
                     
-        }
+        
+        
+        piece = is_in(board.squares[i][j],pieces[1-machineplays],6);
+        
+        if (piece>-1) Tvalue=Tvalue-Vpieces[piece];
+                    
+       
     }
     
     return Tvalue;
