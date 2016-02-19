@@ -57,8 +57,10 @@ int parse_move (struct move *target, char *s, int P) {
         
         if (target->from[1] == 4){
             if (target->from[0] == 0 || target->from[0] == 7)
-            if (target->to[1] == 6 || target->to[1] <= 2){printf("castle? p=%i\n",board.castle[P][1]);
-                if (board.castle[P][1]) {target->iscastle=1; printf("castle.\n");}}
+            if (target->to[1] == 6 || target->to[1] <= 2){//printf("castle? p=%i\n",board.castle[P][1]);
+                if (board.castle[P][1]) {target->iscastle=1; //printf("castle.\n");
+                
+                }}
         
         }
         
@@ -66,7 +68,7 @@ int parse_move (struct move *target, char *s, int P) {
         return 1;
         }
     
-}
+}   
 
 bool is_in(char val, char arr[], int size){
     int i = 0;
@@ -155,7 +157,7 @@ void erase_moves(struct board *tgt, int eraseall) {
     int i = 0;
     tgt->k=0;
     tgt->kad = 0;
-    tgt->hindex = 0;
+
 /*    for (i=0; i < 128; i++) {
         tgt->movelist[i][0][0] = 0;
         tgt->movelist[i][0][1] = 0;
@@ -352,7 +354,7 @@ int fehn2board (char str[]) {
         
     
      number = fstring[z]-'0';
-        if (is_in(fstring[z],pieces[0],6)>-1||is_in(fstring[z],pieces[1],6)) {
+        if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6)) {
             board.squares[i][j] = fstring[z];
             j++;
         }

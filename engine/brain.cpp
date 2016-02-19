@@ -11,22 +11,26 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     struct board *_board = makeparallelboard(&board);  
     
     
-    
+    long Alpha = -1690000;
+    long Beta = +1690000;
     
     
     legal_moves(_board, PL, 0); 
     if (_board->k == 0) return -1;
-    printf("value of k is %i.\n",_board->k);
+    Vb printf("value of k is %i.\n",_board->k);
     
    
     for (i=0;i<_board->k;i++) {
     //infoMOVE = (char *)malloc(sizeof(char)*128);
         
         //show_board(board.squares);
-     printf("new tree branching. i=%i\n",i);
+     Vb printf("new tree branching. i=%i\n",i);
      move_pc(_board, &_board->movelist[i]);    
      _board->movelist[i].score = thinkiterate(_board, PL, DEEP, 0,
-             +16900,-16900);
+             Alpha, Beta);
+     
+     //if (_board->movelist[i].score > Alpha) Alpha
+     
      //show_board(_board->squares);
      undo_move(_board, &_board->movelist[i]); 
              
@@ -121,7 +125,7 @@ int evaluate(struct board *evalboard,int PL) {
 }
 
 long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
-        int Alpha, int Beta) {
+        long Alpha, long Beta) {
 
 
     int i=0;int t=0;int W=0;int top[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -195,7 +199,8 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
                Beta = _board->movelist[i].score;
        }
        
-        if (Beta <= Alpha) {free(_board);return _board->movelist[i].score;}
+        if ((Beta <= Alpha&&PL==machineplays) || (Alpha<=Beta&&PL!=machineplays)) 
+        {free(_board);return _board->movelist[i].score;}
      }}
      
      else {
@@ -209,7 +214,7 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
             //machine_score, enemy_score);
     
      
-     score = score * scoremod(DEEP, Brain.evalmethod);
+     score = score;// * scoremod(DEEP, Brain.evalmethod);
      free(_board);
      return score;
      }

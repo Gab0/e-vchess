@@ -23,7 +23,7 @@ psutil
 
 ##TODO:
 
--> Engine may castle without having rights (rarely happens). Need fix.
--> Better evolutionary approach on the machines, probably using DEAP module.
--> Engine can't show score for full evaluated moveline, showing only it's first move.
+-> Engine may castle without having rights (rarely happens). Need fix.<br>
+-> Better evolutionary approach on the machines, probably using DEAP module.<br>
+-> Engine can't show score for full evaluated moveline, showing only it's first move.<br>
  

@@ -47,14 +47,13 @@ class Application():
 
     def __init__(self):
 
-        #master = self
         self.Cycle = False
         self.looplimit = 0
 
         #sets the number of simultaneous chess tables to be created and played.
-        self.TABLECOUNT = 72
+        self.TABLECOUNT = 30
         #number of tables to be shown on each row of machines.
-        TABLEonROW = 12
+        TABLEonROW = 6
 
         self.TIME = time()
         k=0
@@ -91,6 +90,7 @@ class Application():
         self.setcounter_illegalmove=0
         self.setcounter_draws=0
         self.setcounter_checkmate=0
+        self.setcounter_inactivity=0
 
 
         if (len(sys.argv) > 0) and ('--go' in sys.argv):
@@ -108,7 +108,7 @@ class Application():
         self.CYCLE.start()
         
     def gocycle(self):
-        SLEEPTIME = 2.3
+        SLEEPTIME = 1.3
         if SLEEPTIME < 1: SLEEPTIME = 1.3
         self.ROUND=0
         self.Cycle = True
@@ -123,7 +123,7 @@ class Application():
         #arena/cycle main loop. Important functions and values.
         while self.Cycle:
             TIME = time()-TIME
-            TABLERESPONSE = self.move_read_reliability/self.TABLECOUNT
+            TABLERESPONSE = self.move_read_reliability/(self.looplimit+1)
     
 
             
@@ -132,13 +132,14 @@ class Application():
             SLEEPTIME = round(SLEEPTIME,1)
 
             if self.ROUND % 3 == 0:                
-                self.root.wm_title(self.Title + "  T=%s|R=%s" % (round(SLEEPTIME,1),self.ROUND))
+                self.root.wm_title(self.Title + "  T=%s|R=%s|I=%i" % (round(SLEEPTIME,1),self.ROUND,self.setcounter_inactivity))
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             #also prints running info to log.
-            if (self.ROUND % 3300 == 0) and (self.ROUND != 0):
+            if (self.ROUND % 500 == 0) and (self.ROUND != 0):
 
                 self.routine_pop_management()
+                #self.StatLock_routine_management()
             
             self.move_read_reliability = 0
             print("ROUND %i  T=%i  S=%f  APR=%i%% >>>>>>>>" % (self.ROUND,round(TIME), SLEEPTIME, TABLERESPONSE*100))
@@ -188,27 +189,39 @@ class Application():
     def killemall(self):
         for table in TABLEBOARD:
             if table.online == 1:
-                table.turnoff()
+                table.endgame()
 
     def killunused(self):
         for T in range(len(TABLEBOARD)):
             if T > self.looplimit:
-                TABLEBOARD[T].turnoff()
+                TABLEBOARD[T].endgame()
 
+    def StatLock_routine_management(self):
+        population = loadmachines()
+        population = CyclingStatLock(population)
 
+        self.log('')
+        self.log('>>>>>STATLOCK ROUTINE MANAGEMENT')
+        self.log('')
+
+        setmachines(population,1)
+        
     def routine_pop_management(self):
         population = loadmachines()
-
+        
         #for individual in population:
             #dump_all_paramstat(individual)
 
-        for k in range(8):
+        for k in range(27):
             CHILD = create_hybrid(population)
             if CHILD: population.append(CHILD)
         
-        for k in range(4): population = deltheworst_clonethebest(population, -1)
+        for k in range(6): population = deltheworst_clonethebest(population, -1)
 
-        for k in range(2): mutatemachines(3, population)
+
+        population = replicate_best_inds(population, 3)
+        
+        for k in range(2): population = mutatemachines(3, population)
 
         setmachines(population, 1)
         self.log('')
@@ -333,6 +346,7 @@ class table(Frame):
         except:
             self.initialize=0
             self.log('Uknown startup error.','')
+            self.endgame()
 
         
         self.board.reset()
@@ -356,7 +370,7 @@ class table(Frame):
                     if "MACname > " in line.decode('utf-8'):
                         self.MACnames[i] = line.decode('utf-8')[10:-1] 
 
-            sleep(1)            
+            sleep(3)            
 
 
             
@@ -364,14 +378,14 @@ class table(Frame):
             self.MACHINE[1].stdin.flush()
             
             self.MACHINE[0].stdin.write(bytearray('new\n','utf-8'))
-            self.MACHINE[0].stdin.write(bytearray('black\nwhite\n','utf-8'))
-            self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
+            self.MACHINE[0].stdin.write(bytearray('white\n','utf-8'))
+            #self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
             self.MACHINE[0].stdin.flush()
             
 
         except BrokenPipeError:
             print("broken pipe @ "+str(self.number) + " while starting.")
-            self.log("broken pipe", "setup.")
+            self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
             
             if (self.startuplog[0]): self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
             if (self.startuplog[1]): self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
@@ -412,7 +426,9 @@ class table(Frame):
         if self.flagged_toend == 1:
             self.endgame()
             return
-        if self.initialize==1: return
+        if self.initialize==1:
+            self.log('denied by', 'positive initialize')
+            return
         if len(self.MACHINE) < 2:
             print('machine breakdown @ %i' % self.number)
             self.endgame()
@@ -430,14 +446,15 @@ class table(Frame):
 
 
 
-        if (self.rounds_played % 17 == 0) and (self.rounds_played>3):
+        """if (self.rounds_played % 17 == 0) and (self.rounds_played>3):
             print('chk')
-            self.check_engine_health()
+            self.check_engine_health()"""
 
         
         
         try:
             self.MACHINE[self.turn].stdout.flush()
+
         except BrokenPipeError:
             print("broken pipe @ "+str(self.number) + " while gaming.")
             self.log("broken pipe", self.number)
@@ -445,86 +462,102 @@ class table(Frame):
             return
         except IndexError:
             self.log("read of move with unintialized machines.", self.number)
-            self.turnoff()
-            return
-        
-        SUCCESS = 0   
+            self.endgame()
+            return        
+        MOVE = 0
+
+        self.movereadbuff = []
+
+
         for line in self.MACHINE[self.turn].stdout.readlines():
             #print(line.decode('utf-8'))
-            
-            L = line.decode('utf-8')[:-1].split(" ")
-            if (L[0]=="move") and (len(L)>1):
-                for move in self.board.legal_moves:
+            line = line.decode('utf-8')[:-1]
+            if "puta merda." in line:
+                self.log("PUTA MERDA!", COLOR[self.turn])
+            L = line.split(" ")
+            if ("move" in L[0]) and (len(L)>1):
+                    #print(">>>> %s"%L[1])
+                    MOVE = L[1]
+                    break
+            else: self.movereadbuff.append(line)
                     
-                    self.movelist.append(str(move))
-                    #print(str(move))
 
+        if MOVE:
+            for move in self.board.legal_moves:
+                self.movelist.append(str(move))
+            if MOVE in self.movelist:
 
-                if L[1] in self.movelist:
-                    SUCCESS=1
+                try:
+                    self.board.push(chess.Move.from_uci(MOVE))
                     self.arena.move_read_reliability += 1
                     self.consec_failure=0
                     if GUI: self.setlimit["text"] = "0"
+                    print("move done " + MOVE + "\n")
+                except TypeError:
+                    self.log("BOARD.PUSH ERROR.", MOVE)
+                    print("BOARD.PUSH ERROR!.")
+                    self.endgame()
                     
-                    print("move done " + L[1] + "\n")
-
-
-
-                    try:
-                        self.board.push(chess.Move.from_uci(L[1]))
-                    except TypeError:
-                        self.log("BOARD.PUSH ERROR.", L[1])
-                        print("BOARD.PUSH ERROR!.")
-                        self.endgame()
-                        
-                    if GUI: self.Vrefresh()
-                    
-                    if self.board.is_checkmate():
-                        self.sendresult(self.turn)
-                        return
-                    if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves(): #or self.board.can_claim_threefold_repetition() 
-                        self.sendresult(0.5)
-                        return
-                    
-                    self.turn = 1-self.turn
-                    self.MACHINE[self.turn].stdin.write(bytearray(L[1]+'\n','utf-8'))
-                    self.rounds_played+=1
-
-                    try:
-                        self.MACHINE[self.turn].stdin.flush()
-                    except BrokenPipeError:
-                        print("broken pipe @ " + str(self.number) + " while receiving move.")
-                        self.log("broken pipe while receiving move.", self.number)
-                        self.turnoff()
-                        return
-                else:
-                    print("error! illegal move! "+ L[1])
-                    self.arena.setcounter_illegalmove+=1
-                    self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + L[1])
-                    self.log(L[0],L[1])
-                    self.log(str(self.board),0)
-                    self.log('engine internal board >>>>',0)
-                    
-                    self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
-                    self.MACHINE[self.turn].stdin.flush()
-                    sleep(1)
-                    try:
-                        self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
-                    except AttributeError:
-                        pass
-
-                    self.turnoff()
+                if GUI: self.Vrefresh()
+                
+                if self.board.is_checkmate():
+                    self.sendresult(self.turn)
                     return
-        if SUCCESS==0:
+                if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves(): #or self.board.can_claim_threefold_repetition() 
+                    self.sendresult(0.5)
+                    return
+                
+                self.turn = 1-self.turn
+                self.MACHINE[self.turn].stdin.write(bytearray(MOVE+'\n','utf-8'))
+                self.rounds_played+=1
+
+                try:
+                    self.MACHINE[self.turn].stdin.flush()
+                except BrokenPipeError:
+                    print("broken pipe @ " + str(self.number) + " while receiving move.")
+                    self.log("broken pipe while receiving move.", self.number)
+                    self.endgame()
+                    return
+            else:
+                print("error! illegal move! "+ MOVE)
+                self.arena.setcounter_illegalmove+=1
+                self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + MOVE)
+                self.log(str(self.board),0)
+                self.log('engine internal board >>>>',0)
+                
+                self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
+                self.MACHINE[self.turn].stdin.flush()
+                sleep(1)    
+                try:
+                    self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
+                except AttributeError:
+                    pass
+
+                self.endgame()
+                return
+        else:#no move read this turn.
+            for line in self.movereadbuff:
+                self.log(line,'<<<<< %i' % len(self.movereadbuff))
             self.consec_failure+=1
+
+            if self.consec_failure % 15 == 0:
+                try:
+                    self.log("requested FEN > ","%s" % str(self.board.fen()))
+                    self.MACHINE[self.turn].stdin.write(bytearray('echo\n', 'utf-8'))
+                    self.MACHINE[self.turn].stdin.flush()
+                    self.MACHINE[1-self.turn].stdin.write(bytearray('sorry\n', 'utf-8'))
+                except BrokenPipeError:
+                    self.log('broken pipe on bizarre inactive bug.',COLOR[self.turn])
+                    self.endgame()
             if GUI:
                 self.setlimit["text"] = str(self.consec_failure)
             
-            if self.consec_failure > 14:
+            if self.consec_failure > 36:
                 print("restarting due to inactivity.")
+                self.arena.setcounter_inactivity+=1
                 self.consec_failure = 0
                 
-                self.turnoff()
+                self.endgame()
                 
         if GUI:
             if self.number <= self.arena.looplimit:
@@ -546,9 +579,12 @@ class table(Frame):
         self.online = 0
         self.initialize = 0
         if GUI:
-            self.setlimit["text"] = "off"        
+            self.switch["text"] = "off"
+            self.switch["command"] = self.turnon
+            self.Mnames["text"] = "idle"
             self.Maximize["background"] = "light grey"
-
+            self.visor.delete('1.0',END)
+            
     def sendresult(self, result):
         print("game ends @ " + str(self.number))
 
@@ -578,7 +614,7 @@ class table(Frame):
             MAC.stdin.flush()
         self.online = 0
         
-        self.turnoff()
+        self.endgame()
         
     def setWidgets(self):
         self.visor = Text(self, height=10,width=16, borderwidth=4, relief=GROOVE, font=("Courier",6,'bold'))
@@ -591,7 +627,7 @@ class table(Frame):
 
         self.play = Button(self)
         self.play["text"] = "play"
-        self.play["command"] = self.readmove
+        self.play["command"] = lambda: self.log("requested FEN > ","%s" % str(self.board.fen()))
         #self.play.grid(column=1,row=2)
 
         self.setlimit = Button(self)
@@ -615,17 +651,9 @@ class table(Frame):
         
         if GUI:
             self.switch["text"] = "on"
-            self.switch["command"] = self.turnoff
+            self.switch["command"] = self.endgame
         
-    def turnoff(self):
-        self.endgame()
-        
-        if GUI:
-            self.switch["text"] = "off"
-            self.switch["command"] = self.turnon
-            self.Mnames["text"] = "idle"
-            self.Maximize["background"] = "light grey"
-            self.visor.delete('1.0',END)
+
 
         
     def Vrefresh(self):
@@ -663,7 +691,7 @@ class table(Frame):
                 print('terminating table, memory limit overriden by %s' % self.MACnames[M])
                 self.log('terminating table, memory limit overriden by ', self.MACnames[M])
                 
-                self.turnoff()
+                self.endgame()
             
 
 

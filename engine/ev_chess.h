@@ -61,8 +61,7 @@ struct board;
       char defenders[64][3];
       int kad;
       
-      struct move movehistory[128];
-      int hindex;
+
       
       int castle[2][3];
 
@@ -86,7 +85,8 @@ struct param;
     float cumulative;
    };
 
-   
+extern struct move movehistory[1024];
+extern int hindex;   
 
 using namespace std;
 
@@ -181,7 +181,8 @@ void eval_info_move(struct move *move, int DEEP, int P);
 
 int think (struct move *out, int PL, int DEEP, int verbose);
 int evaluate(struct board *evalboard, int PL);
-long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore, int Alpha, int Beta    );
+long thinkiterate(struct board *feed, int PL, int DEEP, 
+        long chainscore, long Alpha, long Beta);
 float scoremod (int DEEP, int method);
 
 

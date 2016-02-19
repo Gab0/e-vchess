@@ -92,8 +92,8 @@ int loadmachine (int verbose, char *dir) {
            }
            
  
-        if (strstr(line, "param_DEEP") != NULL)   
-            Brain.DEEP = readparam(line, V);
+        //if (strstr(line, "param_DEEP") != NULL)   
+        //    Brain.DEEP = readparam(line, V);
         if (strstr(line, "param_deviationcalc") != NULL)
             Brain.deviationcalc = readparam(line, V);
         if (strstr(line, "eval_randomness") != NULL)

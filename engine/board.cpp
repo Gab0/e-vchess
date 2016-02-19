@@ -79,7 +79,7 @@ int legal_moves (struct board *board, int PL, int verbose) {
     //erase_moves(board,0);
     board->k=0;
     board->kad = 0;
-    board->hindex = 0;
+    //board->hindex = 0;
 
     int EP = 1-PL;
        
@@ -377,9 +377,9 @@ void attackers_defenders (struct board *board, int P) {
 int history_append(struct move *move) {
     
     
-    replicate_move(&board.movehistory[board.hindex], move);
+    replicate_move(&movehistory[hindex], move);
 
-        board.hindex++;
+        hindex++;
         return 0;
     }
     
@@ -390,9 +390,9 @@ int history_rollback(int times) {
     int i=0;
     
     for (i=0;i<times;i++) {
-    board.hindex--;
-    print_play_cord(board.movehistory[board.hindex]);
-    undo_move(&board, &board.movehistory[board.hindex]);
+    hindex--;
+    print_play_cord(movehistory[hindex]);
+    undo_move(&board, &movehistory[hindex]);
     
     }
    return 0; 
@@ -489,7 +489,8 @@ int cancastle (struct board *board, int P, int direction) {
  
 }
 
-void movement_generator(struct board *board,int limit ,char direction, int i, int j, int P) {
+void movement_generator(struct board *board, int limit, 
+                        char direction, int i, int j, int P) {
     int X=0, q=0;
     int Ti=0,Tj=0;
     
@@ -532,13 +533,14 @@ void movement_generator(struct board *board,int limit ,char direction, int i, in
                    append_move(board, i, j, Ti-i, Tj-j, P);
                    q++;
                    if (limit) q=0;
-                   
+
                }
-               if (is_in(board->squares[Ti][Tj],pieces[1-P],6)){
+               if (is_in(board->squares[Ti][Tj],pieces[1-P],6)) {
                    append_move(board, i, j, Ti-i, Tj-j, P);
                    q=0;
                }
-               else q=0;
+               
+               if (is_in(board->squares[Ti][Tj],pieces[P],6)) q=0;
                
                
            }

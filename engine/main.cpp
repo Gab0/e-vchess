@@ -16,6 +16,9 @@ bool loadedmachine = false;
 char *infoAUX = (char *)malloc(256 * sizeof(char));
 
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
+
+struct move movehistory[1024];
+int hindex; 
 //variable params for intelligent evolution (standards initialized);
 
 
@@ -66,7 +69,7 @@ int main(int argc, char** argv) {
     Brain.seekmiddle = 23;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 8;
+    Brain.DEEP = 2;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -95,9 +98,11 @@ int main(int argc, char** argv) {
     if (argc > 1) 
         for (i=0;i<argc;i++) {
             
-        if (strstr(argv[i], "-TOP") != NULL) {selectTOPmachines = true; printf("ack.\n");}    
+        if (strstr(argv[i], "-TOP") != NULL) {
+            selectTOPmachines = true; printf("ack.\n");}    
             
-        if (strstr(argv[i], "-MD") != NULL) {toloadmachine = true; machinepath = argv[i+1];}
+        if (strstr(argv[i], "-MD") != NULL) {
+            toloadmachine = true; machinepath = argv[i+1];}
         
         if (strstr(argv[i], "--showinfo") != NULL) show_info = true;
         
@@ -115,11 +120,12 @@ int main(int argc, char** argv) {
     
 
     
-    char testfehn[128] = "rn1qkbnr/ppp1pppp/3p4/8/3P2b1/4PN2/PPP1BPPP/RNBQK2R w KQkq - 5 5";
+    char testfehn[128] = "r2qk2r/7n/3p3n/1p1pPBp1/PR4Pp/2p4P/2P1p3/2Q1K1NR b - - 5 65";
     
     
 
-    for (i=Brain.DEEP;i>=0;i--) printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
+    for (i=Brain.DEEP;i>=0;i--) 
+        printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
     
     
     inp =(char *)malloc(128*sizeof(char));
@@ -147,7 +153,7 @@ int main(int argc, char** argv) {
    
     if (strstr(inp, "quit") != NULL) return 0;
     
-    //if (strstr(inp, "go") != NULL) computer(1);
+    if (strstr(inp, "go") != NULL) computer(1);
     
     if (strstr(inp, "position") !=NULL) {
         if (strstr(inp, "startpos" ) != NULL) setup_board(1);
@@ -165,16 +171,18 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "test") != NULL) fehn2board(testfehn);
     
-    if (strstr(inp, "black") != NULL && strstr(inp, "white") != NULL) {machineplays = 0; computer(0);}
+    if (strstr(inp, "black") == NULL && strstr(inp, "white") != NULL) {
+        machineplays = 0; computer(0); printf("playing white.");}
     
-    if (strstr(inp, "white") == NULL && strstr(inp, "black") != NULL) {machineplays = 1; printf("playing black. (%i)", machineplays);}
+    if (strstr(inp, "white") == NULL && strstr(inp, "black") != NULL) {
+        machineplays = 1; printf("playing black. (%i)", machineplays);}
     
     if (strstr(inp, "remove") != NULL) history_rollback(2);
     
     if (strstr(inp, "history") != NULL) {
-        printf("move history: %i moves.\n", board.hindex);
-        for (i=0; i < board.hindex; i++) {
-            print_movement(&board.movehistory[i]);
+        printf("move history: %i moves.\n", hindex);
+        for (i=0; i < hindex; i++) {
+            print_movement(&movehistory[i]);
         }
     }
     
@@ -206,6 +214,9 @@ int main(int argc, char** argv) {
         else applyresult(-1);
         
     }
+    if(strstr(inp, "echo") !=NULL) {
+        write(1, output, strlen(output));fflush(stdout);
+    }
     
     if (read_movelines(inp,0)) {
        computer(0);
@@ -233,8 +244,9 @@ void computer(int verbose) {
     struct move move;
 
     
-    if (think(&move, P , Brain.DEEP, 0) < 0) return;
-    sleep(1);
+    if (think(&move, P , Brain.DEEP, 0) < 0) {
+        printf("puta merda.\n");return;}
+    //sleep(1);
     move_pc(&board, &move);
     
  
@@ -242,24 +254,18 @@ void computer(int verbose) {
     cord2pos(move.from);
     cord2pos(move.to);
     
-    Vb show_board(board.squares);
+    //Vb show_board(board.squares);
     
-
-    
- //   if (move[0][0]=='O') {
- //       if (move[1][1] == 0) snprintf(output, 32, "move O-O-O\n");
- //       if (move[1][1] == 1) snprintf(output, 32, "move O-O\n");}
-    
-
-    
-    else {
-        
-     if (move.promoteto != 0)  snprintf(output, 32 ,"move %c%c%c%cq\n",move.from[0],move.from[1],move.to[0],move.to[1]);
-     else snprintf(output, 32 ,"move %c%c%c%c \n", move.from[0],move.from[1],move.to[0],move.to[1]);
+          
+     if (move.promoteto != 0)  
+         snprintf(output, 32 ,"move %c%c%c%cq\n",
+                 move.from[0],move.from[1],move.to[0],move.to[1]);
+     else snprintf(output, 32 ,"move %c%c%c%c \n", 
+                 move.from[0],move.from[1],move.to[0],move.to[1]);
      
-    
+    //sleep(1);
     write(1, output, strlen(output));fflush(stdout);
-    }
+    
     }
 
 

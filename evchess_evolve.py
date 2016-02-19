@@ -32,7 +32,8 @@ class parameter():
     def read(self, split_line):
         if self.locked: return
         try:
-            if split_line[0] == self.name:
+            if self.name in split_line[0]:
+                if split_line[0] == "|": self.locked = 1
                 
 
                 if self.marks_dumpable:
@@ -63,6 +64,7 @@ class parameter():
 
         
     def write(self):
+        
         STR = self.name + " = "
 
         if not type(self.value) == list:
@@ -76,7 +78,8 @@ class parameter():
         if self.marks_dumpable:
             STR += " " + str(self.dumpedvalue)
 
-        STR += "\n"       
+        STR += "\n"
+        if self.locked: STR = "|"+STR
         return STR
 
 
@@ -231,16 +234,25 @@ class parameter():
         if not self.LIM: MAX = 2*self.stdvalue
         else: MAX = self.LIM
         
-        if not self.bLIM: MIN = MAX - 2* self.stdvalue
+        if not self.bLIM: MIN = MAX - 2*self.stdvalue
         else: MIN = self.bLIM
 
-        Grading = (MAX-MIN)/self.INCR
+        Grading = round((MAX-MIN)/self.INCR)
 
         VAL = random.randrange(Grading)
 
         self.value = VAL*self.INCR + MIN
 
+        self.value = self.putonlimits(self.value)
 
+    def lock(self, value):
+        self.value = self.putonlimits(value)
+        self.locked = 1
+        
+    def unlock(self, rnd):
+        self.locked = 0
+        if rnd: self.randomize()
+        
         
 class machine ():
 
@@ -262,14 +274,14 @@ class machine ():
         
 
 
-        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 2, bLIM=4, LIM=10))
+        self.PARAMETERS.append(parameter("param_DEEP", 0, 30, 2, bLIM=4, INCR=2, LIM=10))
 
         self.PARAMETERS.append(parameter("eval_randomness", 0, 30, 60, INCR=10, bLIM=1))
         self.PARAMETERS.append(parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3))
         #self.PARAMETERS.append(parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2))
         self.PARAMETERS.append(parameter("param_evalmethod", 0, 30, 1, aP=1, bLIM=0, LIM=0))
         self.PARAMETERS.append(parameter("param_seekatk", 0, 30, 0.5, bLIM=-1, INCR=0.25, LIM=3))
-        self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 21))
+        self.PARAMETERS.append(parameter("param_seekmiddle", 0, 30, 3, LIM = 5))
         self.PARAMETERS.append(parameter("param_presumeOPPaggro", 0, 30, 1, LIM=1.1, bLIM=1, INCR=0.1))
         self.PARAMETERS.append(parameter("param_pawnrankMOD", 0, 30, 33, LIM=37))
         self.PARAMETERS.append(parameter("param_parallelcheck", 0, 80, 4,LIM=21, bLIM=0))
@@ -349,6 +361,10 @@ class machine ():
 
     def delete(self):
         os.remove(Fdir+'/'+self.filename)
+
+    def resetscores(self):
+        for P in self.TPARAMETERS:
+            P.value = 0
             
 k=0
 population=[]
@@ -557,7 +573,7 @@ def deltheworst_clonethebest(population, action):
                 if (POP_SCORETABLE[k] > MEDIUMSCORE*1.1):
                     print('subject cloned. ' + population[k].filename)
                     NEWINDS.append(population[k])
-                    NEWINDS[-1].filename = str(random.randrange(0,10000)) + '.mac'
+                    NEWINDS[-1].filename = NewMacName()
 
             mutatemachines(6,NEWINDS)
             for I in NEWINDS:
@@ -571,7 +587,7 @@ def create_hybrid(population):
     for I in range(len(population)):
         if population[I].TPARAMETERS[5].value in K_:
             if random.randrange(100) < 60:
-                CHILD = (machine(str(random.randrange(0,6489))+".mac"))
+                CHILD = (machine(NewMacName()))
 
                 for P in range(len(population[I].PARAMETERS)):
                     chance = random.randrange(100)
@@ -585,16 +601,38 @@ def create_hybrid(population):
     
 
 
-def select_best_inds(population):
+def select_best_inds(population, NUMBER):
     TOP = []
-    for IND in range(len(population)):
-        if population[IND].TPARAMETERS[0].value > 0:
-            if population[IND].TPARAMETERS[1].value / population[IND].TPARAMETERS[0].value > 0.5:
-                if population[IND].TPARAMETERS[7].value > 1:
-                    if not population[IND].onTOP:
-                        TOP.append(IND)
+    for i in range(NUMBER): TOP.append(0)
+    
+    SCORE = 0
+    LASTSCORE = 66666
+    for i in range(NUMBER):
+        SCORE = 0
+        for individual in population:
+            SCR = individual.TPARAMETERS[5].value
+            if (SCR > SCORE) and (SCR < LASTSCORE):
+                TOP[i]=individual
+                SCORE = SCR
+                LASTSCORE = SCR
+
+    for i in reversed(range(len(TOP))):
+        if TOP[i] == 0: TOP.pop(i)
 
     return TOP
+
+
+def replicate_best_inds(population, NUMBER):
+    TOP = select_best_inds(population, NUMBER)
+
+
+    
+    for IND in TOP:
+        for N in range(NUMBER):
+            IND.filename = NewMacName()
+            population.append(IND)
+
+    return population
 
 
 def clone_from_template():
@@ -609,7 +647,7 @@ def clone_from_template():
 
     model = open('%s/top_machines/%s' % (Fdir,POOL[X]), 'r')
 
-    CHILD = machine(str(random.randrange(0,6489))+".mac")
+    CHILD = machine(NewMacName())
     for line in model.readlines():
         CHILD.read(line)
     CHILD.onTOP = 0
@@ -619,6 +657,122 @@ def clone_from_template():
 
     return CHILD
 
-#def crossover_reproduction(population):
+
+def NewMacName():
+    return "%i.mac" % random.randrange(0,6489)
+
+
+def Triangulate_value(values):
+    if len(values) == 0: return 0
     
-#setmachines(loadmachines(),1)
+    BUFFER=0
+    #for value in values: BUFFER+=value
+
+    #value = BUFFER/len(values)
+
+    X = random.randrange(len(values))
+    
+
+    return values[X]
+
+
+
+def CyclingStatLock(population):
+    DB = "%s/CyclingLockDB" % Fdir
+    if not os.path.isfile(DB): return population
+
+    ACTIVE = 0
+    NEXT = 0
+    CYCLE_PARAMETERS = []
+    DataBase = open(DB, 'r').readlines()
+    for line in DataBase:
+        L = line.split(" = ")
+        if len(L) > 1:
+            CYCLE_PARAMETERS.append([L[0], float(L[1])])
+    for P in range(len(CYCLE_PARAMETERS)):
+        if CYCLE_PARAMETERS[P][0][0] == ">":
+            CYCLE_PARAMETERS[P][0] = CYCLE_PARAMETERS[P][0][1:]
+            ACTIVE = P
+            
+            
+    if ACTIVE+1<len(CYCLE_PARAMETERS): NEXT = ACTIVE+1
+
+    
+    TOP = select_best_inds(population,3)
+    
+    print(TOP)#TEMP
+    
+    for P in range(len(TOP[0].PARAMETERS)):
+        if TOP[0].PARAMETERS[P].name in CYCLE_PARAMETERS[ACTIVE][0]:
+            ACTIVE_index = P
+
+        if CYCLE_PARAMETERS[NEXT][0] in TOP[0].PARAMETERS[P].name:
+            NEXT_index = P
+
+    APPLIEDvalue = []
+    for T in TOP:
+        #print(T)#TEMP
+        APPLIEDvalue.append(T.PARAMETERS[ACTIVE_index].value)
+
+
+    APPLIEDvalue = Triangulate_value(APPLIEDvalue)
+    CYCLE_PARAMETERS[ACTIVE][1] = APPLIEDvalue
+
+    
+
+    
+    for IND in population:
+                IND.PARAMETERS[NEXT_index].unlock(1)
+                IND.PARAMETERS[ACTIVE_index].lock(APPLIEDvalue)
+                
+
+    DataBase = open(DB, 'w+')
+    for P in range(len(CYCLE_PARAMETERS)):
+        string = "%s = %f\n" % (CYCLE_PARAMETERS[P][0], CYCLE_PARAMETERS[P][1])
+        if P == NEXT: string = ">"+string
+        DataBase.write(string)
+    
+    
+    
+    return population   
+    
+
+def PrepareCyclingStatLock(population):
+    DB = "%s/CyclingLockDB" % Fdir
+    if not os.path.isfile(DB): return population
+
+    ACTIVE = 0
+    NEXT = 0
+    CYCLE_PARAMETERS = []
+    DataBase = open(DB, 'r').readlines()
+    for line in DataBase:
+        L = line.split(" = ")
+        if len(L) > 1:
+            CYCLE_PARAMETERS.append([L[0],L[1][:-1]])
+
+    if len(CYCLE_PARAMETERS) < 1: return population
+
+    #print(CYCLE_PARAMETERS) #TEMP
+    for C in range(len(CYCLE_PARAMETERS)):
+        for P in range(len(population[0].PARAMETERS)):
+            #print(P)
+            #print(C)
+            try:
+                if population[0].PARAMETERS[P].name in CYCLE_PARAMETERS[C][0]:
+                    CYCLE_PARAMETERS[C][0] = P
+            except:
+                print('>>>>>'+population[0].PARAMETERS[P].name)
+                
+
+    for P in range(len(CYCLE_PARAMETERS),-1):
+        if type(CYCLE_PARAMETERS[P][0]) != int:
+            CYCLE_PARAMETERS.pop(P)
+       
+
+
+    for IND in population:
+        IND.resetscores()
+        for CP in CYCLE_PARAMETERS:
+            IND.PARAMETERS[CP[0]].lock(float(CP[1]))
+            
+    return population

@@ -239,7 +239,8 @@ class Application(Frame):
         self.popmenu = Menu(self.menubar)
         self.clearmenu = Menu(self.menubar)
         self.machinemenu = Menu(self.menubar)
-
+        self.actionmenu = Menu(self.menubar)
+        
         self.clearmenu.add_command(label="Clear Scores", command=self.clearscores)
         self.clearmenu.add_command(label="Clear Attr Dump", command=self.TOcleardump)
         self.menubar.add_cascade(label="CLEAR", menu = self.clearmenu)
@@ -271,6 +272,8 @@ class Application(Frame):
         self.machinemenu.add_command(label="DELETE machine", command = self.delete_machine)
         self.menubar.add_cascade(label="MACHINE", menu = self.machinemenu)
 
+        self.actionmenu.add_command(label="Switch to Statlock Cycle.", command = self.TOswitchstatlock)
+        self.menubar.add_cascade(label="ACTION", menu = self.actionmenu)
         
         self.menubar.add_command(label="QUIT", command = root.destroy)
         root.config(menu=self.menubar)
@@ -381,6 +384,13 @@ class Application(Frame):
             CHILD = clone_from_template()
             if CHILD: self.machines.append(CHILD)
         self.savemac
+
+
+
+    def TOswitchstatlock(self):
+        self.machines = PrepareCyclingStatLock(self.machines)
+
+
 
 
     def renew_VIEWDUMP_canvas(self, alreadyexists):
