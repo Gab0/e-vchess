@@ -14,7 +14,7 @@ import threading
 
 import sys
 
-from evchess_evolve import *
+import evchess_evolve
 
 from random import randrange
 
@@ -208,20 +208,29 @@ class Application():
         
     def routine_pop_management(self):
         population = loadmachines()
-        
+
+        originalPOPLEN = len(population)
         #for individual in population:
             #dump_all_paramstat(individual)
 
-        for k in range(27):
+        for k in range(16):
             CHILD = create_hybrid(population)
             if CHILD: population.append(CHILD)
+
         
-        for k in range(6): population = deltheworst_clonethebest(population, -1)
 
+        MODscorelimit = 1
 
-        population = replicate_best_inds(population, 3)
+        while len(population) < originalPOPLEN:
+            population = replicate_best_inds(population, 3)
         
         for k in range(2): population = mutatemachines(3, population)
+
+        NUM = len(population) - originalPOPLEN
+        if NUM > 0:
+            population = deltheworst_clonethebest(population, -NUM, MODscorelimit)
+
+
 
         setmachines(population, 1)
         self.log('')
@@ -385,7 +394,7 @@ class table(Frame):
 
         except BrokenPipeError:
             print("broken pipe @ "+str(self.number) + " while starting.")
-            self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
+            #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
             
             if (self.startuplog[0]): self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
             if (self.startuplog[1]): self.log(self.startuplog[1].decode('utf-8'), 'WHITE')

@@ -10,6 +10,7 @@ from time import sleep
 from shutil import *
 
 from os import remove
+import evchess_evolve
 class Application(Frame):
 
     def show_machine(self):
@@ -246,7 +247,8 @@ class Application(Frame):
         self.menubar.add_cascade(label="CLEAR", menu = self.clearmenu)
         
         self.popmenu.add_separator()
-        self.popmenu.add_command(label="DEL the Worst", command = self.TOdeltheworst)
+        self.popmenu.add_command(label="DEL the Worst", command = lambda: self.TOdeltheworst(1))
+        self.popmenu.add_command(label="DEL 32 Worst", command = lambda: self.TOdeltheworst(32))
         self.popmenu.add_command(label="CLONE the Best", command = self.TOclonethebest)
         self.popmenu.add_separator()
         self.popmenu.add_command(label="DUMP Stats", command = self.TOdumpstats)
@@ -333,12 +335,12 @@ class Application(Frame):
                 individual.dumped_K=0
 
                 
-    def TOdeltheworst(self):
-        self.machines = deltheworst_clonethebest(self.machines, -1)
+    def TOdeltheworst(self, NUMBER):
+        self.machines = deltheworst_clonethebest(self.machines, -NUMBER, 1)
         
 
     def TOclonethebest(self):
-        self.machines = deltheworst_clonethebest(self.machines, 1)
+        self.machines = deltheworst_clonethebest(self.machines, 1, 1)
         
 
 
@@ -356,7 +358,7 @@ class Application(Frame):
 
     def TOroutineprocedures(self):
         self.TOdumpstats()
-        self.TOdeltheworst()
+        self.TOdeltheworst(1)
         self.TOclonethebest()
         self.savemac()
         
