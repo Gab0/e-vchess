@@ -10,7 +10,9 @@ from time import sleep
 from shutil import *
 
 from os import remove
-import evchess_evolve
+
+
+
 class Application(Frame):
 
     def show_machine(self):
