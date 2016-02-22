@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+from evchess_evolve.std_parameters import STDPARAMETERS
+from evchess_evolve.parameter import parameter
+from evchess_evolve.core import Fdir
 class machine ():
 
     def __init__(self, fname):

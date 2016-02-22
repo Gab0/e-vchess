@@ -1,4 +1,5 @@
 #!/bin/python
+
 import chess
 import shlex
 from subprocess import *
@@ -14,7 +15,7 @@ import threading
 
 import sys
 
-from evchess_evolve import *
+import evchess_evolve
 
 from random import randrange
 
@@ -51,9 +52,9 @@ class Application():
         self.looplimit = 0
 
         #sets the number of simultaneous chess tables to be created and played.
-        self.TABLECOUNT = 30
+        self.TABLECOUNT = 32
         #number of tables to be shown on each row of machines.
-        TABLEonROW = 6
+        TABLEonROW = 8
 
         self.TIME = time()
         k=0
@@ -219,7 +220,7 @@ class Application():
 
         
 
-        MODscorelimit = 1
+        MODscorelimit = 1.6
 
         while len(population) < originalPOPLEN:
             population = replicate_best_inds(population, 3)
@@ -404,9 +405,12 @@ class table(Frame):
         if GUI: self.Maximize["background"] = "brown"
   
 
-
-        for NAME in self.MACnames: self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
-
+        try:
+            for NAME in self.MACnames: self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
+        except FileNotFoundError:
+            self.log("filename not found. Maybe coudn't be read properly by arena.","")
+            self.initialize = 0
+            return
 
         self.online = 1
         self.turn = 0      

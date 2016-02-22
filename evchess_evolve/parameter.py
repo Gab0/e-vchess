@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from evchess_evolve.core import *
+
 class parameter():
     def __init__(self, name, dumpable, Cparam, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
         
