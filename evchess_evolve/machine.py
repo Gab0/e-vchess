@@ -3,6 +3,7 @@
 from evchess_evolve.std_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
 from evchess_evolve.core import Fdir
+
 class machine ():
 
     def __init__(self, fname):
@@ -10,21 +11,16 @@ class machine ():
         self.wasmodified = 0
 
 
-        self.TPARAMETERS = []
-        self.PARAMETERS = STDPARAMETERS
+        self.PARAMETERS = STDPARAMETERS()
 
-        self.TPARAMETERS.append(parameter("stat_games", 1, 0, 0))
-        self.TPARAMETERS.append(parameter("stat_wins", 1, 0, 0))
-        self.TPARAMETERS.append(parameter("stat_draws", 1, 0, 0))
-        self.TPARAMETERS.append(parameter("stat_loss", 1, 0, 0))
-        self.TPARAMETERS.append(parameter("stat_K", 1, 0, 0))
-
-        self.TPARAMETERS.append(parameter("stat_elo", 0,0,1000))
+        self.TPARAMETERS = [
+        parameter("stat_games", 1, 0, 0),
+        parameter("stat_wins", 1, 0, 0),
+        parameter("stat_draws", 1, 0, 0),
+        parameter("stat_loss", 1, 0, 0),
+        parameter("stat_K", 1, 0, 0),
+        parameter("stat_elo", 0,0,1000)]
         
-
-
-
- 
 
         self.onTOP = 0
         
@@ -85,11 +81,9 @@ class machine ():
         for i in range(4):
             self.PARAMETERS[i].dumpedvalue = self.PARAMETERS[i].value
 
-
     def randomize(self):
         for parameter in self.PARAMETERS:
-            parameter.randomize
-            
+            parameter.randomize()
 
     def delete(self):
         os.remove(Fdir+'/'+self.filename)

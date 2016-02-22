@@ -156,13 +156,8 @@ def read_param_dump(parameter):
 
 
 
-def setmachines(population, includeall):
+def setmachines(population):
     for i in range(len(population)):
-        
-
-        if os.path.isfile(Fdir+'/'+population[i].filename):
-            os.remove(Fdir+'/'+population[i].filename)
-            
         population[i].write()
 
     if os.path.isfile(Fdir+'/machines.list'):

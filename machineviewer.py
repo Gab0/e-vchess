@@ -10,6 +10,8 @@ from time import sleep
 from shutil import *
 
 from os import remove
+from os import path
+
 from evchess_evolve.core import *
 
 
@@ -21,12 +23,15 @@ class Application(Frame):
         
         self.VIEWDUMP.grid_forget()
         self.blackboard.grid(column=5,row=0, sticky=NSEW,rowspan=10)
-        
-        Fo = open(self.DIR+'/'+self.machines[self.N].filename)
+
+        MACfile = self.DIR+'/'+self.machines[self.N].filename
         self.blackboard.delete('1.0',END)
-        for line in Fo.readlines():
-            self.blackboard.insert(END,line)
-        Fo.close()
+        if os.path.isfile(MACfile):
+            Fo = open(MACfile)
+            
+            for line in Fo.readlines():
+                self.blackboard.insert(END,line)
+            Fo.close()
         
         self.marker["text"] = self.N+1
 
@@ -53,9 +58,7 @@ class Application(Frame):
         for VW in range(len(self.paramVIEWER)):
             
             self.paramVIEWER[VW][1]['text'] = self.machines[self.N].PARAMETERS[VW].value
-            
-
-            
+            if self.machines[self.N].PARAMETERS[VW].locked: self.paramVIEWER[VW][1]['bg'] = 'red'
 
      
     def scrollmachinesU(self):
@@ -109,7 +112,7 @@ class Application(Frame):
                 
 
     def savemac(self):
-        setmachines(self.machines, 1)
+        setmachines(self.machines)
         self.show_machine()
         print('machines saved.')
         
@@ -221,10 +224,10 @@ class Application(Frame):
         self.scroll_eloR.grid(column=2, row=7)        
 
 
-
-
         self.macname = Button(self)
         self.macname["text"] = self.machines[self.N].filename
+        self.macname["width"] = 9
+        self.macname["height"] = 2
         self.macname["command"] = self.savemactext
         self.macname.grid(column=1,row=9, sticky=NSEW, padx=3, pady=4)
         
@@ -279,6 +282,7 @@ class Application(Frame):
    
         self.menubar.add_cascade(label="POPULATION", menu = self.popmenu)
 
+        self.machinemenu.add_command(label="Randomize Machine", command = lambda: self.machines[self.N].randomize())
         self.machinemenu.add_command(label="Send to TOP", command = lambda: self.sendtobest(self.N))
         self.machinemenu.add_command(label="DELETE machine", command = self.delete_machine)
         self.menubar.add_cascade(label="MACHINE", menu = self.machinemenu)
@@ -357,7 +361,7 @@ class Application(Frame):
         if self.W ==1:
             for individual in self.machines:
                 dump_all_paramstat(individual)
-        setmachines(self.machines, 1)
+        setmachines(self.machines)
         print('stats dumped.')
 
     def TOpopulate(self, NUM):
@@ -401,6 +405,8 @@ class Application(Frame):
     def TOswitchstatlock(self):
         self.machines = PrepareCyclingStatLock(self.machines)
 
+    def TOrandomizemachine(self):
+        self.machines[self.N].randomize()
 
 
 
@@ -460,7 +466,7 @@ class Application(Frame):
         self.DIR = Fdir
         self.N= 0
         self.machines = loadmachines()
-        setmachines(self.machines, 1)
+        setmachines(self.machines)
         self.createWidgets()
         self.create_param_viewer()
         self.show_machine()

@@ -1,6 +1,5 @@
 #!/usr/bin/python
-
-from evchess_evolve.core import *
+import random
 
 class parameter():
     def __init__(self, name, dumpable, Cparam, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
@@ -233,7 +232,9 @@ class parameter():
         tree.write(Fdir + "/paramstats.xml")
 
     def randomize(self):
-        if self.locked: return
+        if self.locked:
+            print('locked')
+            return
         if not self.LIM: MAX = 2*self.stdvalue
         else: MAX = self.LIM
         
@@ -241,6 +242,9 @@ class parameter():
         else: MIN = self.bLIM
 
         Grading = round((MAX-MIN)/self.INCR)
+        if Grading == 0:
+            self.value = 0
+            return
 
         VAL = random.randrange(Grading)
 

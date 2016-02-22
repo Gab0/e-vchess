@@ -214,13 +214,13 @@ class Application():
         #for individual in population:
             #dump_all_paramstat(individual)
 
-        for k in range(16):
-            CHILD = create_hybrid(population)
-            if CHILD: population.append(CHILD)
+        #for k in range(8):
+        #    CHILD = create_hybrid(population)
+        #    if CHILD: population.append(CHILD)
 
-        
+        population = populate(population, round(originalPOPLEN/8))
 
-        MODscorelimit = 1.6
+        MODscorelimit = 2
 
         while len(population) < originalPOPLEN:
             population = replicate_best_inds(population, 3)
@@ -236,8 +236,12 @@ class Application():
         setmachines(population, 1)
         self.log('')
         self.log('>>>>ROUTINE MANAGEMENT')
-        self.log("ROUND = %i. checkmate-> %i; draws-> %i; illegal moves-> %i." % (self.ROUND, self.setcounter_checkmate, self.setcounter_draws, self.setcounter_illegalmove))
-        self.log('Illegal move percentage is %f %%.' % (self.setcounter_illegalmove/(self.setcounter_checkmate+self.setcounter_draws+1)))
+        self.log("ROUND = %i. checkmate-> %i; draws-> %i; illegal moves-> %i"
+                 % (self.ROUND, self.setcounter_checkmate, self.setcounter_draws, self.setcounter_illegalmove))
+        self.log("initial population size-> %i; final population size-> %i"
+                 % (originalPOPLEN,len(population)))
+        self.log('Illegal move percentage is %f %%.'
+                 % (self.setcounter_illegalmove*100/(self.setcounter_illegalmove+self.setcounter_checkmate+self.setcounter_draws+1)))
         self.log('')
         print('routine management done.')
 
@@ -485,8 +489,7 @@ class table(Frame):
         for line in self.MACHINE[self.turn].stdout.readlines():
             #print(line.decode('utf-8'))
             line = line.decode('utf-8')[:-1]
-            if "puta merda." in line:
-                self.log("PUTA MERDA!", COLOR[self.turn])
+
             L = line.split(" ")
             if ("move" in L[0]) and (len(L)>1):
                     #print(">>>> %s"%L[1])
@@ -553,7 +556,7 @@ class table(Frame):
                 self.log(line,'<<<<< %i' % len(self.movereadbuff))
             self.consec_failure+=1
 
-            if self.consec_failure % 15 == 0:
+            if self.consec_failure % 25 == 0:
                 try:
                     self.log("requested FEN > ","%s" % str(self.board.fen()))
                     self.MACHINE[self.turn].stdin.write(bytearray('echo\n', 'utf-8'))
@@ -565,7 +568,7 @@ class table(Frame):
             if GUI:
                 self.setlimit["text"] = str(self.consec_failure)
             
-            if self.consec_failure > 36:
+            if self.consec_failure > 27:
                 print("restarting due to inactivity.")
                 self.arena.setcounter_inactivity+=1
                 self.consec_failure = 0
@@ -607,19 +610,19 @@ class table(Frame):
             result = '0-1'
             self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. black wins')
-            self.log('checkmate', self.MACnames[1])
+            #self.log('checkmate', self.MACnames[1])
             
         if result ==0:
             result = '1-0'
             self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. white wins')
-            self.log('checkmate', self.MACnames[0])
+            #self.log('checkmate', self.MACnames[0])
             
         if result == 0.5:
             result = '1/2-1/2'
             self.arena.setcounter_draws+=1
             if GUI: self.visor.insert('10.1', 'draw.')
-            self.log('draw', '1/2')
+            #self.log('draw', '1/2')
             
 
         for MAC in self.MACHINE:    
