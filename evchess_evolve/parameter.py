@@ -138,11 +138,11 @@ class parameter():
 
         
         elif not type(self.value) == list:
-            self.value += getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
+            self.value += self.getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
 
         else:
             for kk in range(len(self.value)):
-                self.value[kk] += getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
+                self.value[kk] += self.getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
                 
 
 
@@ -150,7 +150,16 @@ class parameter():
         if type (self.value) == float:
             self.value = round(self.value, 3)
 
-
+    def getP_act(self, chance, eMOD):
+        result = random.randrange(0,100)+(50-eMOD)
+        if result > chance: return 0
+        elif result < chance/2:
+            print('mutated-')
+            return -1
+        else:
+            print('mutated+')
+            return 1
+        
 
     def dump_parameter_stat(self, individual):
         parameter = self.name

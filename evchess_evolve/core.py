@@ -62,16 +62,7 @@ def loadmachines():
 def p100():
     return random.randrange(0,100)
 
-def getP_act(chance, eMOD):
-    result = random.randrange(0,100)+(50-eMOD)
-    if result > chance: return 0
-    elif result < chance/2:
-        print('mutated-')
-        return -1
-    else:
-        print('mutated+')
-        return 1
-        
+
 def mutatemachines(AGR, population):
 
 

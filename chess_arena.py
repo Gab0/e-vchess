@@ -15,7 +15,7 @@ import threading
 
 import sys
 
-import evchess_evolve
+from evchess_evolve import *
 
 from random import randrange
 
