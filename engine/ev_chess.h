@@ -57,11 +57,11 @@ struct board;
       struct move movelist[128];
       int k;
       
-      char attackers[64][2];
+      char attackers[64][3];
       char defenders[64][3];
       int kad;
       
-
+      int mobility[2];
       
       int castle[2][3];
 
@@ -83,6 +83,8 @@ struct param;
     float parallelcheck;
     float balanceoffense;
     float cumulative;
+    float MODbackup;
+    float MODmobility;
    };
 
 extern struct move movehistory[1024];

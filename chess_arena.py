@@ -15,7 +15,7 @@ import threading
 
 import sys
 
-from evchess_evolve import *
+from evchess_evolve.core import *
 
 from random import randrange
 
@@ -137,7 +137,7 @@ class Application():
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             #also prints running info to log.
-            if (self.ROUND % 500 == 0) and (self.ROUND != 0):
+            if (self.ROUND % 4500 == 0) and (self.ROUND != 0):
 
                 self.routine_pop_management()
                 #self.StatLock_routine_management()
@@ -205,7 +205,7 @@ class Application():
         self.log('>>>>>STATLOCK ROUTINE MANAGEMENT')
         self.log('')
 
-        setmachines(population,1)
+        setmachines(population)
         
     def routine_pop_management(self):
         population = loadmachines()
@@ -222,7 +222,7 @@ class Application():
 
         MODscorelimit = 2
 
-        while len(population) < originalPOPLEN:
+        for k in range(3):
             population = replicate_best_inds(population, 3)
         
         for k in range(2): population = mutatemachines(3, population)
@@ -233,7 +233,7 @@ class Application():
 
 
 
-        setmachines(population, 1)
+        setmachines(population)
         self.log('')
         self.log('>>>>ROUTINE MANAGEMENT')
         self.log("ROUND = %i. checkmate-> %i; draws-> %i; illegal moves-> %i"
@@ -326,7 +326,7 @@ class table(Frame):
 
             
     def newmatch(self):
-        #if self.initialize: return
+        if self.initialize: return
         
 
         
@@ -519,7 +519,7 @@ class table(Frame):
                 if self.board.is_checkmate():
                     self.sendresult(self.turn)
                     return
-                if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves(): #or self.board.can_claim_threefold_repetition() 
+                if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves() or self.board.can_claim_threefold_repetition():
                     self.sendresult(0.5)
                     return
                 

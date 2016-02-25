@@ -116,8 +116,10 @@ int loadmachine (int verbose, char *dir) {
             Brain.balanceoffense = readparam(line, V);
         if (strstr(line, "param_cumulative") != NULL)
             Brain.cumulative = readparam(line, V);          
-                
-           
+        if (strstr(line, "param_MODbackup") != NULL)
+            Brain.MODbackup = readparam(line, V);                
+        if (strstr(line, "param_MODmobility") != NULL)
+            Brain.MODmobility = readparam(line, V);                
            
 
            

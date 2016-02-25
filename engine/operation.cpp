@@ -91,8 +91,8 @@ bool is_legal(struct move *play, int P) {
 
 int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
-    
-    
+    if (board->squares[i+mod_i][j+mod_j] == pieces[1-P][5]) return 0;
+     
     //i=16 denotes a castling movement.
     if (i==16) {
         
@@ -427,24 +427,26 @@ struct board *makeparallelboard (struct board *model) {
     _board->k = 0;//model->k;
     _board->kad = 0;//model->kad;
     
-
-    for (i=0;i<64;i++) {
+    _board->mobility[0] =  model->mobility[0];
+    _board->mobility[1] =  model->mobility[1];
+    
+   /* for (i=0;i<model->kad;i++) {
         _board->attackers[i][0] = '0';
         _board->attackers[i][1] = '0';
     
         _board->defenders[i][0] = '0';
         _board->defenders[i][1] = '0';
         _board->defenders[i][2] = '0';
-    }
+    }*/
     
     
-    for (i=0;i<8;i++){
-        for (j=0;j<8;j++){
+    for (i=0;i<8;i++)
+        for (j=0;j<8;j++)
             _board->squares[i][j] = model->squares[i][j];
             
             
-        }
-    }
+        
+    
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
     

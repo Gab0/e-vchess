@@ -100,13 +100,6 @@ class Application(Frame):
                 Z = self.machines[M].TPARAMETERS[5].value
                 index = M
 
-
-
-
-
-
-
-
         self.N=index
         self.show_machine()
                 
@@ -391,14 +384,14 @@ class Application(Frame):
         for i in range(NUM):
             CHILD = create_hybrid(self.machines)            
             if CHILD: self.machines.append(CHILD)
-        self.savemac
+        self.savemac()
 
 
     def TOpopulatetemplate(self, NUM):
         for i in range(NUM):
             CHILD = clone_from_template()
             if CHILD: self.machines.append(CHILD)
-        self.savemac
+        self.savemac()
 
 
 

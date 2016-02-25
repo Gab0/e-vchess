@@ -64,9 +64,9 @@ int main(int argc, char** argv) {
     
     //randomness is the limit to the randomic small variability on the score, 
     //in centipawns.
-    Brain.randomness = 55;
+    Brain.randomness = 10;
     //seekmiddle augments the score for pieces in the center of the board.
-    Brain.seekmiddle = 23;
+    Brain.seekmiddle = 0;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
     Brain.DEEP = 2;
@@ -76,14 +76,16 @@ int main(int argc, char** argv) {
     Brain.deviationcalc = 0;
     Brain.evalmethod = 0;
     //seekatk augments the score for taken pieces.
-    Brain.seekatk = 1;
+    Brain.seekatk = 0;
     //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
     Brain.presumeOPPaggro = 1;
     //pawnrankMOD augments the score of the pawns, by the rank he occupies.
-    Brain.pawnrankMOD = 20;
-    Brain.parallelcheck = 3.5;
+    Brain.pawnrankMOD = 0;
+    Brain.parallelcheck = 0;
     Brain.balanceoffense = 0;    
     Brain.cumulative = 0;
+    Brain.MODbackup = 0;
+    Brain.MODmobility = 0;
     
     
     

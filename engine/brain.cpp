@@ -26,7 +26,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
         //show_board(board.squares);
      Vb printf("new tree branching. i=%i\n",i);
      move_pc(_board, &_board->movelist[i]);    
-     _board->movelist[i].score = thinkiterate(_board, PL, DEEP, 0,
+     _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
              Alpha, Beta);
      
      //if (_board->movelist[i].score > Alpha) Alpha
@@ -67,12 +67,13 @@ int evaluate(struct board *evalboard,int PL) {
     int j = 0;
     int L=0,Z=0,K=0;
     
-    int chaos = rand() % (int)(Brain.randomness);
+    int chaos = rand() % (int)(Brain.randomness);   
   
     int deadpiece = 0;
     int parallelatks = 0;
+    int paralleldefenders = 0;
     
-    
+    attackers_defenders(evalboard, PL);
 
     
     for (i=0;i<8;i++) for (j=0;j<8;j++) {
@@ -91,26 +92,40 @@ int evaluate(struct board *evalboard,int PL) {
         ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5))*Brain.seekmiddle;
             
 
-     
-     if (L==5) if (Brain.parallelcheck) {
-         parallelatks = ifsquare_attacked(evalboard->squares,i,j,PL,0);
-         if (parallelatks>-1) 
+}
+        
+        
+        
+     for (Z=0;Z<evalboard->kad;Z++) {
+        L= getindex(evalboard->defenders[Z][0],pieces[1-PL],6); 
+        
+        parallelatks = ifsquare_attacked
+        (evalboard->squares,evalboard->defenders[Z][1],
+                            evalboard->defenders[Z][2], 1-PL,0);
+                
+     if (L==5 && Brain.parallelcheck) {
+          if (parallelatks>1) 
             score = score + (parallelatks) * Brain.parallelcheck;}
-     
-     
-     
-     
-        }
+     else {
+        paralleldefenders = ifsquare_attacked
+        (evalboard->squares,evalboard->defenders[Z][1],
+                            evalboard->defenders[Z][2], PL,0);
         
-        
-        
-         for (Z=0;Z<evalboard->kad;Z++) score = score +
-         Brain.pvalues[getindex(evalboard->defenders[Z][0],pieces[1-PL],6)]
-                 *Brain.seekatk;
- 
-
+        score = score - paralleldefenders * Brain.MODbackup;
+         
+         
+     }       
+                
+                
+         score = score + Brain.pvalues[L]*Brain.seekatk;
+         
+         L = getindex(evalboard->attackers[Z][0],pieces[PL],6);
+         
+         
+         
+         }
     score = score+chaos;       
-    
+    score = score + evalboard->mobility[PL] * Brain.MODmobility;
     
     
     //printf("score: %i\n", score);
@@ -144,7 +159,7 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
 
 
      
-     if (_board->k == 0) {
+     if (_board->k == 0) {printf("board.k = %i\n");
          if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
                  findking(_board->squares, 'X', PL), PL, 0)) {
             score = 13000 - 50*(Brain.DEEP-DEEP); 
@@ -154,7 +169,7 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
              
          else score = 0;
 
-         free(_board);
+       free(_board);
        return score;
          
      }
@@ -175,13 +190,13 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
        //show_board(_board->squares);
        undo_move(_board, &_board->movelist[i]);
        
-       if (PL==machineplays) {
-           if (_board->movelist[i].score > Alpha) 
+       if (PL==machineplays)
+           {if (_board->movelist[i].score > Alpha) 
                Alpha = _board->movelist[i].score;
            if(Beta<=Alpha) ABcutoff=1;
-       }
-               
-       
+}
+
+
        else {
             if (_board->movelist[i].score < Beta) 
                Beta = _board->movelist[i].score;
@@ -193,17 +208,17 @@ long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
      }}
      
      else {
+     //score = evaluate(_board, PL);
      machine_score = evaluate(_board,  machineplays);
      enemy_score = evaluate(_board, 1-machineplays);
              
-     score = machine_score - enemy_score *Brain.presumeOPPaggro;
+     score = machine_score - enemy_score * Brain.presumeOPPaggro;
      
      //printf(">>>>>>%i.\n", PL);
     //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
-            //machine_score, enemy_score);
-    
-     
-     score = score;// * scoremod(DEEP, Brain.evalmethod);
+   //machine_score, enemy_score);
+
+
      free(_board);
      return score;
      }

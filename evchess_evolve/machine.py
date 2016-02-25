@@ -4,7 +4,7 @@ from evchess_evolve.std_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
 from evchess_evolve.core import Fdir
 
-class machine ():
+class machine():
 
     def __init__(self, fname):
         self.filename = fname
@@ -63,7 +63,7 @@ class machine ():
 
         if self.onTOP:
             Fo.write('TOP\n')
-            
+
         Fo.close()
 
 

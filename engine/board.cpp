@@ -78,8 +78,7 @@ void show_board (char squares[8][8]) {
 int legal_moves (struct board *board, int PL, int verbose) {
     //erase_moves(board,0);
     board->k=0;
-    board->kad = 0;
-    //board->hindex = 0;
+    board->kad =0;
 
     int EP = 1-PL;
        
@@ -215,8 +214,8 @@ if (board->squares[i][j] == pieces[PL][5]){
         }
 
          
+        board->mobility[PL] = board->k;
 
-        attackers_defenders(board, PL);    
         return 0;
         }
 
@@ -350,7 +349,7 @@ void undo_move(struct board *tg_board, struct move *movement) {
 void attackers_defenders (struct board *board, int P) {
     int i = 0;
     board->kad = 0;
-    
+    char Attacker = 0;
     
     
     for (i=0;i<board->k;i++) {
@@ -358,8 +357,11 @@ void attackers_defenders (struct board *board, int P) {
         if (board->movelist[i].casualty != 'x') {
 
         /*print_movement(k);*/
-        board->attackers[board->kad][0] = board->movelist[i].from[0];
-        board->attackers[board->kad][1] = board->movelist[i].from[1];
+        Attacker = 
+        board->squares[board->movelist[i].from[0]][board->movelist[i].from[1]];
+        board->attackers[board->kad][0] = Attacker;
+        board->attackers[board->kad][1] = board->movelist[i].from[0];
+        board->attackers[board->kad][2] = board->movelist[i].from[1];
     
         board->defenders[board->kad][0] = board->movelist[i].casualty;
         board->defenders[board->kad][1] = board->movelist[i].to[0];
