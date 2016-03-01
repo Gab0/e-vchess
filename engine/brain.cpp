@@ -5,6 +5,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     int i=0; int r=0;
     int last[2]={0,-32760};
 
+    int bI = 0;
     Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,board.k,DEEP);
     
 
@@ -29,14 +30,17 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
              Alpha, Beta);
      
-     //if (_board->movelist[i].score > Alpha) Alpha
+     if (_board->movelist[i].score > Alpha) {
+         Alpha = _board->movelist[i].score;
+         r=i;
+     }
      
      //show_board(_board->squares);
      undo_move(_board, &_board->movelist[i]); 
              
-     if (_board->movelist[i].score>last[1]) {
+    /* if (_board->movelist[i].score>last[1]) {
          last[1] = _board->movelist[i].score;
-         last[0] = i;}
+         last[0] = i;}*/
      
    
      Vb printf("analyzed i=%i; score is %i.\n",i, _board->movelist[i].score);
@@ -49,7 +53,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
     
 
-    r = last[0];
+    //r = last[0];
 
     replicate_move(out, &_board->movelist[r]);
 

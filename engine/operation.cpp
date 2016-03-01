@@ -57,8 +57,8 @@ int parse_move (struct move *target, char *s, int P) {
         
         if (target->from[1] == 4){
             if (target->from[0] == 0 || target->from[0] == 7)
-            if (target->to[1] == 6 || target->to[1] <= 2){//printf("castle? p=%i\n",board.castle[P][1]);
-                if (board.castle[P][1]) {target->iscastle=1; //printf("castle.\n");
+            if (target->to[1] == 6 || target->to[1] == 2){//printf("castle? p=%i\n",board.castle[P][1]);
+                if (board.squares[target->from[0]][target->from[1]]==pieces[P][5]) {target->iscastle=1; //printf("castle.\n");
                 
                 }}
         
@@ -108,7 +108,7 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
         board->movelist[board->k].casualty = 'x';
         
         board->movelist[board->k].iscastle = 1;
-        board->movelist[board->k].lostcastle = 1;
+        board->movelist[board->k].lostcastle = 2;
         
 
     
@@ -127,6 +127,19 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     board->movelist[board->k].iscastle = 0;
     board->movelist[board->k].lostcastle = 0;
     
+    if ((i==0 && P==1)||(i==7 && P==0)){
+        if(j==0 && board->castle[P][0]==1)
+            board->movelist[board->k].lostcastle = 1;
+        
+        if(j==4 && board->castle[P][1]==1)
+            board->movelist[board->k].lostcastle = 2;
+        
+        if(j==7 && board->castle[P][2]==1)
+            board->movelist[board->k].lostcastle = 3;
+            
+    }
+        
+        
     //printf("testing check.\n");
     //print_play_cord(move);
     

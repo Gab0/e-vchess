@@ -67,6 +67,8 @@ struct board;
 
    }; 
    
+  
+   
 struct param;
    struct param {
     int pvalues[6];
@@ -87,7 +89,8 @@ struct param;
     float MODmobility;
    };
 
-extern struct move movehistory[1024];
+extern struct move movehistory[512];
+extern char movehistoryboard[512][8][8];
 extern int hindex;   
 
 using namespace std;
@@ -155,7 +158,7 @@ void movement_generator(struct board *board, int limit, char direction, int i, i
 
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
-int parse_move (struct move *target, char *s);
+int parse_move (struct move *target, char *s, int P);
 bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
 int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P);
@@ -196,6 +199,6 @@ int loadmachine (int verbose, char *dir);
 int applyresult (int result);
 int countpieces (void);
 float readparam(char *line, int verbose);
-
+void dump_history();
 
 #endif	/* BOARD_H */

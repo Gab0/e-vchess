@@ -226,3 +226,17 @@ float readparam(char *line, int verbose) {
 
 
 }
+
+void dump_history() {
+    int i=0;
+    
+    printf("STARTING MOVE HISTORY DUMP.\b");
+    for (i=0;i<hindex;i++) {
+
+        printf("%i\n", i);
+        print_movement(&movehistory[i]);
+        show_board(movehistoryboard[i]);
+    }
+    
+    
+}

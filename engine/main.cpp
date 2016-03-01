@@ -17,7 +17,8 @@ char *infoAUX = (char *)malloc(256 * sizeof(char));
 
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
 
-struct move movehistory[1024];
+struct move movehistory[512];
+char movehistoryboard[512][8][8];
 int hindex; 
 //variable params for intelligent evolution (standards initialized);
 
@@ -69,7 +70,7 @@ int main(int argc, char** argv) {
     Brain.seekmiddle = 0;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 2;
+    Brain.DEEP = 4;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -180,6 +181,10 @@ int main(int argc, char** argv) {
         machineplays = 1; printf("playing black. (%i)", machineplays);}
     
     if (strstr(inp, "remove") != NULL) history_rollback(2);
+    
+    if (strstr(inp, "dump") != NULL) dump_history();
+    
+    
     
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);

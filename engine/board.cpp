@@ -280,19 +280,29 @@ void move_pc(struct board *tg_board, struct move *movement) {
         
         
     }
-        
+  
     int cP =-1;
 
     if(from[0]==7) cP = 0;
     if(from[0]==0) cP = 1;
     
+    
+    if (movement->lostcastle==1) tg_board->castle[cP][0]=0;
+    if (movement->lostcastle==2) tg_board->castle[cP][1]=0;
+    if (movement->lostcastle==3) tg_board->castle[cP][2]=0;
+        
+    
+    
+    /*
     if (cP > -1){
         if (tg_board->squares[to[0]][to[1]] == pieces[cP][5]) {
         if(from[1]==0 && tg_board->castle[cP][0] == 1) {tg_board->castle[cP][0] = 0; movement->lostcastle=1;}
         if(from[1]==4 && tg_board->castle[cP][1] == 1) {tg_board->castle[cP][1] = 0; movement->lostcastle=2;}
         if(from[1]==7 && tg_board->castle[cP][2] == 1) {tg_board->castle[cP][2] = 0; movement->lostcastle=3;}
         }
-        }
+        }*/
+    
+    
     
 }
 
@@ -334,9 +344,9 @@ void undo_move(struct board *tg_board, struct move *movement) {
     if(to[0]==0) cP = 1;
     
     if (cP > -1){
-        if(to[1]==0 && movement->lostcastle==1) tg_board->castle[cP][0] = 1;
-        if(to[1]==4 && movement->lostcastle==2) tg_board->castle[cP][1] = 1;
-        if(to[1]==7 && movement->lostcastle==3) tg_board->castle[cP][2] = 1;
+        if(movement->lostcastle==1) tg_board->castle[cP][0] = 1;
+        if(movement->lostcastle==2) tg_board->castle[cP][1] = 1;
+        if(movement->lostcastle==3) tg_board->castle[cP][2] = 1;
        
         }
     
@@ -377,10 +387,14 @@ void attackers_defenders (struct board *board, int P) {
 }
 
 int history_append(struct move *move) {
-    
+    int i=0,j=0;
     
     replicate_move(&movehistory[hindex], move);
-
+    
+    for (i=0;i<8;i++) 
+        for (j=0;j<8;j++) 
+            movehistoryboard[hindex][i][j] = board.squares[i][j];
+                    
         hindex++;
         return 0;
     }
