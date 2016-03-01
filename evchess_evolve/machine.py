@@ -19,9 +19,9 @@ class machine():
         parameter("stat_draws", 1, 0, 0),
         parameter("stat_loss", 1, 0, 0),
         parameter("stat_K", 1, 0, 0),
-        parameter("stat_elo", 0,0,1000)]
+        ]
         
-
+        self.ELO = 1000
         self.onTOP = 0
         
         self.stat_games = 0
@@ -63,6 +63,8 @@ class machine():
 
         if self.onTOP:
             Fo.write('TOP\n')
+
+        Fo.write(str(self.ELO))
 
         Fo.close()
 

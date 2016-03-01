@@ -44,7 +44,7 @@ class Application(Frame):
 
         self.VIEW_draws["text"] = self.machines[self.N].TPARAMETERS[2].value
 
-        self.VIEW_elo["text"] = self.machines[self.N].TPARAMETERS[5].value
+        self.VIEW_elo["text"] = self.machines[self.N].ELO
 
         self.macname["text"] = self.machines[self.N].filename
 
@@ -76,7 +76,7 @@ class Application(Frame):
 
 
     def scrollbestmachines(self, ceiling, direction):
-        if ceiling: ceiling = self.machines[self.N].TPARAMETERS[5].value
+        if ceiling: ceiling = self.machines[self.N].ELO
         else: ceiling = 66666
 
         VECTOR = True
@@ -85,19 +85,19 @@ class Application(Frame):
         
         if direction < 0:
             VECTOR = False
-            Z = self.machines[self.N].TPARAMETERS[5].value
+            Z = self.machines[self.N].ELO
             while Z < ceiling:
                 index = random.randrange(len(self.machines))
-                Z = self.machines[index].TPARAMETERS[5].value
+                Z = self.machines[index].ELO
         
         
 
         for M in range(len(self.machines)):
-            candidate = self.machines[M].TPARAMETERS[5].value
+            candidate = self.machines[M].ELO
             
             if (((candidate > Z) and (candidate < ceiling) and (VECTOR)) or
                ((candidate < Z) and (candidate > ceiling) and not (VECTOR))):
-                Z = self.machines[M].TPARAMETERS[5].value
+                Z = self.machines[M].ELO
                 index = M
 
         self.N=index
@@ -246,7 +246,8 @@ class Application(Frame):
         self.clearmenu = Menu(self.menubar)
         self.machinemenu = Menu(self.menubar)
         self.actionmenu = Menu(self.menubar)
-        
+
+        self.clearmenu.add_command(label="PURGE machines", command=self.TOpurge)
         self.clearmenu.add_command(label="Clear Scores", command=self.clearscores)
         self.clearmenu.add_command(label="Clear Attr Dump", command=self.TOcleardump)
         self.menubar.add_cascade(label="CLEAR", menu = self.clearmenu)
@@ -401,6 +402,8 @@ class Application(Frame):
     def TOrandomizemachine(self):
         self.machines[self.N].randomize()
 
+    def TOpurge(self):
+        self.machines=PurgeMachines(self.machines)
 
 
     def renew_VIEWDUMP_canvas(self, alreadyexists):

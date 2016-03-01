@@ -24,7 +24,7 @@ from psutil import *
 import gc
 
 # path to e-vchess executable and the directory where machines are stored, respectively.
-evchessP = "/home/gabs/NetBeansProjects/CppApplication_1/dist/Release/GNU-Linux/e-vchess"
+evchessP = "engine/dist/Release/GNU-Linux/e-vchess"
 machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
 
 evchessARGS = [evchessP, "-MD", machineDIR]
@@ -225,7 +225,7 @@ class Application():
         for k in range(3):
             population = replicate_best_inds(population, 3)
         
-        for k in range(2): population = mutatemachines(3, population)
+        for k in range(2): population = mutatemachines(1, population)
 
         NUM = len(population) - originalPOPLEN
         if NUM > 0:
@@ -535,30 +535,39 @@ class table(Frame):
                     self.endgame()
                     return
             else:
-                print("error! illegal move! "+ MOVE)
+                print("error! Illegal move! "+ MOVE)
+                self.log("error! Illegal move! "+ MOVE,0)
                 self.arena.setcounter_illegalmove+=1
-                self.log('illegal move. by %s.' % COLOR[self.turn], self.MACnames[self.turn] + " " + MOVE)
-                self.log(str(self.board),0)
-                self.log('engine internal board >>>>',0)
                 
-                self.MACHINE[self.turn].stdin.write(bytearray('show\n','utf-8'))
+                #self.log(str(self.board),0)
+                #self.log('engine internal board >>>>',0)
+                
+                self.MACHINE[self.turn].stdin.write(bytearray('dump\n','utf-8'))
                 self.MACHINE[self.turn].stdin.flush()
                 sleep(1)    
                 try:
-                    self.log(self.MACHINE[self.turn].stdout.read().decode('utf-8'),0)
+                    Hdump = self.MACHINE[self.turn].stdout.read().decode('utf-8')
+                    
+                    FLOG = open('log/log_illegal%i.txt' % self.arena.ROUND,'w+')
+                    FLOG.write('illegal move. by %s. %s -> %s\n' % (COLOR[self.turn], self.MACnames[self.turn], MOVE))
+                    FLOG.write('')
+                    FLOG.write(Hdump)
+                    FLOG.write(str(self.board))
+                    FLOG.close()
+                    
                 except AttributeError:
                     pass
 
                 self.endgame()
                 return
         else:#no move read this turn.
-            for line in self.movereadbuff:
-                self.log(line,'<<<<< %i' % len(self.movereadbuff))
+            #for line in self.movereadbuff:
+            #    self.log(line,'<<<<< %i' % len(self.movereadbuff))
             self.consec_failure+=1
 
             if self.consec_failure % 25 == 0:
                 try:
-                    self.log("requested FEN > ","%s" % str(self.board.fen()))
+                    #self.log("requested FEN > ","%s" % str(self.board.fen()))
                     self.MACHINE[self.turn].stdin.write(bytearray('echo\n', 'utf-8'))
                     self.MACHINE[self.turn].stdin.flush()
                     self.MACHINE[1-self.turn].stdin.write(bytearray('sorry\n', 'utf-8'))

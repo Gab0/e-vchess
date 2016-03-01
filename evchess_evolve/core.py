@@ -24,6 +24,10 @@ k=0
 population=[]
 
 
+
+
+
+
 def populate(population,popsize):
     NEWINDS = []
     for i in range(popsize):
@@ -32,7 +36,7 @@ def populate(population,popsize):
 
 
     for I in NEWINDS:
-        I.randomize()
+        #I.randomize()
         population.append(I)
 
         
@@ -41,7 +45,16 @@ def populate(population,popsize):
 def loadmachines():
         population = []
         k=0
-        for file in os.listdir(Fdir):
+
+        Fo = open(Fdir+'/machines.list','r')
+        mLIST = Fo.readlines()
+        Fo.close()
+
+        for file in mLIST:
+            if file[-1] == '\n': file = file[:-1]
+
+           
+
         
             if file.endswith(".mac"):
                 Fo = open(Fdir+'/'+file, "r+")
@@ -57,6 +70,7 @@ def loadmachines():
 
 
                 k+=1
+                
 
         return population
 def p100():
@@ -183,7 +197,7 @@ def deltheworst_clonethebest(population, action, MODlimit):
         if population[k].PARAMETERS[0].value == 0:
             POP_SCORETABLE.append(-1)
             continue
-        SCORE = population[k].TPARAMETERS[5].value  #population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
+        SCORE = population[k].ELO  #population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
 
             
         POP_SCORETABLE.append(SCORE)
@@ -201,11 +215,11 @@ def deltheworst_clonethebest(population, action, MODlimit):
             for D in range(action):
                 CURRENT_SCORE = [0,66666]
                 for k in range(len(population)):
-                    if (population[k].TPARAMETERS[5].value > -1):
-                        if (population[k].TPARAMETERS[5].value < MEDIUMSCORE*MODlimit):
-                            if population[k].TPARAMETERS[5].value < CURRENT_SCORE[1]:
+                    if (population[k].ELO > -1):
+                        if (population[k].ELO < MEDIUMSCORE*MODlimit):
+                            if population[k].ELO < CURRENT_SCORE[1]:
                                 CURRENT_SCORE[0] = k
-                                CURRENT_SCORE[1] = population[k].TPARAMETERS[5].value
+                                CURRENT_SCORE[1] = population[k].ELO
 
                                 
 
@@ -235,9 +249,9 @@ def deltheworst_clonethebest(population, action, MODlimit):
 
 def create_hybrid(population):
     K = random.randrange(len(population))
-    K_ = range(population[K].TPARAMETERS[5].value-20,  population[K].TPARAMETERS[5].value+20) 
+    K_ = range(population[K].ELO-20,  population[K].ELO+20) 
     for I in range(len(population)):
-        if population[I].TPARAMETERS[5].value in K_:
+        if population[I].ELO in K_:
             if random.randrange(100) < 60:
                 CHILD = (machine(NewMacName()))
 
@@ -262,7 +276,7 @@ def select_best_inds(population, NUMBER):
     for i in range(NUMBER):
         SCORE = 0
         for individual in population:
-            SCR = individual.TPARAMETERS[5].value
+            SCR = individual.ELO
             if (SCR > SCORE) and (SCR < LASTSCORE):
                 TOP[i]=individual
                 SCORE = SCR
@@ -427,4 +441,18 @@ def PrepareCyclingStatLock(population):
         for CP in CYCLE_PARAMETERS:
             IND.PARAMETERS[CP[0]].lock(float(CP[1]))
             
+    return population
+
+
+def PurgeMachines(population):
+    print('Purging machines. is this OK? (type OK')
+    RLY = input()
+    if not 'OK' in RLY: return population
+    for file in os.listdir(Fdir):
+
+        if file.endswith(".mac"): os.remove("%s/%s" % (Fdir,file))
+    os.remove(Fdir+'/machines.list')
+
+    population = populate([],1)
+    setmachines(population)
     return population
