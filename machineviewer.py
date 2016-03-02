@@ -248,6 +248,7 @@ class Application(Frame):
         self.actionmenu = Menu(self.menubar)
 
         self.clearmenu.add_command(label="PURGE machines", command=self.TOpurge)
+        self.clearmenu.add_command(label="RELEASE orphans", command=ReleaseOrphan)
         self.clearmenu.add_command(label="Clear Scores", command=self.clearscores)
         self.clearmenu.add_command(label="Clear Attr Dump", command=self.TOcleardump)
         self.menubar.add_cascade(label="CLEAR", menu = self.clearmenu)

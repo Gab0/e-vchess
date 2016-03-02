@@ -456,3 +456,21 @@ def PurgeMachines(population):
     population = populate([],1)
     setmachines(population)
     return population
+
+def ReleaseOrphan():
+    Fo = open("%s/machines.list" % Fdir, 'r')
+    mLIST = Fo.readlines()
+    Fo.close
+
+    
+    for file in os.listdir(Fdir):
+        if file.endswith('.mac'):
+            FOUND = 0
+            for guest in mLIST:
+                if file in guest: FOUND = 1
+            if not FOUND:
+                os.remove("%s/%s" % (Fdir, file))
+                print('Deleted orphan: %s.' % file)
+
+
+            

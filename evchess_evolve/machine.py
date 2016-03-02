@@ -54,7 +54,9 @@ class machine():
 
         if 'TOP' in split_line:
             self.onTOP = 1
-            
+
+        if 'stat_elo' in split_line:
+            self.ELO = int(split_line[2])
     def write(self):
         Fo = open(Fdir+'/'+self.filename, "w+")
         for parameter in self.PARAMETERS+self.TPARAMETERS:
@@ -64,7 +66,7 @@ class machine():
         if self.onTOP:
             Fo.write('TOP\n')
 
-        Fo.write(str(self.ELO))
+        Fo.write('stat_elo = %i\n' %self.ELO)
 
         Fo.close()
 
