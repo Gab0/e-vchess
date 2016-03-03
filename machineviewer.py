@@ -325,10 +325,8 @@ class Application(Frame):
     def clearscores(self):
         if self.W == 1:
             for individual in self.machines:
-                for param in individual.TPARAMETERS:
-                    param.value = 0
-                    if param.name == "stat_elo":
-                        param.value = 1000
+                individual.ELO = 1000
+                
                 individual.stat_draws=0
                 individual.stat_wins=0
                 individual.stat_games=0

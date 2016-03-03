@@ -130,7 +130,7 @@ extern char *machinepath;
 
 extern bool againstHUMAN;
 extern bool toloadmachine;
-
+extern bool loadDEEP;
 
 extern bool allow_castling;
 /*functions from main.cpp*/

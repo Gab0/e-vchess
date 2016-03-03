@@ -38,6 +38,7 @@ bool show_info = false;
 
 bool againstHUMAN = false;
 bool toloadmachine = false;
+bool loadDEEP = true;
 
 bool allow_castling = true;
 
@@ -70,7 +71,7 @@ int main(int argc, char** argv) {
     Brain.seekmiddle = 0;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 4;
+    Brain.DEEP = 2;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -99,7 +100,8 @@ int main(int argc, char** argv) {
     char *inp;
 
     if (argc > 1) 
-        for (i=0;i<argc;i++) {
+     for (i=0;i<argc;i++) {
+        
             
         if (strstr(argv[i], "-TOP") != NULL) {
             selectTOPmachines = true; printf("ack.\n");}    
@@ -110,8 +112,12 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "--showinfo") != NULL) show_info = true;
         
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
-  
+        
+        if (strstr(argv[i], "--deep") != NULL) {
+            Brain.DEEP = (float)atof(argv[i+1]);
+            loadDEEP = false;
         }
+     }  
     
         
     

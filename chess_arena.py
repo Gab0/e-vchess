@@ -27,7 +27,7 @@ import gc
 evchessP = "engine/dist/Release/GNU-Linux/e-vchess"
 machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
 
-evchessARGS = [evchessP, "-MD", machineDIR]
+evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "2"]
 
 
 GUI = 1
@@ -342,11 +342,12 @@ class table(Frame):
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
 
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
-        except:# OSError:
-            self.arena.shrinkloop()
+        except:
+            #self.arena.shrinkloop()
             for M in self.MACHINE:
                 M.kill()
             self.initialize=0
+            self.endgame()
             return -1
 
         sleep(4)
@@ -357,13 +358,15 @@ class table(Frame):
             flags = fcntl(self.MACHINE[0].stdout, F_GETFL) # get current p.stdout flags
             fcntl(self.MACHINE[0].stdout, F_SETFL, flags | O_NONBLOCK)
             fcntl(self.MACHINE[1].stdout, F_SETFL, flags | O_NONBLOCK)#fcntl(self.Bmachine.stdout, F_SETFL, flags | O_NONBLOCK) >>>>>?
+
+            self.board.reset()
         except:
             self.initialize=0
             self.log('Uknown startup error.','')
             self.endgame()
 
         
-        self.board.reset()
+        
         
         if GUI: self.Maximize["background"] = "brown"
         #self.Pout(self.Wmachine.stdout.readlines())
@@ -519,9 +522,27 @@ class table(Frame):
                 if self.board.is_checkmate():
                     self.sendresult(self.turn)
                     return
-                if self.board.is_stalemate() or self.board.is_insufficient_material() or self.board.can_claim_fifty_moves() or self.board.can_claim_threefold_repetition():
+                if self.board.is_stalemate() or self.board.is_insufficient_material():
                     self.sendresult(0.5)
                     return
+
+                if self.board.can_claim_fifty_moves() or self.board.can_claim_threefold_repetition():
+
+                    Wp = 0
+                    Bp = 0
+                    Wpc = ['P','R','N','B','Q']
+                    Bpc = ['p','r','n','b','q']
+                    
+                    for z in str(self.board):
+                        if z in Wpc: Wp+=1
+                        if z in Bpc: Bp+=1
+                    if Wp > 1.5 * Bp:
+                        self.sendresult(0)
+                    elif Bp > 1.5 * Wp:
+                        self.sendresult(1)
+                    else:
+                        self.sendresult(0.5)
+                    return    
                 
                 self.turn = 1-self.turn
                 self.MACHINE[self.turn].stdin.write(bytearray(MOVE+'\n','utf-8'))
