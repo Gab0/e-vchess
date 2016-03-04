@@ -1,0 +1,30 @@
+param_DEEP = 4
+
+eval_randomness = 33
+
+param_evalmethod = 0
+
+param_seekatk = 0
+
+param_seekmiddle = 0
+
+param_presumeOPPaggro = 1
+
+param_pawnrankMOD = 0
+
+param_parallelcheck = 0
+
+param_balanceoffense = 1
+
+stat_games = 0 0
+
+stat_wins = 0 0
+
+stat_draws = 0 0
+
+stat_loss = 0 0
+
+stat_K = 0 0
+
+stat_elo = 1000
+
