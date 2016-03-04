@@ -91,6 +91,7 @@ class Application():
         self.setcounter_illegalmove=0
         self.setcounter_draws=0
         self.setcounter_checkmate=0
+        self.setcounter_forcedwin=0
         self.setcounter_inactivity=0
 
 
@@ -109,7 +110,7 @@ class Application():
         self.CYCLE.start()
         
     def gocycle(self):
-        SLEEPTIME = 1.3
+        SLEEPTIME = 1
         if SLEEPTIME < 1: SLEEPTIME = 1.3
         self.ROUND=0
         self.Cycle = True
@@ -131,16 +132,21 @@ class Application():
             if TABLERESPONSE < 0.42: SLEEPTIME += 0.1
             if (TABLERESPONSE > 0.81) and (SLEEPTIME > 0.5): SLEEPTIME -= 0.1
             SLEEPTIME = round(SLEEPTIME,1)
-
+            
+            #update window name to reflect current values.
             if self.ROUND % 3 == 0:                
                 self.root.wm_title(self.Title + "  T=%s|R=%s|I=%i" % (round(SLEEPTIME,1),self.ROUND,self.setcounter_inactivity))
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             #also prints running info to log.
-            if (self.ROUND % 4500 == 0) and (self.ROUND != 0):
+            if self.ROUND != 0:
+                LEVEL = ""
+                
+                if not self.ROUND %  375: LEVEL += "A"
+                if not self.ROUND % 1250: LEVEL += "B"
+                if not self.ROUND % 2500: LEVEL += "C" 
 
-                self.routine_pop_management()
-                #self.StatLock_routine_management()
+                if len(LEVEL): self.routine_pop_management(LEVEL)
             
             self.move_read_reliability = 0
             print("ROUND %i  T=%i  S=%f  APR=%i%% >>>>>>>>" % (self.ROUND,round(TIME), SLEEPTIME, TABLERESPONSE*100))
@@ -157,10 +163,9 @@ class Application():
                             TABLEBOARD[t].newmatch_thread()
                             if virtual_memory()[2] > 97: self.memorylimit=1
             if self.ROUND == 0:
-                sleep(6)
+                sleep(7)
             self.ROUND+=1
 
-            #if self.ROUND % 16 == 0: gc.collect() #free memory used by executed newmatch threads.
             if self.ROUND > 100000: i=0
             sleep(SLEEPTIME)
         return
@@ -207,7 +212,7 @@ class Application():
 
         setmachines(population)
         
-    def routine_pop_management(self):
+    def routine_pop_management(self, LEVEL):
         population = loadmachines()
 
         originalPOPLEN = len(population)
@@ -218,30 +223,41 @@ class Application():
         #    CHILD = create_hybrid(population)
         #    if CHILD: population.append(CHILD)
 
-        population = populate(population, round(originalPOPLEN/8))
 
-        MODscorelimit = 2
+        if "A" in LEVEL:
+            for k in range(2): population = mutatemachines(1,population)
 
-        for k in range(3):
-            population = replicate_best_inds(population, 3)
-        
-        for k in range(2): population = mutatemachines(1, population)
+        if "B" in LEVEL:
+            for k in range(4): population = mutatemachines(1,population)
+       
+        if "C" in LEVEL:
+            population = populate(population, round(originalPOPLEN/8))
 
-        NUM = len(population) - originalPOPLEN
-        if NUM > 0:
-            population = deltheworst_clonethebest(population, -NUM, MODscorelimit)
+            MODscorelimit = 2
 
+            for k in range(3):
+                population = replicate_best_inds(population, 3)
+            
+            for k in range(2): population = mutatemachines(1, population)
 
+            NUM = len(population) - originalPOPLEN
+            if NUM > 0:
+                population = deltheworst_clonethebest(population, -NUM, MODscorelimit)
+
+        totalgames = (self.setcounter_illegalmove
+                     +self.setcounter_forcedwin
+                     +self.setcounter_checkmate
+                     +self.setcounter_draws+1)   
 
         setmachines(population)
         self.log('')
-        self.log('>>>>ROUTINE MANAGEMENT')
-        self.log("ROUND = %i. checkmate-> %i; draws-> %i; illegal moves-> %i"
-                 % (self.ROUND, self.setcounter_checkmate, self.setcounter_draws, self.setcounter_illegalmove))
+        self.log('>>>>ROUTINE MANAGEMENT %s' % LEVEL)
+        self.log("ROUND = %i. checkmate-> %i; forced wins-> %i; draws-> %i; illegal moves-> %i"
+                 % (self.ROUND, self.setcounter_checkmate, self.setcounter_forcedwin, self.setcounter_draws, self.setcounter_illegalmove))
         self.log("initial population size-> %i; final population size-> %i"
                  % (originalPOPLEN,len(population)))
         self.log('Illegal move percentage is %f %%.'
-                 % (self.setcounter_illegalmove*100/(self.setcounter_illegalmove+self.setcounter_checkmate+self.setcounter_draws+1)))
+                 % (self.setcounter_illegalmove*100/totalgames))
         self.log('')
         print('routine management done.')
 
@@ -284,7 +300,7 @@ class table(Frame):
 
         self.arena = arena
 
-
+        self.MACHINE = []
         
         self.consec_failure=0
   
@@ -309,7 +325,8 @@ class table(Frame):
             self.startThread.join(0)
             self.startThread = None
             
-        elif not (self.startThread) and (self.initialize == 1): self.initialize = 0
+        elif not (self.startThread) and (self.initialize):
+            self.initialize = 0
         
 
         elif (self.startThread) and (self.initialize == 0):
@@ -318,7 +335,7 @@ class table(Frame):
             
         else:
             try:
-                if not (self.startThread) and (self.online==0):
+                if not (self.startThread) and not (self.online):
                     self.startThread = threading.Thread(target=self.newmatch)
                     self.startThread.start()
             except RuntimeError:
@@ -329,6 +346,7 @@ class table(Frame):
         if self.initialize: return
         
 
+        while len(self.MACHINE)>0: self.MACHINE[0].join(0)
         
         self.MACHINE = []
         self.MACcontent = []
@@ -343,15 +361,15 @@ class table(Frame):
 
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
         except:
-            #self.arena.shrinkloop()
+            self.log('exception', '#1')
             for M in self.MACHINE:
                 M.kill()
             self.initialize=0
             self.endgame()
-            return -1
+            return
 
         sleep(4)
-
+        if GUI: self.Maximize["background"] = "gold"
         try:
             self.MACnames = ['zero','zero']
         
@@ -361,10 +379,11 @@ class table(Frame):
 
             self.board.reset()
         except:
+            self.log('exception', '#2')
             self.initialize=0
             self.log('Uknown startup error.','')
             self.endgame()
-
+            return
         
         
         
@@ -395,8 +414,12 @@ class table(Frame):
             self.MACHINE[1].stdin.flush()
             
             self.MACHINE[0].stdin.write(bytearray('new\n','utf-8'))
+            self.MACHINE[0].stdin.flush()
+            sleep(0.3)
             self.MACHINE[0].stdin.write(bytearray('white\n','utf-8'))
-            #self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
+            self.MACHINE[0].stdin.flush()
+            sleep(0.3)
+            self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
             self.MACHINE[0].stdin.flush()
             
 
@@ -537,9 +560,9 @@ class table(Frame):
                         if z in Wpc: Wp+=1
                         if z in Bpc: Bp+=1
                     if Wp > 1.5 * Bp:
-                        self.sendresult(0)
+                        self.sendresult(0.2)
                     elif Bp > 1.5 * Wp:
-                        self.sendresult(1)
+                        self.sendresult(0.8)
                     else:
                         self.sendresult(0.5)
                     return    
@@ -634,23 +657,30 @@ class table(Frame):
     def sendresult(self, result):
         print("game ends @ " + str(self.number))
 
+        if result == 0.5:
+            self.arena.setcounter_draws+=1
+        else:
+            if round(result) == result:
+                self.arena.setcounter_checkmate+=1
+            else:
+                self.arena.setcounter_forcedwin+=1
+                result = round(result)
+            
+        
         self.sendELO(result)
         
-        if result==1:
+        if result > 0.5:
             result = '0-1'
-            self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. black wins')
             #self.log('checkmate', self.MACnames[1])
             
-        if result ==0:
+        elif result < 0.5:
             result = '1-0'
-            self.arena.setcounter_checkmate+=1
             if GUI: self.visor.insert('10.1', 'checkmate. white wins')
             #self.log('checkmate', self.MACnames[0])
             
-        if result == 0.5:
+        elif result == 0.5:
             result = '1/2-1/2'
-            self.arena.setcounter_draws+=1
             if GUI: self.visor.insert('10.1', 'draw.')
             #self.log('draw', '1/2')
             
@@ -769,6 +799,9 @@ class table(Frame):
 
 
     def sendELO(self, winner):
+
+        
+
         
         ELO = []
         index = []
@@ -794,15 +827,16 @@ class table(Frame):
             ELO[1-winner] -= DIF
 
             
+            try:
+                for C in range(len(self.MACcontent)):
+                    self.MACcontent[C][index[C]] = "stat_elo = %i\n"  % ELO[C]
+                    F = open('machines/%s' % self.MACnames[C], 'w')
+                    for line in self.MACcontent[C]:
+                        F.write(line)
+                    F.close()
 
-            for C in range(len(self.MACcontent)):
-                self.MACcontent[C][index[C]] = "stat_elo = %i\n"  % ELO[C]
-                F = open('machines/%s' % self.MACnames[C], 'w')
-                for line in self.MACcontent[C]:
-                    F.write(line)
-                F.close()
-
-
+            except:
+                self.log('sending ELO failed.', '')
 
             
 

@@ -11,13 +11,13 @@ def STDPARAMETERS():
 
         #parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2),
 
-        parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
+        #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 30, 0, bLIM=-0.25, INCR=0.25, LIM=2),
+        parameter("param_seekatk", 0, 80, 0, bLIM=-0.25, INCR=0.25, LIM=2),
 
         parameter("param_seekmiddle", 0, 30, 3, LIM = 5),
 
-        parameter("param_presumeOPPaggro", 0, 30, 1, LIM=1.1, bLIM=1, INCR=0.1),
+        parameter("param_presumeOPPaggro", 0, 50, 1, LIM=1.1, bLIM=1, INCR=0.1),
 
         parameter("param_pawnrankMOD", 0, 30, 0, LIM=37),
 

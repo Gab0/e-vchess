@@ -162,8 +162,6 @@ int main(int argc, char** argv) {
    
     if (strstr(inp, "quit") != NULL) return 0;
     
-    if (strstr(inp, "go") != NULL) computer(1);
-    
     if (strstr(inp, "position") !=NULL) {
         if (strstr(inp, "startpos" ) != NULL) setup_board(1);
         else {
@@ -176,21 +174,21 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "quit") !=NULL) return 0;
     
-    if (strstr(inp, "new") != NULL) {machineplays = 1; setup_board(1);} 
+    if (strstr(inp, "new") != NULL) setup_board(1);
     
     if (strstr(inp, "test") != NULL) fehn2board(testfehn);
     
-    if (strstr(inp, "black") == NULL && strstr(inp, "white") != NULL) {
-        machineplays = 0; computer(0); printf("playing white.");}
+    if (/*strstr(inp, "black") != NULL*/strstr(inp, "white") != NULL) 
+        machineplays = 0;
     
-    if (strstr(inp, "white") == NULL && strstr(inp, "black") != NULL) {
-        machineplays = 1; printf("playing black. (%i)", machineplays);}
+    if (strstr(inp, "white") == NULL && strstr(inp, "black") != NULL)
+        machineplays = 1; 
     
     if (strstr(inp, "remove") != NULL) history_rollback(2);
     
     if (strstr(inp, "dump") != NULL) dump_history();
     
-    
+    if (strstr(inp, "go") != NULL) computer(machineplays);
     
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);

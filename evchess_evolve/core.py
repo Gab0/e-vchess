@@ -4,35 +4,17 @@ import os
 import random
 import xml.etree.ElementTree as ET
 
-
-
+#machine directory.
 Fdir = "/home/gabs/Desktop/e-vchess/machines"
 
-
-
-
 from evchess_evolve.machine import machine
-
-
-#machine directory.
-
-
-
-
-            
-k=0
-population=[]
-
-
-
-
 
 
 def populate(population,popsize):
     NEWINDS = []
     for i in range(popsize):
         NEWINDS.append(machine(str(random.randrange(0,6489))+".mac")) 
-        
+    
 
 
     for I in NEWINDS:
@@ -53,9 +35,6 @@ def loadmachines():
         for file in mLIST:
             if file[-1] == '\n': file = file[:-1]
 
-           
-
-        
             if file.endswith(".mac"):
                 Fo = open(Fdir+'/'+file, "r+")
                 population.append(machine(file))
@@ -81,7 +60,7 @@ def mutatemachines(AGR, population):
 
 
     for i in range(len(population)):
-            eMOD = 50-population[i].TPARAMETERS[1].value + population[i].TPARAMETERS[2].value/2 /(population[i].TPARAMETERS[0].value+1)
+            eMOD = 50-population[i].ELO/25
 
             population[i].mutate(eMOD, AGR)
                 

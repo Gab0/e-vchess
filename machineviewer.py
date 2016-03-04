@@ -77,7 +77,9 @@ class Application(Frame):
 
     def scrollbestmachines(self, ceiling, direction):
         if ceiling: ceiling = self.machines[self.N].ELO
-        else: ceiling = 66666
+        else:
+            if direction >= 0: ceiling = +66666
+            else: ceiling = -66666
 
         VECTOR = True
         Z = 0
@@ -85,23 +87,24 @@ class Application(Frame):
         
         if direction < 0:
             VECTOR = False
-            Z = self.machines[self.N].ELO
-            while Z < ceiling:
-                index = random.randrange(len(self.machines))
-                Z = self.machines[index].ELO
+            Z = 6666
+
         
-        
+        if not direction: Valid=1
+        else: Valid=0
 
         for M in range(len(self.machines)):
             candidate = self.machines[M].ELO
             
-            if (((candidate > Z) and (candidate < ceiling) and (VECTOR)) or
-               ((candidate < Z) and (candidate > ceiling) and not (VECTOR))):
+            if (((candidate > Z) and (candidate < ceiling) and VECTOR) or
+               ((candidate < Z) and (candidate > ceiling) and not VECTOR)):
                 Z = self.machines[M].ELO
                 index = M
-
-        self.N=index
-        self.show_machine()
+                Valid=1
+                
+        if Valid:        
+            self.N=index
+            self.show_machine()
                 
 
     def savemac(self):

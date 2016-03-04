@@ -43,11 +43,6 @@ void setup_board (int setup) {
 	
         for(i=0;i<3;i++) {board.castle[0][i]=1; board.castle[1][i]=1;}
         
-	/*board->ep_file = 0;
-	
-	board->white_oo = board->white_ooo = 1;
-	board->black_oo = board->black_ooo = 1;
-    */
    }
     
    else {
@@ -196,17 +191,8 @@ if (board->squares[i][j] == pieces[PL][5]){
         if (cancastle(board, PL,-1)) append_move(board, 16, 2, 0, 0, PL);
         
         if (cancastle(board, PL, 1)) append_move(board, 16, 6, 0, 0, PL);
-                
        
     }
-    
-    
-
-    
-    
-      
-    
-    
 
         }
          
@@ -229,10 +215,6 @@ int mpc(char squares[8][8], int i, int j, int player) {
     
     if (is_in(squares[i][j],pieces[enemy],6))
     {/*printf("mpc granted %i%i\n", i,j); */return 1;}
-    
-    
-    
-    
     
     else return 0;
    
@@ -563,13 +545,6 @@ void movement_generator(struct board *board, int limit,
            else q=0;
            } 
       }
-       
-    
-    
-    
-    
- 
-    
     
     
 }
