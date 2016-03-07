@@ -164,10 +164,8 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "position") !=NULL) {
         if (strstr(inp, "startpos" ) != NULL) setup_board(1);
-        else {
-
-            fehn2board(inp);
-        }}
+        else fehn2board(inp);
+        }
     //if (strstr(inp, "moves") !=NULL) read_movelines(inp);
     
     if (strstr(inp, "show") !=NULL) show_board(board.squares);

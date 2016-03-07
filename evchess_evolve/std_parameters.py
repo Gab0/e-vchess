@@ -13,7 +13,7 @@ def STDPARAMETERS():
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 80, 0, bLIM=-0.25, INCR=0.25, LIM=2),
+        parameter("param_seekatk", 0, 80, 0.4, bLIM=-0.2, INCR=0.2, LIM=0.8),
 
         parameter("param_seekmiddle", 0, 30, 3, LIM = 5),
 

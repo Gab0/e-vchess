@@ -221,7 +221,7 @@ class Application(Frame):
 
 
         self.macname = Button(self)
-        self.macname["text"] = self.machines[self.N].filename
+        #self.macname["text"] = self.machines[self.N].filename
         self.macname["width"] = 9
         self.macname["height"] = 2
         self.macname["command"] = self.savemactext
@@ -276,6 +276,7 @@ class Application(Frame):
         self.popmenu.add_command(label="send best to TOP", command = self.TOautotop)
         self.popmenu.add_separator()
         self.popmenu.add_command(label="ABORT bad machines", command = self.abort_machines)
+        self.popmenu.add_command(label="LOAD files directly", command = lambda: self.TOloadmacfolder(64))
         
    
         self.menubar.add_cascade(label="POPULATION", menu = self.popmenu)
@@ -295,9 +296,13 @@ class Application(Frame):
 
         self.paramVIEWER = []
         self.paramNAMES = []
-        for i in range(len(self.machines[0].PARAMETERS)):
+
+        S = machine('sample')
+
+        
+        for i in range(len(S.PARAMETERS)):
             self.paramVIEWER.append([Label(self), Button(self)])
-            self.paramNAMES.append(self.machines[self.N].PARAMETERS[i].name)
+            self.paramNAMES.append(S.PARAMETERS[i].name)
             
             self.paramVIEWER[i][0]["text"] = self.paramNAMES[i]
             self.paramVIEWER[i][1]['command'] = self.show_attr_dump(self.paramNAMES[i])
@@ -342,7 +347,9 @@ class Application(Frame):
                 individual.dumped_loss=0
                 individual.dumped_draws=0
                 individual.dumped_K=0
-
+                
+    def TOloadmacfolder(self, NUMBER):
+        self.machines = recover_popfromfolder(NUMBER)
                 
     def TOdeltheworst(self, NUMBER):
         self.machines = deltheworst_clonethebest(self.machines, -NUMBER, 1)
@@ -467,10 +474,13 @@ class Application(Frame):
         setmachines(self.machines)
         self.createWidgets()
         self.create_param_viewer()
-        self.show_machine()
+        if len(self.machines):
+            self.show_machine()
+            self.savemac()
+
         self.W=1
         
-        self.savemac()
+        
 
 
         

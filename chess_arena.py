@@ -25,7 +25,7 @@ import gc
 
 # path to e-vchess executable and the directory where machines are stored, respectively.
 evchessP = "engine/dist/Release/GNU-Linux/e-vchess"
-machineDIR =  "/home/gabs/Desktop/e-vchess/machines"
+machineDIR =  "machines"
 
 evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "2"]
 
@@ -346,7 +346,7 @@ class table(Frame):
         if self.initialize: return
         
 
-        while len(self.MACHINE)>0: self.MACHINE[0].join(0)
+        while len(self.MACHINE)>0: self.MACHINE[0].kill()
         
         self.MACHINE = []
         self.MACcontent = []
@@ -800,9 +800,6 @@ class table(Frame):
 
     def sendELO(self, winner):
 
-        
-
-        
         ELO = []
         index = []
         for C in range(len(self.MACcontent)):

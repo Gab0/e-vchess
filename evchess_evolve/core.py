@@ -3,9 +3,11 @@
 import os
 import random
 import xml.etree.ElementTree as ET
+import copy
 
 #machine directory.
 Fdir = "/home/gabs/Desktop/e-vchess/machines"
+machine_dir = "/home/gabs/Desktop/e-vchess/machines"
 
 from evchess_evolve.machine import machine
 
@@ -28,7 +30,9 @@ def loadmachines():
         population = []
         k=0
 
-        Fo = open(Fdir+'/machines.list','r')
+        machinelist = "%s/machines.list" % machine_dir
+        if not os.path.isfile(machinelist): return population
+        Fo = open(machinelist,'r')
         mLIST = Fo.readlines()
         Fo.close()
 
@@ -36,7 +40,7 @@ def loadmachines():
             if file[-1] == '\n': file = file[:-1]
 
             if file.endswith(".mac"):
-                Fo = open(Fdir+'/'+file, "r+")
+                Fo = open(machine_dir+'/'+file, "r+")
                 population.append(machine(file))
                 
                 for line in Fo.readlines():
@@ -45,13 +49,51 @@ def loadmachines():
                     if len(L) == 3:
                         L.append(0)
 
-                    population[k].read(L)
+                    population[-1].read(L)
 
 
-                k+=1
+                
                 
 
         return population
+
+
+def recover_popfromfolder(N):#Linux only.
+    entirety = []
+    k=0
+    X=0
+    for file in os.listdir(machine_dir):
+        if file.endswith(".mac"):
+            X+=1
+            Fo = open(machine_dir+'/'+file, "r+")
+            entirety.append(machine(file))
+            
+            for line in Fo.readlines():
+                if line == "\n": continue
+                L = line.split()
+                if len(L) == 3:
+                    L.append(0)
+
+                entirety[k].read(L)
+
+
+            k+=1
+    population = []
+    
+    if N>X: N=X
+    for W in range(N):
+        Best=[0,0]
+        for M in range(len(entirety)):
+            if entirety[M].ELO > Best[1]:
+                Best[1] = entirety[M].ELO
+                Best[0] = M
+
+        population.append(copy.deepcopy(entirety[Best[0]]))
+        entirety[Best[0]].ELO = 0
+
+    return population
+        
+        
 def p100():
     return random.randrange(0,100)
 

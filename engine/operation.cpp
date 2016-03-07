@@ -359,12 +359,14 @@ int fehn2board (char str[]) {
     int number=0;
     int PL=0;
     fstring = strtok(str, " ");
-    strtok(NULL, " ");
+    
 
-    
-    
-    for (z=0;z<=64;z++) {
-        
+    fstring = strtok(NULL, " ");
+
+    //read boardmap section.
+    setup_board(0);
+    printf("%s /%i\n",fstring, strlen(fstring));
+    for (z=0;z<strlen(fstring);z++) {
     
      number = fstring[z]-'0';
         if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6)) {
@@ -375,16 +377,37 @@ int fehn2board (char str[]) {
             i++;
             j=0;        
         }
-        if (0<number && number<9) {
-            for (n=0;n<(fstring[z]-'0');n++) {
-                board.squares[i][j] = 'x';
-                j++;
-                           }
-        }
-        if (i==7 && j==7) {
-          if (fstring[z] == 'b') PL=1;  
-        }
+        if (0<number && number<9) j=j+number;
+
 }
+    
+    fstring = strtok(NULL, " ");
+    //read active player section.
+    
+    //if (fstring == 'b')
+    
+    fstring = strtok(NULL, " ");
+    //read castling righst section.
+    for (i=0;i<2;i++) for (j=0;j<3;j++) {
+        board.castle[i][j]=0;
+        board.castle[i][1]=1;
+    }
+    
+    
+    for (z=0;z<strlen(fstring);z++) {
+        if (fstring[z] == 'Q') board.castle[0][0]=1;
+        if (fstring[z] == 'K') board.castle[0][1]=1;
+        if (fstring[z] == 'q') board.castle[1][0]=1;
+        if (fstring[z] == 'k') board.castle[1][1]=1;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     return PL;
 }
 
