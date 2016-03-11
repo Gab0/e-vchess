@@ -140,6 +140,11 @@ int loadmachine (int verbose, char *dir) {
        printf("machinepath>> %s\n", machinepath);
        
        loadedmachine = true;
+       
+       if (againstHUMAN) {
+           log(dir,machinepath);
+       }
+       
        return 0;
     
     
@@ -155,7 +160,7 @@ int applyresult (int result) {
     if (!againstHUMAN) {
     if (result==1) fprintf(file, "\nW\n");
     else if (result==-1) fprintf(file,"\nL\n");
-    else if (result==5) fprintf(file, "\nx\n");
+    else if (result==0) fprintf(file, "\nx\n");
     else fprintf(file, "\nD\n");
  
     
@@ -166,7 +171,7 @@ int applyresult (int result) {
     else {
     if (result==1) fprintf(file, "\nHW\n");
     else if (result==-1) fprintf(file,"\nHL\n");
-    else if (result==5) fprintf(file, "\nHx\n");
+    else if (result==0) fprintf(file, "\nHx\n");
     else fprintf(file, "\nHD\n"); 
         
         
@@ -235,9 +240,20 @@ void dump_history() {
     for (i=0;i<hindex;i++) {
 
         printf("%i\n", i);
-        print_movement(&movehistory[i]);
+        print_movement(&movehistory[i],0);
         show_board(movehistoryboard[i]);
     }
     
     
+}
+
+void log(char *location, const char content[]) {
+    printf("saving log. %s\n", content);
+    
+    sprintf(location, "%s/engine_log", location);
+    FILE *logfile = fopen(location, "a");
+    fprintf(logfile, ">> %s\n", content);
+    fclose(logfile);
+            
+            
 }

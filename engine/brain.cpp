@@ -15,8 +15,9 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     long Alpha = -1690000;
     long Beta = 1690000;
     
-    
+        
     legal_moves(_board, PL, 0); 
+    
     if (_board->k == 0) return -1;
     Vb printf("value of k is %i.\n",_board->k);
     
@@ -37,14 +38,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      
      //show_board(_board->squares);
      undo_move(_board, &_board->movelist[i]); 
-             
-    /* if (_board->movelist[i].score>last[1]) {
-         last[1] = _board->movelist[i].score;
-         last[0] = i;}*/
+
      
-   
-     Vb printf("analyzed i=%i; score is %i.\n",i, _board->movelist[i].score);
-     if (show_info) printf(">>>>>>>>\n");
+     Vb printf("analyzed i=%i; score is %li.\n",i, _board->movelist[i].score);
+     Vb if (show_info) printf(">>>>>>>>\n");
      if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);              
              
              
@@ -62,7 +59,128 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
    
    return r;
+   free(_board);
 }
+
+long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
+        long Alpha, long Beta) {
+
+
+    int i=0, j=0, t=0, W=0, r=0;
+    
+    int enemy_score=0,machine_score=0;
+    
+
+    struct board *_board = makeparallelboard(feed);
+    
+   
+    int ABcutoff = 0;
+
+    //struct move result;
+   
+    long score=0, NullMove=0;
+   
+     
+    legal_moves(_board, PL, 0);
+    
+
+     if (_board->k == 0) {
+         if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
+                 findking(_board->squares, 'X', PL), PL, 0)) {
+            score = 13000 - 50*(Brain.DEEP-DEEP); 
+            if (PL == machineplays) score = -score;
+            
+         }
+             
+         else score = 0;
+
+       free(_board);
+       return score;
+         
+     }
+    
+     else reorder_movelist(_board);  
+
+
+    
+   if (DEEP>0) {
+       //NULL MOVE: guaranteed as long as if PL is not in check,
+       //and its not K+P endgame.
+       if (DEEP>Brain.DEEP-2&&_board->k>5) {
+       forsquares {
+               if (_board->squares[i][j]!='x'&& 
+                   _board->squares[i][j]!=pieces[PL][0]&&
+                   !is_in(_board->squares[i][j],pieces[1-PL],6)) NullMove = 1;
+               if (_board->squares[i][j]==pieces[PL][5])
+                   if (ifsquare_attacked (_board->squares,i,j,PL,0)){
+                        NullMove=0;break;break;
+                   }
+           }
+               
+           if(NullMove) {
+               NullMove = thinkiterate(_board,1-PL,DEEP-1,0,Alpha,Beta);
+            if(PL==machineplays) if (NullMove > Alpha) Alpha = NullMove;
+            else if (NullMove < Beta) Beta = NullMove;
+           }
+       }
+       
+
+   //Movelist iteration.    
+   for(i=0;i<_board->k;i++) {
+       
+       move_pc(_board, &_board->movelist[i]);  
+
+       _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0, 
+               Alpha, Beta);
+       
+       //eval_info_move(&_board->movelist[i],DEEP, PL);
+       //show_board(_board->squares);
+       undo_move(_board, &_board->movelist[i]);
+       
+       //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
+       
+       if (PL==machineplays) 
+           if (_board->movelist[i].score > Alpha) {
+               //printf("*.\n");
+               Alpha = _board->movelist[i].score; r=i;
+           
+           if(Beta<=Alpha) ABcutoff=1;}
+
+
+       if (PL!=machineplays)
+            if (_board->movelist[i].score < Beta) {
+               //printf("*.\n");
+               Beta = _board->movelist[i].score; r=i;
+            
+            if(Beta<=Alpha) ABcutoff=1;
+            }
+       
+       
+              
+        if (ABcutoff) {
+            score = _board->movelist[i].score;
+            free(_board);
+            return score;
+        }
+     }
+   }
+     
+     else {
+     //score = evaluate(_board, PL);
+     machine_score = evaluate(_board,  machineplays);
+     enemy_score = evaluate(_board, 1-machineplays);
+             
+     score = machine_score - enemy_score * Brain.presumeOPPaggro;
+     
+     //printf(">>>>>>%i.\n", PL);
+    //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
+   //machine_score, enemy_score);
+     //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
+
+     free(_board);
+     return score;
+     }
+    }
 
 int evaluate(struct board *evalboard,int PL) {
     int score = 0;
@@ -124,7 +242,7 @@ int evaluate(struct board *evalboard,int PL) {
          score = score + Brain.pvalues[L]*Brain.seekatk;
          
          L = getindex(evalboard->attackers[Z][0],pieces[PL],6);
-         
+         score = score - Brain.pvalues[L] * Brain.balanceoffense;
          
          
          }
@@ -136,120 +254,6 @@ int evaluate(struct board *evalboard,int PL) {
     return score;
     
 }
-
-long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
-        long Alpha, long Beta) {
-
-
-    int i=0, t=0, W=0, r=0;
-    
-    int enemy_score=0,machine_score=0;
-    
-
-    struct board *_board = makeparallelboard(feed);
-    
-   
-    int ABcutoff = 0;
-
-    //struct move result;
-   
-    long score=0;
-   
-     
-    legal_moves(_board, PL, 0);
-    reorder_movelist(_board);
-    
-    
-
-
-     
-     if (_board->k == 0) {printf("board.k = %i\n");
-         if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
-                 findking(_board->squares, 'X', PL), PL, 0)) {
-            score = 13000 - 50*(Brain.DEEP-DEEP); 
-            if (PL == machineplays) score = -score;
-            
-         }
-             
-         else score = 0;
-
-       free(_board);
-       return score;
-         
-     }
-    
-       
-
-
-    
-   if (DEEP>0) {
-   for(i=0;i<_board->k;i++) {
-       
-       move_pc(_board, &_board->movelist[i]);  
-       
-       _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0, 
-               Alpha, Beta);
-       
-       //eval_info_move(&_board->movelist[i],DEEP, PL);
-       //show_board(_board->squares);
-       undo_move(_board, &_board->movelist[i]);
-       
-       if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
-       
-       if (PL==machineplays) 
-           if (_board->movelist[i].score > Alpha) {
-               //printf("*.\n");
-               Alpha = _board->movelist[i].score; r=i;
-           
-           if(Beta<=Alpha) ABcutoff=1;}
-
-
-       if (PL!=machineplays)
-            if (_board->movelist[i].score < Beta) {
-               //printf("*.\n");
-               Beta = _board->movelist[i].score; r=i;
-            
-            if(Beta<=Alpha) ABcutoff=1;
-            }
-       
-       
-              
-        if (ABcutoff) {
-            score = _board->movelist[i].score;
-            free(_board);
-            return score;
-        }
-     }
-   }
-     
-     else {
-     //score = evaluate(_board, PL);
-     machine_score = evaluate(_board,  machineplays);
-     enemy_score = evaluate(_board, 1-machineplays);
-             
-     score = machine_score - enemy_score * Brain.presumeOPPaggro;
-     
-     //printf(">>>>>>%i.\n", PL);
-    //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
-   //machine_score, enemy_score);
-     //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
-
-     free(_board);
-     return score;
-     }
-    
-
-    
-   
-   score = _board->movelist[r].score;//printf("score is %i\n", score);
-
-   //if (PL!=machineplays) score = -score;
- 
-    //printf("found i=%i and i=%i.\n", top[0][0], top[1][0]);
-   
-   free(_board);
-   return score;
-    }
 
 float scoremod (int DEEP, int method) {
     

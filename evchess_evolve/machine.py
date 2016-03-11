@@ -21,7 +21,7 @@ class machine():
         parameter("stat_K", 1, 0, 0),
         ]
         
-        self.ELO = 1000
+        self.ELO = 1300
         self.onTOP = 0
         
         self.stat_games = 0

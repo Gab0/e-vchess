@@ -27,7 +27,7 @@ import gc
 evchessP = "engine/dist/Release/GNU-Linux/e-vchess"
 machineDIR =  "machines"
 
-evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "2"]
+evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "4"]
 
 
 GUI = 1
@@ -139,12 +139,12 @@ class Application():
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             #also prints running info to log.
-            if self.ROUND != 0:
+            if (self.ROUND) and not (self.ROUND % 10):
                 LEVEL = ""
                 
-                if not self.ROUND %  375: LEVEL += "A"
-                if not self.ROUND % 1250: LEVEL += "B"
-                if not self.ROUND % 2500: LEVEL += "C" 
+                if not self.ROUND % 1250: LEVEL += "A"
+                if not self.ROUND % 2500: LEVEL += "B"
+                if not self.ROUND % 5000: LEVEL += "C" 
 
                 if len(LEVEL): self.routine_pop_management(LEVEL)
             
@@ -231,19 +231,19 @@ class Application():
             for k in range(4): population = mutatemachines(1,population)
        
         if "C" in LEVEL:
-            population = populate(population, round(originalPOPLEN/8))
-
             MODscorelimit = 2
+            X = round(originalPOPLEN/8)
+            population = deltheworst_clonethebest(population, -X-3, MODscorelimit)
 
-            for k in range(3):
-                population = replicate_best_inds(population, 3)
+            population = populate(population, X)
+         
+
+
+            population = replicate_best_inds(population, 3)
             
             for k in range(2): population = mutatemachines(1, population)
 
-            NUM = len(population) - originalPOPLEN
-            if NUM > 0:
-                population = deltheworst_clonethebest(population, -NUM, MODscorelimit)
-
+                
         totalgames = (self.setcounter_illegalmove
                      +self.setcounter_forcedwin
                      +self.setcounter_checkmate
@@ -362,8 +362,8 @@ class table(Frame):
             self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
         except:
             self.log('exception', '#1')
-            for M in self.MACHINE:
-                M.kill()
+            #for M in self.MACHINE:
+            #    M.kill()
             self.initialize=0
             self.endgame()
             return
@@ -642,7 +642,7 @@ class table(Frame):
             #print('killing %s' % machine.pid)
             call(['kill', '-9', str(machine.pid)])
             machine.terminate()
-            self.MACHINE = []
+        self.MACHINE = []
 
 
         self.online = 0

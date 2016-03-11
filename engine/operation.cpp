@@ -23,52 +23,7 @@ void pos2cord (char out[]) {
     out[1] = i;
 }
 
-int parse_move (struct move *target, char *s, int P) {
 
-    
-    //if (strstr(s,"O-O-O") != NULL) {castle(&board, 1, 1-machineplays, 0); return 1;}
-    //if (strstr(s, "O-O") != NULL ) {castle(&board,1,1-machineplays,1); return 1;}
-    
-    if (!isalpha(s[0]) || !isalpha(s[2])) return 0;
-    if (!isdigit(s[1]) || !isdigit(s[3])) return 0;
-    if (s[0] < 'a' || s[0] > 'h' || s[2] < 'a' || s[2] > 'h') return 0;
-    if (s[1] < '1' || s[1] > '8' || s[3] < '1' || s[3] > '8') return 0;
-    
-    
-    
-    else {
-        target->from[0] = s[0];
-        target->from[1] = s[1];
-        target->to[0] = s[2];
-        target->to[1] = s[3];
-
-        pos2cord(target->from);
-        pos2cord(target->to);           
-        
-        
-        
-        if(s[4]=='q') {
-            if (s[1]<s[3])target->promoteto='Q';
-            if (s[1]>s[3])target->promoteto='q';
-
-        }
-        
-        else target->promoteto=0;
-        
-        if (target->from[1] == 4){
-            if (target->from[0] == 0 || target->from[0] == 7)
-            if (target->to[1] == 6 || target->to[1] == 2){//printf("castle? p=%i\n",board.castle[P][1]);
-                if (board.squares[target->from[0]][target->from[1]]==pieces[P][5]) {target->iscastle=1; //printf("castle.\n");
-                
-                }}
-        
-        }
-        
-
-        return 1;
-        }
-    
-}   
 
 bool is_in(char val, char arr[], int size){
     int i = 0;
@@ -93,6 +48,11 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     if (board->squares[i+mod_i][j+mod_j] == pieces[1-P][5]) return 0;
      
+    board->movelist[board->k].passant=0;
+    board->movelist[board->k].passantJ[0]=board->passantJ;
+    board->movelist[board->k].passantJ[1]=-1;
+        
+    if (i>7) {
     //i=16 denotes a castling movement.
     if (i==16) {
         
@@ -110,11 +70,26 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
         board->movelist[board->k].iscastle = 1;
         board->movelist[board->k].lostcastle = 2;
         
+        }
 
-    
+        
+        //i=55 or 22 denotes an en passant capture.
+     if(i==33||i==44){
+            board->movelist[board->k].passant=1;
+            i = i/11;
+        }
+        
+        //i=33 or 44 denotes a double-step pawn movement.
+     if(i==11||i==66) { 
+            board->movelist[board->k].passantJ[1]=j;
+                i=i/11;
+        }
     }
+        
+        
     
-    else { 
+    
+    if (i<8) { 
     
     board->movelist[board->k].from[0] = i;
     board->movelist[board->k].from[1] = j;
@@ -126,6 +101,10 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     board->movelist[board->k].promoteto = 0;
     board->movelist[board->k].iscastle = 0;
     board->movelist[board->k].lostcastle = 0;
+    
+    if (board->movelist[board->k].passant) 
+        board->movelist[board->k].casualty = pieces[1-P][0];
+    
     
     if ((i==0 && P==1)||(i==7 && P==0)){
         if(j==0 && board->castle[P][0]==1)
@@ -205,16 +184,7 @@ void erase_moves(struct board *tgt, int eraseall) {
     tgt->hindex = 0;*/
 }
 
-void print_movement (struct move *move) {
-    char play[2][2] = {{move->from[0], move->from[1]},
-                        {move->to[0], move->to[1]}};
-    
-    cord2pos(play[0]);
-    cord2pos(play[1]);
-    
-    print_play(play);
-    
-}
+
 
 int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
     //show_board(squares);
@@ -350,94 +320,6 @@ int check_move_check (struct board *tg_board, struct move *move, int P) {
     return check;
 }
 
-int fehn2board (char str[]) {
-    char *fstring;
-    int z=0;
-    int i=0;
-    int j=0;
-    int n=0;
-    int number=0;
-    int PL=0;
-    fstring = strtok(str, " ");
-    
-
-    fstring = strtok(NULL, " ");
-
-    //read boardmap section.
-    setup_board(0);
-    printf("%s /%i\n",fstring, strlen(fstring));
-    for (z=0;z<strlen(fstring);z++) {
-    
-     number = fstring[z]-'0';
-        if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6)) {
-            board.squares[i][j] = fstring[z];
-            j++;
-        }
-        if (fstring[z]=='/') {
-            i++;
-            j=0;        
-        }
-        if (0<number && number<9) j=j+number;
-
-}
-    
-    fstring = strtok(NULL, " ");
-    //read active player section.
-    
-    //if (fstring == 'b')
-    
-    fstring = strtok(NULL, " ");
-    //read castling righst section.
-    for (i=0;i<2;i++) for (j=0;j<3;j++) {
-        board.castle[i][j]=0;
-        board.castle[i][1]=1;
-    }
-    
-    
-    for (z=0;z<strlen(fstring);z++) {
-        if (fstring[z] == 'Q') board.castle[0][0]=1;
-        if (fstring[z] == 'K') board.castle[0][1]=1;
-        if (fstring[z] == 'q') board.castle[1][0]=1;
-        if (fstring[z] == 'k') board.castle[1][1]=1;
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    return PL;
-}
-
-int read_movelines (char txt[128], int verbose) {
-    char *movement = strtok(txt, " ");
-    struct move move;
-    int x=0;
-
-    //movement = strtok(NULL, " "); 
-
-        while ( movement != NULL) {
-
-            if (parse_move(&move, movement, 1-machineplays)) {
-                Vb printf("moving from input: %i%i %i%i\n",move.from[0],move.from[1],move.to[0],move.to[1]);
-                move.casualty = board.squares[move.to[0]][move.to[1]]; 
-                
-                move_pc(&board, &move);
-
-                history_append(&move);
-                x++;
-            }
-        movement = strtok(NULL, " ");        
-                
-        }
-    Vb printf("%i moves read.\n",x);
-
-    
-    
-    return x;
-}
 
 int getindex (char x, char array[],int size) {
     int i=0;
@@ -481,7 +363,7 @@ struct board *makeparallelboard (struct board *model) {
             _board->squares[i][j] = model->squares[i][j];
             
             
-        
+    _board->passantJ = model->passantJ;
     
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
@@ -498,9 +380,6 @@ void freeboard (struct board *target) {
     
     }
 }
-
-
-
 
 void select_top (struct move *array, int size, int target[], int quant) {
     int i = 0;
@@ -594,7 +473,11 @@ void replicate_move(struct move *target, struct move *source) {
         
         target->iscastle = source->iscastle;
         target->lostcastle = source->lostcastle;
-    
+        
+        target->passant = source->passant;
+        target->passantJ[0] = source->passantJ[0];
+        target->passantJ[1] = source->passantJ[1];
+        
         target->score = 0;
 }
 
@@ -604,20 +487,6 @@ int power(int base, unsigned int exp) {
         result *= base;
     return result;
  }
-
-void eval_info_move(struct move *move, int DEEP, int P) {
-    struct move showmovebuff;
-    
-    replicate_move(&showmovebuff, move);
-
-     cord2pos(showmovebuff.from);
-     cord2pos(showmovebuff.to);
-       
-            asprintf(&output, "%i %i 0 %i %c%c%c%c\n", DEEP, move->score, P, 
-              showmovebuff.from[0], showmovebuff.from[1],
-              showmovebuff.to[0], showmovebuff.to[1]);
-     write(1, output, strlen(output));   
-}
 
 void reorder_movelist(struct board *board) {
     int i=0;

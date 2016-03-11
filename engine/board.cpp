@@ -12,8 +12,6 @@
 using namespace std;
 
 
-
-
 void setup_board (int setup) {
     int i;
     
@@ -54,7 +52,7 @@ void setup_board (int setup) {
        
    }
     
-    
+    board.passantJ=-1;
     //erase_moves(&board, 1);
     }
 
@@ -105,7 +103,11 @@ int legal_moves (struct board *board, int PL, int verbose) {
                 if (i==6&&PL==1) {promote++; promote++;}
                 if (i==1&&PL==0) {promote++; promote++;}
                 
-                
+                if (board->passantJ==j+1||board->passantJ==j-1)
+                    if (board->passantJ>-1)
+                        if (i==5||i==2) 
+                            append_move(board,i*11,j,pawn_vector,board->passantJ-j,PL);
+
                 
                 if ((is_in(board->squares[i+pawn_vector][j+1],pieces[EP],6)) && onboard(i+pawn_vector,j+1)) 
               
@@ -124,17 +126,11 @@ int legal_moves (struct board *board, int PL, int verbose) {
                                           
                 
                 if (promote > 1) { promote--;promote--;}
-            
-                
-                
-                
-                
 
-                if (board->squares[i+(2*pawn_vector)][j] == 'x' && i == (6-(5*PL)) && onboard(i+(2*pawn_vector),j)){
-                    //*printf("double pawn movement added.\n");*/
-                    if(board->squares[i+pawn_vector][j]=='x') append_move(board,i,j,-2+PL+PL+PL+PL,0,PL);
+                if (board->squares[i+(2*pawn_vector)][j] == 'x' && i == 6-5*PL && onboard(i+(2*pawn_vector),j))
+                        if(board->squares[i+pawn_vector][j]=='x') append_move(board,i*11,j,4*PL-2,0,PL);
                           
-               }
+               
             
             } 
             
@@ -230,18 +226,7 @@ void move_pc(struct board *tg_board, struct move *movement) {
 
     
     int i=0;
-    
-    
-    
-    /*pos2cord(from, movement[0][0],movement[0][1]);
-    pos2cord(to, movement[1][0], movement[1][1]);
-    */
-    
-    /*print_play(movement);*/
-    
-    /*printf("%i %i to %i %i\n", from[0],from[1],to[0],to[1]);*/
-    //printf("moving %s.\n", tg_board->squares[from[0]][from[1]]);
-    
+
     tg_board->squares[to[0]][to[1]] = tg_board->squares[from[0]][from[1]];
     tg_board->squares[from[0]][from[1]] = 'x';
     
@@ -257,12 +242,11 @@ void move_pc(struct board *tg_board, struct move *movement) {
             tg_board->squares[to[0]][to[1]-1] = tg_board->squares[to[0]][7];
             tg_board->squares[to[0]][7] = 'x';
         }        
-        
-        
-        
-        
     }
   
+    if(movement->passant) tg_board->squares[from[0]][to[1]] == 'x';
+        
+    
     int cP =-1;
 
     if(from[0]==7) cP = 0;
@@ -273,17 +257,9 @@ void move_pc(struct board *tg_board, struct move *movement) {
     if (movement->lostcastle==2) tg_board->castle[cP][1]=0;
     if (movement->lostcastle==3) tg_board->castle[cP][2]=0;
         
-    
-    
-    /*
-    if (cP > -1){
-        if (tg_board->squares[to[0]][to[1]] == pieces[cP][5]) {
-        if(from[1]==0 && tg_board->castle[cP][0] == 1) {tg_board->castle[cP][0] = 0; movement->lostcastle=1;}
-        if(from[1]==4 && tg_board->castle[cP][1] == 1) {tg_board->castle[cP][1] = 0; movement->lostcastle=2;}
-        if(from[1]==7 && tg_board->castle[cP][2] == 1) {tg_board->castle[cP][2] = 0; movement->lostcastle=3;}
-        }
-        }*/
-    
+
+    tg_board->passantJ=movement->passantJ[1];
+
     
     
 }
@@ -309,7 +285,8 @@ void undo_move(struct board *tg_board, struct move *movement) {
         if (movement->from[0]==1) tg_board->squares[to[0]][to[1]] = 'P';
            
     }
-        if(movement->iscastle){
+    
+    if(movement->iscastle){
         if (movement->from[1] < 4) {
             tg_board->squares[from[0]][0] = tg_board->squares[to[0]][from[1]+1];
             tg_board->squares[from[0]][from[1]+1] = 'x';
@@ -320,6 +297,11 @@ void undo_move(struct board *tg_board, struct move *movement) {
             tg_board->squares[from[0]][from[1]-1] = 'x';
         } 
 }
+    
+    if(movement->passant) {
+        tg_board->squares[to[0]][from[1]] = movement->casualty;
+        tg_board->squares[from[0]][from[1]] = 'x';
+    }
     
     int cP=-1;
     if(to[0]==7) cP = 0;
@@ -332,7 +314,7 @@ void undo_move(struct board *tg_board, struct move *movement) {
        
         }
     
-    
+    tg_board->passantJ=movement->passantJ[0];
     
     
 }
@@ -447,7 +429,6 @@ int findking (char board[8][8], char YorX, int player) {
     }
     return -1;
 }
-
 
 int cancastle (struct board *board, int P, int direction) {
     if (!board->castle[P][1]) return 0;

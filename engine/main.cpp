@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     signal(SIGTERM, SIG_IGN); 
     signal(SIGCHLD, SIG_IGN);
     
-    printf("id name e-v dchess engine v0.3\n");
+    printf("id name e-v dchess engine v0.7\n");
     printf("id author afrogabs\n");
     printf("uci ok\n");
     
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     Brain.seekmiddle = 0;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 2;
+    Brain.DEEP = 4;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
      for (i=0;i<argc;i++) {
         
             
-        if (strstr(argv[i], "-TOP") != NULL) {
-            selectTOPmachines = true; printf("ack.\n");}    
+        if (strstr(argv[i], "-TOP") != NULL)
+                                    selectTOPmachines = true;   
             
         if (strstr(argv[i], "-MD") != NULL) {
             toloadmachine = true; machinepath = argv[i+1];}
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     
 
     
-    char testfehn[128] = "r2qk2r/7n/3p3n/1p1pPBp1/PR4Pp/2p4P/2P1p3/2Q1K1NR b - - 5 65";
+    char testfehn[128] = "fen r3kb1r/pp1qpppp/2np4/1Np3Q1/4n3/5N2/PPPP1PPP/R1BK3R w kq - 0 1";
     
     
 
@@ -191,8 +191,12 @@ int main(int argc, char** argv) {
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
         for (i=0; i < hindex; i++) {
-            print_movement(&movehistory[i]);
+            print_movement(&movehistory[i],0);
         }
+    }
+    
+    if (strstr(inp, "testsend") != NULL) {
+        applyresult(1);
     }
     
     /*if (strstr(inp, "usermove") !=NULL) { 
@@ -204,14 +208,14 @@ int main(int argc, char** argv) {
     if (strstr(inp, "list") !=NULL)  {
         legal_moves(&board,0,0);
         printf("list [%i]:\n", board.k);
-        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i]);
+        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i],0);
         printf("attacker? %c.\n", board.movelist[i].casualty);}
     }   
              
     if (strstr(inp, "lis1") !=NULL)  {
         legal_moves(&board,1,0);
         printf("list [%i]:\n", board.k);
-        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i]);
+        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i],0);
         printf("attacker? %c.\n", board.movelist[i].casualty);}
     }   
            
@@ -232,11 +236,7 @@ int main(int argc, char** argv) {
         
 
     }
-    
-    
-    //signal(SIGINT, computer);
-//printf("\n>>>\n");
-    //fflush(stdin);
+
     
     for (i=0;i<128;i++) inp[i]=0;
 

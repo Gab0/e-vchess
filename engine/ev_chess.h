@@ -24,7 +24,7 @@
 #define print_play(p) printf("from %c%c to %c%c\n", p[0][0],p[0][1],p[1][0],p[1][1])
 #define print_play_cord(p) printf("from %c%c to %c%c\n", p.from[0],p.from[1],p.to[0],p.to[1])
 #define expand_play(p) p.from[0],p.from[1],p.to[0],p.to[1]
-
+#define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 
 #define Vb if (verbose)
 
@@ -46,8 +46,8 @@ struct move {
     
     char casualty;
     
-
-    
+    int passantJ[2];
+    int passant;
 };
 
 
@@ -64,7 +64,8 @@ struct board;
       int mobility[2];
       
       int castle[2][3];
-
+      
+      int passantJ;
    }; 
    
   
@@ -158,29 +159,31 @@ void movement_generator(struct board *board, int limit, char direction, int i, i
 
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
-int parse_move (struct move *target, char *s, int P);
+
 bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
 int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
-void print_movement (struct move *move);
-
 int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
 int check_move_check (struct board *tg_board, struct move *move, int P);
-
-int fehn2board (char str[]);
-
-int read_movelines (char txt[128], int verbose);
 int getindex (char x, char array[],int size);
 struct board *makeparallelboard (struct board *board);
 void select_top (struct move *array, int size, int target[], int quant);
 void replicate_move(struct move *target, struct move *source) ;
 //void freeboard (struct board *target);
 int power(int base, unsigned int exp);
-
 void reorder_movelist(struct board *board); 
 
+
+
+/*functions from interface.cpp*/
+
+int parse_move (struct move *target, char *s, int P);
+void print_movement (struct move *move, int full);
+int read_movelines (char txt[128], int verbose);
+int fehn2board (char str[]);
 void eval_info_move(struct move *move, int DEEP, int P);
+
 
 /*functions from brain.cpp*/
 
@@ -200,5 +203,6 @@ int applyresult (int result);
 int countpieces (void);
 float readparam(char *line, int verbose);
 void dump_history();
+void log(char *location, const char content[]);
 
 #endif	/* BOARD_H */

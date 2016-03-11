@@ -102,7 +102,7 @@ def mutatemachines(AGR, population):
 
 
     for i in range(len(population)):
-            eMOD = 50-population[i].ELO/25
+            eMOD = 100-population[i].ELO/25
 
             population[i].mutate(eMOD, AGR)
                 
@@ -218,8 +218,7 @@ def deltheworst_clonethebest(population, action, MODlimit):
         if population[k].PARAMETERS[0].value == 0:
             POP_SCORETABLE.append(-1)
             continue
-        SCORE = population[k].ELO  #population[k].PARAMETERS[1].value + (population[k].PARAMETERS[2].value/2) / (population[k].PARAMETERS[0].value)
-
+        SCORE = population[k].ELO
             
         POP_SCORETABLE.append(SCORE)
         MEDIUMSCORE += SCORE
@@ -230,27 +229,27 @@ def deltheworst_clonethebest(population, action, MODlimit):
         print('mediumscore = %i' % MEDIUMSCORE)
         if action < 0:
             action = -action
-            N_removed = 0
-            
-
-            for D in range(action):
+   
+            for D in range (action):
                 CURRENT_SCORE = [0,66666]
                 for k in range(len(population)):
-                    if (population[k].ELO > -1):
-                        if (population[k].ELO < MEDIUMSCORE*MODlimit):
-                            if population[k].ELO < CURRENT_SCORE[1]:
-                                CURRENT_SCORE[0] = k
-                                CURRENT_SCORE[1] = population[k].ELO
+                    if population[k] != 0:
+                        if (population[k].ELO > -1):
+                            if (population[k].ELO < MEDIUMSCORE*MODlimit):
+                                if population[k].ELO < CURRENT_SCORE[1]:
+                                    CURRENT_SCORE[0] = k
+                                    CURRENT_SCORE[1] = population[k].ELO
 
-                                
+                                    
 
                 print('subject deleted. ' + population[CURRENT_SCORE[0]].filename)
-                try:
+                """try:
                     os.remove(Fdir+'/'+population[CURRENT_SCORE[0]].filename)
                 except FileNotFoundError:
-                    print("can't find machine file, but it's ok.")
-                population.pop(CURRENT_SCORE[0])
+                    print("can't find machine file, but it's ok.")"""
+                population[CURRENT_SCORE[0]] = 0
 
+            population = [x for x in population if x != 0]
 
 
 
@@ -317,7 +316,7 @@ def replicate_best_inds(population, NUMBER):
     for IND in TOP:
         for N in range(NUMBER):
             IND.filename = NewMacName()
-            population.append(IND)
+            population.append(copy.deepcopy(IND))
 
     return population
 
