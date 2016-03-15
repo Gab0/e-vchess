@@ -19,7 +19,7 @@ of the parameters from zero, the engine will also take number of possible moves 
  2) Run chess_arena.py for ten thousand cycles, on a 32-tabled session, then look at the population on the Machineviewer.<br>
  3) Send some machines on the 1200's or 1300's ELO to the top machines.<br>
  3) Run xboard or other chess interface, loading the engine with --TOP arg.<br>
-	>>$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 6'<br>
+	`<$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 6'>`<br>
  4) If you can't win, try to understand this repo and contribute to it. If you can, run 10k more cycles of chess_arena and try again.<br>
  
 ##Dependencies:
