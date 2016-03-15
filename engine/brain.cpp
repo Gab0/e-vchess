@@ -1,48 +1,67 @@
 #include "ev_chess.h"
 
 
+#define DUMP(B) if (B!=NULL){free(B);B=NULL;}
+       
+
+
+
+
+
 int think (struct move *out, int PL, int DEEP, int verbose) {
     int i=0; int r=0;
     int last[2]={0,-32760};
 
     int bI = 0;
-    Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,board.k,DEEP);
     
+    time_t startT = time(NULL);
 
     struct board *_board = makeparallelboard(&board);  
-    
+    Vb printf("Master Address: %p\n", (void *)_board); 
     
     long Alpha = -1690000;
     long Beta = 1690000;
     
-        
-    legal_moves(_board, PL, 0); 
+    struct movelist moves;
+    legal_moves(_board, &moves,PL, 0); 
     
-    if (_board->k == 0) return -1;
-    Vb printf("value of k is %i.\n",_board->k);
+    reorder_movelist(&moves);
     
-   
-    for (i=0;i<_board->k;i++) {
+    
+    Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,moves.k,DEEP);
+    if (moves.k == 0) return -1;
+    Vb printf("value of k is %i.\n",moves.k);
+    
+    
+    
+    for (i=0;i<moves.k;i++) {
     //infoMOVE = (char *)malloc(sizeof(char)*128);
+        if(i==0)
+           if(!canNullMove(DEEP, _board, moves.k, PL))
+               continue;       
+        
         
         //show_board(board.squares);
      Vb printf("new tree branching. i=%i\n",i);
-     move_pc(_board, &_board->movelist[i]);    
-     _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
+     Vb print_movement(&moves.movements[i],0);
+     printf("Alpha = %i\n", Alpha);
+     
+     move_pc(_board, &moves.movements[i]);    
+     moves.movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
              Alpha, Beta);
      
-     if (_board->movelist[i].score > Alpha) {
-         Alpha = _board->movelist[i].score;
+     if (moves.movements[i].score > Alpha) {
+         Alpha = moves.movements[i].score;
          r=i;
      }
      
      //show_board(_board->squares);
-     undo_move(_board, &_board->movelist[i]); 
+     undo_move(_board, &moves.movements[i]); 
 
      
-     Vb printf("analyzed i=%i; score is %li.\n",i, _board->movelist[i].score);
+     Vb printf("analyzed i=%i; score is %li.\n",i, moves.movements[i].score);
      Vb if (show_info) printf(">>>>>>>>\n");
-     if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);              
+     if (show_info) eval_info_move(&moves.movements[i],DEEP, startT, PL);              
              
              
 
@@ -50,139 +69,123 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
     
 
-    //r = last[0];
 
-    replicate_move(out, &_board->movelist[r]);
-
-    
+    if (r==0) r++;
+    replicate_move(out, &moves.movements[r]);
+    print_movement(out,1);
+   
    Vb printf("r = %i\n", r);
 
-   
+   DUMP(_board);
    return r;
-   free(_board);
+   
 }
 
-long thinkiterate(struct board *feed, int PL, int DEEP, long chainscore,
+long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
         long Alpha, long Beta) {
-
 
     int i=0, j=0, t=0, W=0, r=0;
     
     int enemy_score=0,machine_score=0;
-    
 
     struct board *_board = makeparallelboard(feed);
-    
-   
+
     int ABcutoff = 0;
 
     //struct move result;
    
-    long score=0, NullMove=0;
-   
-     
-    legal_moves(_board, PL, 0);
+    long score=0;
     
-
-     if (_board->k == 0) {
+    struct movelist moves;
+    legal_moves(_board, &moves, PL, 0);
+    
+    Vb printf("DEEP = %i; K=%i Address: %p\n", DEEP,moves.k ,(void *)_board); 
+    Vb printf("NullMove!\n"); 
+    
+     //If in checkmate/stalemate situation;
+     if (moves.k == 1) {
          if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
                  findking(_board->squares, 'X', PL), PL, 0)) {
             score = 13000 - 50*(Brain.DEEP-DEEP); 
             if (PL == machineplays) score = -score;
-            
          }
-             
-         else score = 0;
-
-       free(_board);
+          else score = 0;
+        
+       Vb printf("check/stalemate.\n");
        return score;
          
      }
     
-     else reorder_movelist(_board);  
-
-
     
+
+
+    Vb show_board(_board->squares);
    if (DEEP>0) {
+    reorder_movelist(&moves); 
+    
+   //Movelist iteration.    
+   for(i=0;i<moves.k;i++) {
        //NULL MOVE: guaranteed as long as if PL is not in check,
        //and its not K+P endgame.
-       if (DEEP>Brain.DEEP-2&&_board->k>5) {
-       forsquares {
-               if (_board->squares[i][j]!='x'&& 
-                   _board->squares[i][j]!=pieces[PL][0]&&
-                   !is_in(_board->squares[i][j],pieces[1-PL],6)) NullMove = 1;
-               if (_board->squares[i][j]==pieces[PL][5])
-                   if (ifsquare_attacked (_board->squares,i,j,PL,0)){
-                        NullMove=0;break;break;
-                   }
-           }
-               
-           if(NullMove) {
-               NullMove = thinkiterate(_board,1-PL,DEEP-1,0,Alpha,Beta);
-            if(PL==machineplays) if (NullMove > Alpha) Alpha = NullMove;
-            else if (NullMove < Beta) Beta = NullMove;
-           }
-       }
+       if(i==0)
+           if(!canNullMove(DEEP, _board, moves.k, PL))
+               continue;
        
+       move_pc(_board, &moves.movements[i]);  
 
-   //Movelist iteration.    
-   for(i=0;i<_board->k;i++) {
-       
-       move_pc(_board, &_board->movelist[i]);  
-
-       _board->movelist[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0, 
+       moves.movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
                Alpha, Beta);
        
        //eval_info_move(&_board->movelist[i],DEEP, PL);
        //show_board(_board->squares);
-       undo_move(_board, &_board->movelist[i]);
+       undo_move(_board, &moves.movements[i]);
        
        //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
        
        if (PL==machineplays) 
-           if (_board->movelist[i].score > Alpha) {
+           if (moves.movements[i].score > Alpha) {
                //printf("*.\n");
-               Alpha = _board->movelist[i].score; r=i;
+               Alpha = moves.movements[i].score; r=i;
            
            if(Beta<=Alpha) ABcutoff=1;}
 
-
        if (PL!=machineplays)
-            if (_board->movelist[i].score < Beta) {
+            if (moves.movements[i].score < Beta) {
                //printf("*.\n");
-               Beta = _board->movelist[i].score; r=i;
+               Beta = moves.movements[i].score; r=i;
             
             if(Beta<=Alpha) ABcutoff=1;
             }
-       
-       
               
         if (ABcutoff) {
-            score = _board->movelist[i].score;
-            free(_board);
+            score = moves.movements[i].score;
+
             return score;
         }
      }
+     if (r==0)r++;  
+     score = moves.movements[r].score;  
+     return score;       
    }
      
      else {
-     //score = evaluate(_board, PL);
-     machine_score = evaluate(_board,  machineplays);
-     enemy_score = evaluate(_board, 1-machineplays);
+     machine_score = evaluate(_board, &moves, machineplays);
+     enemy_score = evaluate(_board, &moves, 1-machineplays);
              
      score = machine_score - enemy_score * Brain.presumeOPPaggro;
-     
+     //printf("S=%i\n", score);
      //printf(">>>>>>%i.\n", PL);
     //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
    //machine_score, enemy_score);
-     //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
+     Vb if (show_info) eval_info_move(&moves.movements[i],DEEP, 0, PL);  
+     
 
-     free(_board);
      return score;
      }
-    }
 
-int evaluate(struct board *evalboard,int PL) {
+}
+
+int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     int score = 0;
     
     int i = 0;
@@ -195,10 +198,11 @@ int evaluate(struct board *evalboard,int PL) {
     int parallelatks = 0;
     int paralleldefenders = 0;
     
-    attackers_defenders(evalboard, PL);
+    attackers_defenders(evalboard->squares, *moves, PL);
 
     
-    for (i=0;i<8;i++) for (j=0;j<8;j++) {
+    forsquares {
+        if (evalboard->squares[i][j] == 'x') continue;
         L = getindex(evalboard->squares[i][j],pieces[PL],6);
         if (L<0) continue;
         K = Brain.pvalues[L];
@@ -218,20 +222,20 @@ int evaluate(struct board *evalboard,int PL) {
         
         
         
-     for (Z=0;Z<evalboard->kad;Z++) {
-        L= getindex(evalboard->defenders[Z][0],pieces[1-PL],6); 
+     for (Z=0;Z<moves->kad;Z++) {
+        L= getindex(moves->defenders[Z][0],pieces[1-PL],6); 
         
         parallelatks = ifsquare_attacked
-        (evalboard->squares,evalboard->defenders[Z][1],
-                            evalboard->defenders[Z][2], 1-PL,0);
+        (evalboard->squares,moves->defenders[Z][1],
+                            moves->defenders[Z][2], 1-PL,0);
                 
      if (L==5 && Brain.parallelcheck) {
           if (parallelatks>1) 
             score = score + (parallelatks) * Brain.parallelcheck;}
      else {
         paralleldefenders = ifsquare_attacked
-        (evalboard->squares,evalboard->defenders[Z][1],
-                            evalboard->defenders[Z][2], PL,0);
+        (evalboard->squares,moves->defenders[Z][1],
+                            moves->defenders[Z][2], PL,0);
         
         score = score - paralleldefenders * Brain.MODbackup;
          
@@ -241,13 +245,13 @@ int evaluate(struct board *evalboard,int PL) {
                 
          score = score + Brain.pvalues[L]*Brain.seekatk;
          
-         L = getindex(evalboard->attackers[Z][0],pieces[PL],6);
+         L = getindex(moves->attackers[Z][0],pieces[PL],6);
          score = score - Brain.pvalues[L] * Brain.balanceoffense;
          
          
          }
     score = score+chaos;       
-    score = score + evalboard->mobility[PL] * Brain.MODmobility;
+    score = score + moves->k * Brain.MODmobility;
     
     
     //printf("score: %i\n", score);
@@ -289,4 +293,21 @@ float scoremod (int DEEP, int method) {
     
     
     return modifier;
+}
+
+
+int canNullMove (int DEEP, struct board *board, int K, int P) {
+    int i=0,j=0,NullMove=0;
+           if (DEEP>Brain.DEEP-2&&K>5) 
+       forsquares {
+               if (board->squares[i][j]!='x'&& 
+                   board->squares[i][j]!=pieces[P][0]&&
+                   !is_in(board->squares[i][j],pieces[1-P],6)) NullMove = 1;
+               if (board->squares[i][j]==pieces[P][5])
+                   if (ifsquare_attacked (board->squares,i,j,P,0)){
+                        NullMove=0;break;break;
+                   }
+       }
+        return  NullMove;       
+               
 }

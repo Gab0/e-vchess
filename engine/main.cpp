@@ -3,6 +3,7 @@
 
 struct board board;
 struct param Brain;
+struct movelist moves;
 
 char pieces[2][6] = {{'P','R','N','B','Q','K'},{'p','r','n','b','q','k'}};
 
@@ -206,17 +207,17 @@ int main(int argc, char** argv) {
     }*/
         
     if (strstr(inp, "list") !=NULL)  {
-        legal_moves(&board,0,0);
-        printf("list [%i]:\n", board.k);
-        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i],0);
-        printf("attacker? %c.\n", board.movelist[i].casualty);}
+        legal_moves(&board, &moves,0,0);
+        printf("list [%i]:\n", moves.k);
+        for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
+        printf("attacker? %c.\n", moves.movements[i].casualty);}
     }   
              
     if (strstr(inp, "lis1") !=NULL)  {
-        legal_moves(&board,1,0);
-        printf("list [%i]:\n", board.k);
-        for (i=0; i < board.k; i++) { print_movement(&board.movelist[i],0);
-        printf("attacker? %c.\n", board.movelist[i].casualty);}
+        legal_moves(&board,&moves,1,0);
+        printf("list [%i]:\n", moves.k);
+        for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
+        printf("attacker? %c.\n", moves.movements[i].casualty);}
     }   
            
        

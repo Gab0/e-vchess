@@ -239,8 +239,8 @@ void dump_history() {
     printf("STARTING MOVE HISTORY DUMP.\b");
     for (i=0;i<hindex;i++) {
 
-        printf("%i\n", i);
-        print_movement(&movehistory[i],0);
+        printf("%i     [%i]\n", i, machineplays);
+        print_movement(&movehistory[i],1);
         show_board(movehistoryboard[i]);
     }
     
@@ -248,7 +248,7 @@ void dump_history() {
 }
 
 void log(char *location, const char content[]) {
-    printf("saving log. %s\n", content);
+    //printf("saving log. %s\n", content);
     
     sprintf(location, "%s/engine_log", location);
     FILE *logfile = fopen(location, "a");

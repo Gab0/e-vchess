@@ -105,7 +105,8 @@ void print_movement (struct move *move, int full) {
         printf("lostcastle = %i.\n", move->lostcastle);
         printf("passant = %i.\n", move->passant);
         printf("passantJ = %i %i.\n", move->passantJ[0], move->passantJ[1]);
-        printf("promoteto = %c.\n", move->promoteto);
+        if (!move->promoteto) printf("promoteto = 0\n");
+        else printf("promoteto = %c.\n", move->promoteto);
         printf("casualty = %c.\n", move->casualty);
     }
     
@@ -164,11 +165,11 @@ int parse_move (struct move *target, char *s, int P) {
                 if (target->to[0]==3||target->to[0]==4)
                     target->passantJ[1] = target->from[1];
         //read EP capture.
-        if (board.passantJ>-1)
-            if (board.squares[target->from[0]][target->from[1]]==pieces[1-machineplays][0])
-                if (target->from[0]==4||target->from[1]==5)
-                    if (target->to[1]==board.passantJ)
-                        target->passant=1;
+        if (target->to[1] == board.passantJ)
+            if (board.squares[target->from[0]][target->to[1]]==pieces[machineplays][0])
+                if (board.squares[target->from[0]][target->from[1]] == pieces[1-machineplays][0])
+                    if ((target->from[0]==3&&machineplays)||(target->from[0]==4&&!machineplays))
+                            target->passant=1;
                 
         
 
@@ -176,15 +177,16 @@ int parse_move (struct move *target, char *s, int P) {
         
     
 }   
-void eval_info_move(struct move *move, int DEEP, int P) {
+void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
     struct move showmovebuff;
     
+    time_t elapsedT = time(NULL) - startT;
     replicate_move(&showmovebuff, move);
 
      cord2pos(showmovebuff.from);
      cord2pos(showmovebuff.to);
        
-            asprintf(&output, "%i %i 0 %i %c%c%c%c\n", DEEP, move->score, P, 
+            asprintf(&output, "%i %i %ld %i %c%c%c%c\n", DEEP, move->score, elapsedT, P, 
               showmovebuff.from[0], showmovebuff.from[1],
               showmovebuff.to[0], showmovebuff.to[1]);
      write(1, output, strlen(output));   

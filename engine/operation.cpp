@@ -34,23 +34,16 @@ bool is_in(char val, char arr[], int size){
     return false;
 }
 
-bool is_legal(struct move *play, int P) {
-    int i = 0;
-    for (i=0; i < board.k; i++) {
-        if (comp_arr(board.movelist[i].from, play->from) &&
-            comp_arr(board.movelist[i].to, play->to)) return true;
-    
-    }
-    return false;
-}
 
-int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
+int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P) {
     
-    if (board->squares[i+mod_i][j+mod_j] == pieces[1-P][5]) return 0;
+    //if (board->squares[i+mod_i][j+mod_j] == pieces[1-P][5]) return 0;
      
-    board->movelist[board->k].passant=0;
-    board->movelist[board->k].passantJ[0]=board->passantJ;
-    board->movelist[board->k].passantJ[1]=-1;
+    moves->movements[moves->k].passant=0;
+    moves->movements[moves->k].passantJ[0]=board->passantJ;
+    moves->movements[moves->k].passantJ[1]=-1;
+    
+    
         
     if (i>7) {
     //i=16 denotes a castling movement.
@@ -58,30 +51,30 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
         
         int I = 7 * (1-P);
         
-        board->movelist[board->k].from[0] = I;
-        board->movelist[board->k].from[1] = 4;
+        moves->movements[moves->k].from[0] = I;
+        moves->movements[moves->k].from[1] = 4;
         
-        board->movelist[board->k].to[0] = I;
-        board->movelist[board->k].to[1] = j;
+        moves->movements[moves->k].to[0] = I;
+        moves->movements[moves->k].to[1] = j;
         
-        board->movelist[board->k].promoteto = 0;
-        board->movelist[board->k].casualty = 'x';
+        moves->movements[moves->k].promoteto = 0;
+        moves->movements[moves->k].casualty = 'x';
         
-        board->movelist[board->k].iscastle = 1;
-        board->movelist[board->k].lostcastle = 2;
+        moves->movements[moves->k].iscastle = 1;
+        moves->movements[moves->k].lostcastle = 2;
         
         }
 
         
-        //i=55 or 22 denotes an en passant capture.
+        //i=33 or 44 denotes an en passant capture.
      if(i==33||i==44){
-            board->movelist[board->k].passant=1;
+          moves->movements[moves->k].passant = 1;
             i = i/11;
         }
         
-        //i=33 or 44 denotes a double-step pawn movement.
+        //i=11 or 66 denotes a double-step pawn movement.
      if(i==11||i==66) { 
-            board->movelist[board->k].passantJ[1]=j;
+            moves->movements[moves->k].passantJ[1]=j;
                 i=i/11;
         }
     }
@@ -91,30 +84,30 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     if (i<8) { 
     
-    board->movelist[board->k].from[0] = i;
-    board->movelist[board->k].from[1] = j;
+    moves->movements[moves->k].from[0] = i;
+    moves->movements[moves->k].from[1] = j;
     
-    board->movelist[board->k].to[0]=i+mod_i;
-    board->movelist[board->k].to[1]=j+mod_j;
+    moves->movements[moves->k].to[0]=i+mod_i;
+    moves->movements[moves->k].to[1]=j+mod_j;
     
-    board->movelist[board->k].casualty = board->squares[i+mod_i][j+mod_j];
-    board->movelist[board->k].promoteto = 0;
-    board->movelist[board->k].iscastle = 0;
-    board->movelist[board->k].lostcastle = 0;
+    moves->movements[moves->k].casualty = board->squares[i+mod_i][j+mod_j];
+    moves->movements[moves->k].promoteto = 0;
+    moves->movements[moves->k].iscastle = 0;
+    moves->movements[moves->k].lostcastle = 0;
     
-    if (board->movelist[board->k].passant) 
-        board->movelist[board->k].casualty = pieces[1-P][0];
+    if (moves->movements[moves->k].passant) 
+        moves->movements[moves->k].casualty = pieces[1-P][0];
     
     
     if ((i==0 && P==1)||(i==7 && P==0)){
         if(j==0 && board->castle[P][0]==1)
-            board->movelist[board->k].lostcastle = 1;
+            moves->movements[moves->k].lostcastle = 1;
         
         if(j==4 && board->castle[P][1]==1)
-            board->movelist[board->k].lostcastle = 2;
+            moves->movements[moves->k].lostcastle = 2;
         
         if(j==7 && board->castle[P][2]==1)
-            board->movelist[board->k].lostcastle = 3;
+            moves->movements[moves->k].lostcastle = 3;
             
     }
         
@@ -124,12 +117,12 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
     
     if (P>3) {printf("fodeumlk\n");exit(0);}
     
-    if (P==3) {board->movelist[board->k].promoteto = 'q'; P=1;}
-    if (P==2) {board->movelist[board->k].promoteto = 'Q'; P=0;}
+    if (P==3) {moves->movements[moves->k].promoteto = 'q'; P=1;}
+    if (P==2) {moves->movements[moves->k].promoteto = 'Q'; P=0;}
     
     
     
-    if (check_move_check(board, &board->movelist[board->k], P)) return 0;      
+    if (check_move_check(board, &moves->movements[moves->k], P)) return 0;      
         
        
   
@@ -139,50 +132,11 @@ int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P) {
 
     /*printf("appending[k=%i]: ", k);*/
     /*print_movement(k,P);*/
-                    board->k++;
+                    moves->k++;
                     return 1;
 }
 
 
-//DEPRECATED FUNCTION.
-void erase_moves(struct board *tgt, int eraseall) {
-    int i = 0;
-    tgt->k=0;
-    tgt->kad = 0;
-
-/*    for (i=0; i < 128; i++) {
-        tgt->movelist[i][0][0] = 0;
-        tgt->movelist[i][0][1] = 0;
-        tgt->movelist[i][1][0] = 0;
-        tgt->movelist[i][1][1] = 0;
-        tgt->movelist[i][2][0] = 0;
-        tgt->movelist[i][2][1] = 0;
-        
-        if (eraseall) {
-        
-        tgt->movehistory[i][0][0] = 0;
-        tgt->movehistory[i][0][1] = 0;
-        tgt->movehistory[i][1][0] = 0;
-        tgt->movehistory[i][1][1] = 0;
-        tgt->movehistory[i][2][0] = 0;
-        tgt->movehistory[i][2][1] = 0;
-        }
-    }
-    
-    if (eraseall) for (i=0; i < 64; i++) {
-        tgt->attackers[i][0] = 0;
-        tgt->attackers[i][1] = 0;
-        
-        tgt->defenders[i][0] = 0;
-        tgt->defenders[i][1] = 0;
-        tgt->defenders[i][2] = 0;
-        
-    }
-        
-    tgt->k=0;
-    tgt->kad = 0;
-    tgt->hindex = 0;*/
-}
 
 
 
@@ -338,25 +292,6 @@ struct board *makeparallelboard (struct board *model) {
     
 
     struct board *_board = (struct board *)malloc(sizeof (struct board));
-
-    //else {struct board *_board = cudaMalloc()
-
-    //_board->attackers = board->attackers;
-    _board->k = 0;//model->k;
-    _board->kad = 0;//model->kad;
-    
-    _board->mobility[0] =  model->mobility[0];
-    _board->mobility[1] =  model->mobility[1];
-    
-   /* for (i=0;i<model->kad;i++) {
-        _board->attackers[i][0] = '0';
-        _board->attackers[i][1] = '0';
-    
-        _board->defenders[i][0] = '0';
-        _board->defenders[i][1] = '0';
-        _board->defenders[i][2] = '0';
-    }*/
-    
     
     for (i=0;i<8;i++)
         for (j=0;j<8;j++)
@@ -488,29 +423,32 @@ int power(int base, unsigned int exp) {
     return result;
  }
 
-void reorder_movelist(struct board *board) {
+void reorder_movelist(struct movelist *movelist) {
     int i=0;
     struct move temp;
     
     int Freeindex[128];
-    int bFK=0; int tFK=0;
+    int bFK=0, tFK=0;
     
+
     
-    
-    for (i=0;i<board->k;i++) {
-        if (board->movelist[i].casualty == 'x') {
+    for (i=1;i<movelist->k;i++) {
+        if (movelist->movements[i].casualty == 'x') {
             Freeindex[tFK] = i;
             tFK++;
             }
         
-        else if (tFK-bFK) {
+        else if (tFK>bFK) {
+            replicate_move(&temp, &movelist->movements[Freeindex[bFK]]);
+            //temp = movelist->movements[Freeindex[bFK]];
+            //movelist->movements[Freeindex[bFK]] = movelist->movements[i];
+            replicate_move(&movelist->movements[Freeindex[bFK]], &movelist->movements[i]);;
             
-            temp = board->movelist[Freeindex[bFK]];
-            board->movelist[Freeindex[bFK]] = board->movelist[i];
-            board->movelist[i] = temp;
+            replicate_move(&movelist->movements[i],&temp);
+            //movelist->movements[i] = temp;
             bFK++;
         }
-        
+
         
         
     }

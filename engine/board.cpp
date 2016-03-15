@@ -59,20 +59,27 @@ void setup_board (int setup) {
 void show_board (char squares[8][8]) {
     int i,j;
 
-    for (i = 0; i < 8; i++) {
-        for (j = 0; j < 8; j++) {
+    for(i=0;i<8;i++){
+        for(j=0;j<8;j++)
             printf("%c ", squares[i][j]);
-        }
-        printf("\n");
+      
+        printf("\n");}
+    //if (full){
+   //     printf("")
+   // }
+    
+    
     }
 
-}
+int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
+    
+    moves->k=0;
+    moves->kad =0;
 
-int legal_moves (struct board *board, int PL, int verbose) {
-    //erase_moves(board,0);
-    board->k=0;
-    board->kad =0;
-
+    //NullMove.
+    append_move(board, moves,9,6,6,6,PL);
+    
+    
     int EP = 1-PL;
        
   
@@ -93,10 +100,10 @@ int legal_moves (struct board *board, int PL, int verbose) {
         
         
         /*printf("starting move findings. PL=%i. pawn_vector=%i\n", PL,pawn_vector);*/
-        for (i=0;i < 8; i++){
-        for (j=0;j < 8; j++){
-            /*printf(">%i %i\n",i,j);*/
-            
+        
+        
+        forsquares{
+            if (!is_in(board->squares[i][j],pieces[PL],6)) continue;
             
             if (board->squares[i][j] == pieces[PL][0]) {
 
@@ -105,30 +112,31 @@ int legal_moves (struct board *board, int PL, int verbose) {
                 
                 if (board->passantJ==j+1||board->passantJ==j-1)
                     if (board->passantJ>-1)
-                        if (i==5||i==2) 
-                            append_move(board,i*11,j,pawn_vector,board->passantJ-j,PL);
-
+                        if ((i==3&&!PL)||(i==4&&PL)) 
+                            if (board->squares[i][board->passantJ]==pieces[1-PL][0]) 
+                                append_move(board, moves, i*11,j,pawn_vector,board->passantJ-j,PL);
+                        
                 
                 if ((is_in(board->squares[i+pawn_vector][j+1],pieces[EP],6)) && onboard(i+pawn_vector,j+1)) 
               
-                    append_move(board,i,j,pawn_vector,1,promote);
+                    append_move(board, moves,i,j,pawn_vector,1,promote);
                     
                 
                 if ((is_in(board->squares[i+pawn_vector][j-1],pieces[EP],6)) && onboard(i+pawn_vector,j-1))
                     
-                    append_move(board,i,j,pawn_vector,-1,promote);
+                    append_move(board,moves,i,j,pawn_vector,-1,promote);
                                        
                 
                         
                 if (board->squares[i+pawn_vector][j] == 'x' && onboard(i+pawn_vector,j)) 
 
-                    append_move(board,i,j,pawn_vector,0,promote);
+                    append_move(board,moves,i,j,pawn_vector,0,promote);
                                           
                 
                 if (promote > 1) { promote--;promote--;}
 
                 if (board->squares[i+(2*pawn_vector)][j] == 'x' && i == 6-5*PL && onboard(i+(2*pawn_vector),j))
-                        if(board->squares[i+pawn_vector][j]=='x') append_move(board,i*11,j,4*PL-2,0,PL);
+                        if(board->squares[i+pawn_vector][j]=='x') append_move(board,moves,i*11,j,4*PL-2,0,PL);
                           
                
             
@@ -138,7 +146,7 @@ int legal_moves (struct board *board, int PL, int verbose) {
             if (board->squares[i][j] == pieces[PL][1]) {
                /* printf("scanning tower moves\n");*/
 
-        movement_generator(board,0, '+', i, j, PL);
+        movement_generator(board,moves,0, '+', i, j, PL);
             }
             
             
@@ -151,11 +159,11 @@ int legal_moves (struct board *board, int PL, int verbose) {
          for (zeta=0; zeta < 4; zeta++){
              
      k_atk = mpc(board->squares, i+HT[zeta][0],j+HT[zeta][1],PL);       
-     if (k_atk) append_move(board,i,j,HT[zeta][0],HT[zeta][1],PL);
+     if (k_atk) append_move(board,moves,i,j,HT[zeta][0],HT[zeta][1],PL);
         
     
      k_atk = mpc(board->squares, i+HT[zeta][1],j+HT[zeta][0],PL);
-     if (k_atk) append_move(board,i,j,HT[zeta][1],HT[zeta][0],PL);
+     if (k_atk) append_move(board,moves,i,j,HT[zeta][1],HT[zeta][0],PL);
     
          }
          }
@@ -164,39 +172,39 @@ int legal_moves (struct board *board, int PL, int verbose) {
      if(board->squares[i][j] == pieces[PL][3]){
         /* printf("scanning bishop moves\n");*/
 
-         movement_generator(board,0, 'X', i, j, PL);
+         movement_generator(board,moves,0, 'X', i, j, PL);
                 
                 
      }
  if (board->squares[i][j] == pieces[PL][4]) {
      /*printf("scanning queen moves.\n"); */          
 
-     movement_generator(board,0, '+', i, j, PL);
-     movement_generator(board,0, 'X', i, j, PL);
+     movement_generator(board,moves,0, '+', i, j, PL);
+     movement_generator(board,moves,0, 'X', i, j, PL);
            
             }
             
 if (board->squares[i][j] == pieces[PL][5]){
     /*printf("scanning king moves.\n");*/
     
-     movement_generator(board,1, '+', i, j, PL);
-     movement_generator(board,1, 'X', i, j, PL);
+     movement_generator(board,moves,1, '+', i, j, PL);
+     movement_generator(board,moves,1, 'X', i, j, PL);
     
     if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, PL, 0)) {
 
-        if (cancastle(board, PL,-1)) append_move(board, 16, 2, 0, 0, PL);
+        if (cancastle(board, PL,-1)) append_move(board,moves, 16, 2, 0, 0, PL);
         
-        if (cancastle(board, PL, 1)) append_move(board, 16, 6, 0, 0, PL);
+        if (cancastle(board, PL, 1)) append_move(board,moves, 16, 6, 0, 0, PL);
        
     }
 
         }
          
         }
-        }
+        
 
          
-        board->mobility[PL] = board->k;
+        //board->mobility[PL] = board->k;
 
         return 0;
         }
@@ -219,11 +227,15 @@ int mpc(char squares[8][8], int i, int j, int player) {
 }
 
 void move_pc(struct board *tg_board, struct move *movement) {
-
+    
+    //Nullmove;
+    if (movement->from[0]==9) return;
+    
     char from[2] = {movement->from[0], movement->from[1]};
     char to[2] = {movement->to[0], movement->to[1]};
     
-
+    
+    
     
     int i=0;
 
@@ -244,7 +256,7 @@ void move_pc(struct board *tg_board, struct move *movement) {
         }        
     }
   
-    if(movement->passant) tg_board->squares[from[0]][to[1]] == 'x';
+    if(movement->passant) tg_board->squares[from[0]][to[1]] = 'x';
         
     
     int cP =-1;
@@ -266,10 +278,13 @@ void move_pc(struct board *tg_board, struct move *movement) {
 
 void undo_move(struct board *tg_board, struct move *movement) {
     
+    //Nullmove;
+    if (movement->from[0]==9) return;
+    
     char to[2] = {movement->from[0], movement->from[1]};
     char from[2] = {movement->to[0], movement->to[1]};
     
-    
+
      
     if(movement->casualty==0) movement->casualty='x';
     
@@ -320,31 +335,31 @@ void undo_move(struct board *tg_board, struct move *movement) {
 }
 
 
-void attackers_defenders (struct board *board, int P) {
+void attackers_defenders (char squares[8][8], struct movelist moves, int P) {
     int i = 0;
-    board->kad = 0;
+    moves.kad = 0;
     char Attacker = 0;
     
     
-    for (i=0;i<board->k;i++) {
+    for (i=0;i<moves.k;i++) {
 
-        if (board->movelist[i].casualty != 'x') {
+        if (moves.movements[i].casualty != 'x') {
 
         /*print_movement(k);*/
         Attacker = 
-        board->squares[board->movelist[i].from[0]][board->movelist[i].from[1]];
-        board->attackers[board->kad][0] = Attacker;
-        board->attackers[board->kad][1] = board->movelist[i].from[0];
-        board->attackers[board->kad][2] = board->movelist[i].from[1];
+        squares[moves.movements[i].from[0]][moves.movements[i].from[1]];
+        moves.attackers[moves.k][0] = Attacker;
+        moves.attackers[moves.k][1] = moves.movements[i].from[0];
+        moves.attackers[moves.k][2] = moves.movements[i].from[1];
     
-        board->defenders[board->kad][0] = board->movelist[i].casualty;
-        board->defenders[board->kad][1] = board->movelist[i].to[0];
-        board->defenders[board->kad][2] = board->movelist[i].to[1];
+        moves.defenders[moves.k][0] = moves.movements[i].casualty;
+        moves.defenders[moves.k][1] = moves.movements[i].to[0];
+        moves.defenders[moves.k][2] = moves.movements[i].to[1];
         
         //char buf[2] = {defenders[kad][1], defenders[kad][2]};
         //cord2pos(buf);
         /*printf("defender: %c at %c%c.\n",defenders[kad][0],buf[0],buf[1]);*/
-        board->kad++;
+        moves.kad++;
         }
     } 
     
@@ -422,7 +437,7 @@ int findking (char board[8][8], char YorX, int player) {
         if (board[i][j] == KING) {
             if (YorX == 'Y') return i;
             if (YorX == 'X') return j;
-            else printf("ERROR invalid YorX for findking");
+
             
             
         }
@@ -468,7 +483,7 @@ int cancastle (struct board *board, int P, int direction) {
  
 }
 
-void movement_generator(struct board *board, int limit, 
+void movement_generator(struct board *board, struct movelist *moves, int limit, 
                         char direction, int i, int j, int P) {
     int X=0, q=0;
     int Ti=0,Tj=0;
@@ -509,13 +524,13 @@ void movement_generator(struct board *board, int limit,
            
            if (onboard(Ti,Tj)) {
                if (board->squares[Ti][Tj]=='x') {
-                   append_move(board, i, j, Ti-i, Tj-j, P);
+                   append_move(board, moves, i, j, Ti-i, Tj-j, P);
                    q++;
                    if (limit) q=0;
 
                }
                if (is_in(board->squares[Ti][Tj],pieces[1-P],6)) {
-                   append_move(board, i, j, Ti-i, Tj-j, P);
+                   append_move(board, moves, i, j, Ti-i, Tj-j, P);
                    q=0;
                }
                

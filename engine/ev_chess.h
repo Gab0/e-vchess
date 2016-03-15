@@ -49,19 +49,21 @@ struct move {
     int passantJ[2];
     int passant;
 };
-
+struct movelist;
+struct movelist {
+    struct move movements[128];
+    char attackers[64][3];
+    char defenders[64][3];
+    
+    int k;
+    int kad;
+    
+    int mobility;
+};
 
 struct board;
    struct board {
       char squares[8][8];
-      struct move movelist[128];
-      int k;
-      
-      char attackers[64][3];
-      char defenders[64][3];
-      int kad;
-      
-      int mobility[2];
       
       int castle[2][3];
       
@@ -134,35 +136,35 @@ extern bool toloadmachine;
 extern bool loadDEEP;
 
 extern bool allow_castling;
-/*functions from main.cpp*/
 
+//functions from main.cpp;
 void computer(int verbose);
 void SIGthink(int signum);
     
-/*functions from board.cpp*/
+//functions from board.cpp;
 void setup_board(int setup);
 void show_board(char squares[8][8]);
-int legal_moves (struct board *board, int PL, int verbose);
+int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose);
 int mpc (char squares[8][8], int i, int j, int player);
 void move_pc(struct board *tg_board, struct move *movement);
 void undo_move(struct board *tg_board, struct move *movement);
-void attackers_defenders (struct board *board,int P);
+void attackers_defenders (char squares[8][8], struct movelist moves, int P);
 void h_move_pc (struct board *board,char movement[][2]);
 int history_append(struct move *move);
 int history_rollback(int times);
 //void castle (struct board *board, int doundo, int PL, int side);
 int findking (char board[8][8], char YorX, int player);
 int cancastle (struct board *board, int P, int direction);
-void movement_generator(struct board *board, int limit, char direction, int i, int j, int P);
+void movement_generator(struct board *board, struct movelist *moves, int limit, 
+                        char direction, int i, int j, int P);
 
-/*functions from operation.cpp*/
-
+//functions from operation.cpp;
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
 
 bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
-int append_move(struct board *board, int i,int j, int mod_i, int mod_j, int P);
+int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
 int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
 int check_move_check (struct board *tg_board, struct move *move, int P);
@@ -172,32 +174,29 @@ void select_top (struct move *array, int size, int target[], int quant);
 void replicate_move(struct move *target, struct move *source) ;
 //void freeboard (struct board *target);
 int power(int base, unsigned int exp);
-void reorder_movelist(struct board *board); 
+void reorder_movelist(struct movelist *movelist); 
 
 
 
-/*functions from interface.cpp*/
-
+//functions from interface.cpp;
 int parse_move (struct move *target, char *s, int P);
 void print_movement (struct move *move, int full);
 int read_movelines (char txt[128], int verbose);
 int fehn2board (char str[]);
-void eval_info_move(struct move *move, int DEEP, int P);
+void eval_info_move(struct move *move, int DEEP, time_t startT, int P);
 
 
-/*functions from brain.cpp*/
-
+//functions from brain.cpp;
 int think (struct move *out, int PL, int DEEP, int verbose);
-int evaluate(struct board *evalboard, int PL);
+int evaluate(struct board *evalboard, struct movelist *moves, int PL);
 long thinkiterate(struct board *feed, int PL, int DEEP, 
-        long chainscore, long Alpha, long Beta);
+        int verbose, long Alpha, long Beta);
 float scoremod (int DEEP, int method);
+int canNullMove (int DEEP, struct board *board, int K, int P);
 
 
 
-
-/*functions from evolution.cpp*/
-
+//functions from evolution.cpp;
 int loadmachine (int verbose, char *dir);
 int applyresult (int result);
 int countpieces (void);
