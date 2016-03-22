@@ -3,7 +3,7 @@ from evchess_evolve.parameter import parameter
 def STDPARAMETERS():
     return [
 
-        parameter("param_DEEP", 0, 30, 2, bLIM=4, INCR=2, LIM=10),
+        #parameter("param_DEEP", 0, 30, 2, bLIM=4, INCR=2, LIM=10),
 
         parameter("eval_randomness", 0, 30, 20, INCR=10, bLIM=1, LIM=270),
 

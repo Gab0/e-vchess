@@ -16,7 +16,7 @@ import threading
 import sys
 
 from evchess_evolve.core import *
-
+from evchess_evolve.advanced import * 
 from random import randrange
 
 from psutil import *
@@ -213,6 +213,7 @@ class Application():
         setmachines(population)
         
     def routine_pop_management(self, LEVEL):
+        if not len(LEVEL): return
         population = loadmachines()
 
         originalPOPLEN = len(population)
@@ -228,12 +229,9 @@ class Application():
             for k in range(2): population = mutatemachines(1,population)
 
         if "B" in LEVEL:
-            for k in range(4): population = mutatemachines(1,population)
-       
-        if "C" in LEVEL:
             MODscorelimit = 2
             X = round(originalPOPLEN/8)
-            population = deltheworst_clonethebest(population, -X-3, MODscorelimit)
+            population = deltheworst_clonethebest(population, -X+3, MODscorelimit)
 
             population = populate(population, X)
          
@@ -243,13 +241,18 @@ class Application():
             
             for k in range(2): population = mutatemachines(1, population)
 
+        #setmachines need to happen before management level C, which is advanced and loads
+            #the population by it's own method.
+        setmachines(population)
+        if "C" in LEVEL:
+             ADVmanagement()
                 
         totalgames = (self.setcounter_illegalmove
                      +self.setcounter_forcedwin
                      +self.setcounter_checkmate
                      +self.setcounter_draws+1)   
 
-        setmachines(population)
+        
         self.log('')
         self.log('>>>>ROUTINE MANAGEMENT %s' % LEVEL)
         self.log("ROUND = %i. checkmate-> %i; forced wins-> %i; draws-> %i; illegal moves-> %i"
