@@ -71,7 +71,7 @@ void show_board (char squares[8][8]) {
     
     }
 
-int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
+Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
     
     moves->k=0;
     moves->kad =0;
@@ -209,7 +209,7 @@ if (board->squares[i][j] == pieces[PL][5]){
         return 0;
         }
 
-int mpc(char squares[8][8], int i, int j, int player) {
+Device int mpc(char squares[8][8], int i, int j, int player) {
 
     int enemy = 1 - player;
 
@@ -226,7 +226,7 @@ int mpc(char squares[8][8], int i, int j, int player) {
     else return 0;
 }
 
-void move_pc(struct board *tg_board, struct move *movement) {
+Host Device void move_pc(struct board *tg_board, struct move *movement) {
     
     //Nullmove;
     if (movement->from[0]==9) return;
@@ -276,7 +276,7 @@ void move_pc(struct board *tg_board, struct move *movement) {
     
 }
 
-void undo_move(struct board *tg_board, struct move *movement) {
+Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
     //Nullmove;
     if (movement->from[0]==9) return;
@@ -335,7 +335,7 @@ void undo_move(struct board *tg_board, struct move *movement) {
 }
 
 
-void attackers_defenders (char squares[8][8], struct movelist moves, int P) {
+Device void attackers_defenders (char squares[8][8], struct movelist moves, int P) {
     int i = 0;
     moves.kad = 0;
     char Attacker = 0;
@@ -393,39 +393,9 @@ int history_rollback(int times) {
    return 0; 
 }
 
-//LEGACY FUNCTION.
-void castle (struct board *board, int doundo, int PL, int side) {
-    int i = 0;
-    int j = 0;
-    
-    if (PL == 0) i=7;
-   
-   
-    if (doundo) {
-        board->squares[i][4]='x';
-        board->squares[i][j]='x';
-        if(side) {
-            board->squares[i][6]=pieces[PL][5];
-            board->squares[i][5]=pieces[PL][1];}
-        else {
-            board->squares[i][2]=pieces[PL][5];
-            board->squares[i][3]=pieces[PL][1];}
-    }
-    
-    else {
-        board->squares[i][4]=pieces[PL][5];
-        board->squares[i][j]=pieces[PL][1];;
-        if(side) {
-            board->squares[i][6]='x';
-            board->squares[i][5]='x';}
-        else {
-            board->squares[i][2]='x';
-            board->squares[i][3]='x';}        
-    }
-}
 
 
-int findking (char board[8][8], char YorX, int player) {
+Device int findking (char board[8][8], char YorX, int player) {
     char KING = pieces[player][5];
  
     int i=0;
@@ -445,7 +415,7 @@ int findking (char board[8][8], char YorX, int player) {
     return -1;
 }
 
-int cancastle (struct board *board, int P, int direction) {
+Device int cancastle (struct board *board, int P, int direction) {
     if (!board->castle[P][1]) return 0;
     if (!allow_castling) return 0;
     int ROW = 7*(1-P);
@@ -483,7 +453,7 @@ int cancastle (struct board *board, int P, int direction) {
  
 }
 
-void movement_generator(struct board *board, struct movelist *moves, int limit, 
+Device void movement_generator(struct board *board, struct movelist *moves, int limit, 
                         char direction, int i, int j, int P) {
     int X=0, q=0;
     int Ti=0,Tj=0;

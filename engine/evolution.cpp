@@ -142,7 +142,7 @@ int loadmachine (int verbose, char *dir) {
        loadedmachine = true;
        
        if (againstHUMAN) {
-           log(dir,machinepath);
+           chesslog(dir,machinepath);
        }
        
        return 0;
@@ -247,7 +247,7 @@ void dump_history() {
     
 }
 
-void log(char *location, const char content[]) {
+void chesslog(char *location, const char content[]) {
     //printf("saving log. %s\n", content);
     
     sprintf(location, "%s/engine_log", location);

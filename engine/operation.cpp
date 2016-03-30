@@ -25,7 +25,7 @@ void pos2cord (char out[]) {
 
 
 
-bool is_in(char val, char arr[], int size){
+Device bool is_in(char val, char arr[], int size){
     int i = 0;
     for (i=0; i < size; i++) {
         if (arr[i] == val)
@@ -35,13 +35,15 @@ bool is_in(char val, char arr[], int size){
 }
 
 
-int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P) {
+Device int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P) {
     
     //if (board->squares[i+mod_i][j+mod_j] == pieces[1-P][5]) return 0;
      
     moves->movements[moves->k].passant=0;
     moves->movements[moves->k].passantJ[0]=board->passantJ;
     moves->movements[moves->k].passantJ[1]=-1;
+    
+    moves->movements[moves->k].iscastle = 0;
     
     
         
@@ -115,7 +117,7 @@ int append_move(struct board *board, struct movelist *moves, int i,int j, int mo
     //printf("testing check.\n");
     //print_play_cord(move);
     
-    if (P>3) {printf("fodeumlk\n");exit(0);}
+    if (P>3) {printf("fodeumlk\n");}
     
     if (P==3) {moves->movements[moves->k].promoteto = 'q'; P=1;}
     if (P==2) {moves->movements[moves->k].promoteto = 'Q'; P=0;}
@@ -140,7 +142,7 @@ int append_move(struct board *board, struct movelist *moves, int i,int j, int mo
 
 
 
-int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
+Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
     //show_board(squares);
     
     int i = 0;
@@ -232,7 +234,7 @@ int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose)
     return result;
 }
 
-int check_move_check (struct board *tg_board, struct move *move, int P) {
+Device int check_move_check (struct board *tg_board, struct move *move, int P) {
     
 
     int kpos[2];
@@ -275,7 +277,7 @@ int check_move_check (struct board *tg_board, struct move *move, int P) {
 }
 
 
-int getindex (char x, char array[],int size) {
+Device int getindex (char x, char array[],int size) {
     int i=0;
     for (i=0;i<size;i++) {
         if (array[i] == x) return i;
@@ -284,7 +286,7 @@ int getindex (char x, char array[],int size) {
     return -1;
 }
 
-struct board *makeparallelboard (struct board *model) {
+Device struct board *makeparallelboard (struct board *model) {
     int i=0;
     int j=0;
     int k=0;
@@ -316,7 +318,7 @@ void freeboard (struct board *target) {
     }
 }
 
-void select_top (struct move *array, int size, int target[], int quant) {
+Device void select_top (struct move *array, int size, int target[], int quant) {
     int i = 0;
     int qu=0;
     int win[16][2]={0};
@@ -396,7 +398,7 @@ void select_top (struct move *array, int size, int target[], int quant) {
     
 }
 
-void replicate_move(struct move *target, struct move *source) {
+Host Device void replicate_move(struct move *target, struct move *source) {
     target->from[0] = source->from[0];
     target->from[1] = source->from[1];
 
@@ -416,14 +418,14 @@ void replicate_move(struct move *target, struct move *source) {
         target->score = 0;
 }
 
-int power(int base, unsigned int exp) {
+Device int power(int base, unsigned int exp) {
     int i, result = 1;
     for (i = 0; i < exp; i++)
         result *= base;
     return result;
  }
 
-void reorder_movelist(struct movelist *movelist) {
+Device void reorder_movelist(struct movelist *movelist) {
     int i=0;
     struct move temp;
     

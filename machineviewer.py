@@ -368,7 +368,7 @@ class Application(Frame):
         print('stats dumped.')
 
     def TOpopulate(self, NUM):
-        self.machines = populate(self.machines, NUM)
+        self.machines = populate(self.machines, NUM, 1)
         print('created 16 standard postmutated individuals.')
 
 

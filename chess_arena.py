@@ -231,13 +231,15 @@ class Application():
         if "B" in LEVEL:
             MODscorelimit = 2
             X = round(originalPOPLEN/8)
-            population = deltheworst_clonethebest(population, -X+3, MODscorelimit)
+            population = deltheworst_clonethebest(population, -X-3, MODscorelimit)
 
-            population = populate(population, X)
-         
-
+            population = populate(population, X, 1)
 
             population = replicate_best_inds(population, 3)
+
+            population = deltheworst_clonethebest(population,
+                                                 originalPOPLEN-len(population),
+                                                 MODscorelimit)
             
             for k in range(2): population = mutatemachines(1, population)
 
@@ -517,7 +519,7 @@ class table(Frame):
 
         for line in self.MACHINE[self.turn].stdout.readlines():
             #print(line.decode('utf-8'))
-            line = line.decode('utf-8')[:-1]
+            line = line.decode('utf-8', 'ignore')[:-1]
 
             L = line.split(" ")
             if ("move" in L[0]) and (len(L)>1):

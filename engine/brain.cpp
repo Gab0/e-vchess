@@ -1,18 +1,15 @@
 #include "ev_chess.h"
 
 
-#define DUMP(B) if (B!=NULL){free(B);B=NULL;}
+#define DUMP(B) if(B!=NULL){free(B);B=NULL;}
        
 
 
 
 
-
 int think (struct move *out, int PL, int DEEP, int verbose) {
+    
     int i=0; int r=0;
-    int last[2]={0,-32760};
-
-    int bI = 0;
     
     time_t startT = time(NULL);
 
@@ -22,69 +19,117 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     long Alpha = -1690000;
     long Beta = 1690000;
     
-    struct movelist moves;
-    legal_moves(_board, &moves,PL, 0); 
+    struct movelist *moves = (struct movelist *) calloc(1, sizeof(struct movelist));
+    //moves->k = 0;
+    //moves->kad = 0;
     
-    reorder_movelist(&moves);
+            
+    legal_moves(_board, moves,PL, 0); 
     
-    
-    Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,moves.k,DEEP);
-    if (moves.k == 0) return -1;
-    Vb printf("value of k is %i.\n",moves.k);
-    
+    reorder_movelist(moves);
     
     
-    for (i=0;i<moves.k;i++) {
+    Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,moves->k,DEEP);
+    if (moves->k == 0) return -1;
+    Vb printf("value of k is %i.\n",moves->k);
+    
+    
+    
+    
     //infoMOVE = (char *)malloc(sizeof(char)*128);
+        
+#ifdef __CUDACC__        
+    
+
+    struct board *GPUboard;
+    struct moves *GPUmoves;
+    
+    GPUmachineplays = machineplays;
+    
+    cudaMalloc((void**) &GPUboard, sizeof(struct board));
+    cudaMemcpy(&GPUboard, &_board, sizeof(struct board), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**) &GPUmoves, sizeof(struct moves));
+    cudaMemcpy(&GPUmoves, moves, sizeof(struct moves), cudaMemcpyHostToDevice);
+    
+    kerneliterate <<<1, 35>>> (GPUboard, GPUmoves.movements[i], PL, DEEP);
+        
+    
+        
+// non cuda move evaluating mehthod.        
+#else
+      for (i=0;i<moves->k;i++) {
         if(i==0)
-           if(!canNullMove(DEEP, _board, moves.k, PL))
+           if(!canNullMove(DEEP, _board, moves->k, PL))
                continue;       
         
         
         //show_board(board.squares);
      Vb printf("new tree branching. i=%i\n",i);
-     Vb print_movement(&moves.movements[i],0);
+     Vb print_movement(&moves->movements[i],0);
      printf("Alpha = %i\n", Alpha);
      
-     move_pc(_board, &moves.movements[i]);    
-     moves.movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
+     move_pc(_board, &moves->movements[i]);    
+     moves->movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, 0,
              Alpha, Beta);
      
-     if (moves.movements[i].score > Alpha) {
-         Alpha = moves.movements[i].score;
+     if (moves->movements[i].score > Alpha) {
+         Alpha = moves->movements[i].score;
          r=i;
+
      }
      
      //show_board(_board->squares);
-     undo_move(_board, &moves.movements[i]); 
+     undo_move(_board, &moves->movements[i]); 
 
      
-     Vb printf("analyzed i=%i; score is %li.\n",i, moves.movements[i].score);
-     Vb if (show_info) printf(">>>>>>>>\n");
-     if (show_info) eval_info_move(&moves.movements[i],DEEP, startT, PL);              
+     Vb printf("analyzed i=%i; score is %li.\n",i, moves->movements[i].score);
+     IFnotGPU( Vb if (show_info) printf(">>>>>>>>\n"); )
+     IFnotGPU( if (show_info) eval_info_move(&moves->movements[i],DEEP, startT, PL); )              
+      }     
              
-             
-
-     }
+#endif
+     
 
     
 
 
     if (r==0) r++;
-    replicate_move(out, &moves.movements[r]);
+    replicate_move(out, &moves->movements[r]);
     print_movement(out,1);
    
    Vb printf("r = %i\n", r);
-
+   
+   DUMP(moves);
    DUMP(_board);
    return r;
    
 }
+#ifdef __CUDACC__
+Global void kerneliterate(struct board *modelboard, struct move *move, int PL, int DEEP) {
+    
+    
+    
+    struct board *board;
+    
+    
+ 
+        
+    move_pc(board, move);
+    long Alpha = -16900;
+    long Beta = 16900;
+    move->score = thinkiterate(board, PL, DEEP, 0, Alpha, Beta);
+    undo_move(board, move);        
+            
+    cudaFree(board);
+}
 
-long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
+#endif
+
+Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
         long Alpha, long Beta) {
 
-    int i=0, j=0, t=0, W=0, r=0;
+    int i=0, r=0;
     
     int enemy_score=0,machine_score=0;
 
@@ -107,11 +152,12 @@ long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
          if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
                  findking(_board->squares, 'X', PL), PL, 0)) {
             score = 13000 - 50*(Brain.DEEP-DEEP); 
-            if (PL == machineplays) score = -score;
+            if (PL == Machineplays) score = -score;
          }
           else score = 0;
         
        Vb printf("check/stalemate.\n");
+        DUMP(_board);
        return score;
          
      }
@@ -119,7 +165,7 @@ long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
     
 
 
-    Vb show_board(_board->squares);
+    IFnotGPU( Vb show_board(_board->squares); )
    if (DEEP>0) {
     reorder_movelist(&moves); 
     
@@ -142,14 +188,14 @@ long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
        
        //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
        
-       if (PL==machineplays) 
+       if (PL==Machineplays) 
            if (moves.movements[i].score > Alpha) {
                //printf("*.\n");
                Alpha = moves.movements[i].score; r=i;
            
            if(Beta<=Alpha) ABcutoff=1;}
 
-       if (PL!=machineplays)
+       if (PL!=Machineplays)
             if (moves.movements[i].score < Beta) {
                //printf("*.\n");
                Beta = moves.movements[i].score; r=i;
@@ -159,33 +205,34 @@ long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
               
         if (ABcutoff) {
             score = moves.movements[i].score;
-
+             DUMP(_board);
             return score;
         }
      }
      if (r==0)r++;  
      score = moves.movements[r].score;  
+      DUMP(_board);
      return score;       
    }
      
      else {
-     machine_score = evaluate(_board, &moves, machineplays);
-     enemy_score = evaluate(_board, &moves, 1-machineplays);
+     machine_score = evaluate(_board, &moves, Machineplays);
+     enemy_score = evaluate(_board, &moves, 1-Machineplays);
              
      score = machine_score - enemy_score * Brain.presumeOPPaggro;
      //printf("S=%i\n", score);
      //printf(">>>>>>%i.\n", PL);
     //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
    //machine_score, enemy_score);
-     Vb if (show_info) eval_info_move(&moves.movements[i],DEEP, 0, PL);  
+     IFnotGPU( Vb if (show_info) eval_info_move(&moves.movements[i],DEEP, 0, PL); )
      
-
+     DUMP(_board);
      return score;
      }
 
 }
 
-int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
+Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     int score = 0;
     
     int i = 0;
@@ -296,7 +343,7 @@ float scoremod (int DEEP, int method) {
 }
 
 
-int canNullMove (int DEEP, struct board *board, int K, int P) {
+Device int canNullMove (int DEEP, struct board *board, int K, int P) {
     int i=0,j=0,NullMove=0;
            if (DEEP>Brain.DEEP-2&&K>5) 
        forsquares {

@@ -2,16 +2,18 @@
 
 
 struct board board;
-struct param Brain;
+Device struct param Brain;
 struct movelist moves;
 
-char pieces[2][6] = {{'P','R','N','B','Q','K'},{'p','r','n','b','q','k'}};
+Device char pieces[2][6] = {{'P','R','N','B','Q','K'},{'p','r','n','b','q','k'}};
 
 bool computer_turn = false;
 
 char *output = (char *)malloc(256 * sizeof(char));
 
 int machineplays = 1;
+Device int GPUmachineplays = 1;
+
 bool loadedmachine = false;
 
 char *infoAUX = (char *)malloc(256 * sizeof(char));
@@ -35,16 +37,21 @@ int  infomoveINDEX;
 
 char *machinepath;
 
-bool show_info = false;
+Device bool show_info = false;
 
 bool againstHUMAN = false;
 bool toloadmachine = false;
 bool loadDEEP = true;
 
-bool allow_castling = true;
-
+IFnotGPU( bool allow_castling = true; )
+IFGPU( __device__ bool allow_castling = true; )
 int main(int argc, char** argv) {
 
+#ifdef __CUDACC__
+    standardBrain <<<1, 1>>> ();
+#else
+    standardBrain();
+#endif
     int i=0;
     signal(SIGINT, SIG_IGN);    
     signal(SIGTERM, SIG_IGN); 
@@ -53,46 +60,6 @@ int main(int argc, char** argv) {
     printf("id name e-v dchess engine v0.7\n");
     printf("id author afrogabs\n");
     printf("uci ok\n");
-    
-    //iniatializing variables with standard values.
-    
-    //pvalues is the value of each piece in centipawns. 
-    //order is pawn-rook-knight-bishop-queen-king.
-    Brain.pvalues[0] = 100;
-    Brain.pvalues[1] = 500;
-    Brain.pvalues[2] = 300;
-    Brain.pvalues[3] = 300;
-    Brain.pvalues[4] = 900;
-    Brain.pvalues[5] = 2000;
-    
-    //randomness is the limit to the randomic small variability on the score, 
-    //in centipawns.
-    Brain.randomness = 10;
-    //seekmiddle augments the score for pieces in the center of the board.
-    Brain.seekmiddle = 0;
-    //DEEP is the number of future moves to be evaluated.
-    //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 4;
-    //seekpieces augments the score for attacked enemy pieces.
-    Brain.seekpieces = 1;
-    
-    Brain.deviationcalc = 0;
-    Brain.evalmethod = 0;
-    //seekatk augments the score for taken pieces.
-    Brain.seekatk = 0;
-    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    Brain.presumeOPPaggro = 1;
-    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
-    Brain.pawnrankMOD = 0;
-    Brain.parallelcheck = 0;
-    Brain.balanceoffense = 0;    
-    Brain.cumulative = 0;
-    Brain.MODbackup = 0;
-    Brain.MODmobility = 0;
-    
-    
-    
-    
     
     
     
@@ -205,7 +172,7 @@ int main(int argc, char** argv) {
             computer(1);
         }
     }*/
-        
+#ifndef __CUDACC__
     if (strstr(inp, "list") !=NULL)  {
         legal_moves(&board, &moves,0,0);
         printf("list [%i]:\n", moves.k);
@@ -219,7 +186,7 @@ int main(int argc, char** argv) {
         for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
         printf("attacker? %c.\n", moves.movements[i].casualty);}
     }   
-           
+#endif
        
     if(strstr(inp, "result") !=NULL) {
         if (strstr(inp, "1-0")!=NULL && machineplays == 0) applyresult(1);
@@ -281,4 +248,45 @@ void computer(int verbose) {
 
 void SIGthink(int signum) {
     computer(1);
+}
+
+
+Host Device void standardBrain() {
+       
+    //iniatializing variables with standard values.
+    
+    //pvalues is the value of each piece in centipawns. 
+    //order is pawn-rook-knight-bishop-queen-king.
+    Brain.pvalues[0] = 100;
+    Brain.pvalues[1] = 500;
+    Brain.pvalues[2] = 300;
+    Brain.pvalues[3] = 300;
+    Brain.pvalues[4] = 900;
+    Brain.pvalues[5] = 2000;
+    
+    //randomness is the limit to the randomic small variability on the score, 
+    //in centipawns.
+    Brain.randomness = 10;
+    //seekmiddle augments the score for pieces in the center of the board.
+    Brain.seekmiddle = 0;
+    //DEEP is the number of future moves to be evaluated.
+    //must be an even number, in order to always end in a engine move.
+    Brain.DEEP = 4;
+    //seekpieces augments the score for attacked enemy pieces.
+    Brain.seekpieces = 1;
+    
+    Brain.deviationcalc = 0;
+    Brain.evalmethod = 0;
+    //seekatk augments the score for taken pieces.
+    Brain.seekatk = 0;
+    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
+    Brain.presumeOPPaggro = 1;
+    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
+    Brain.pawnrankMOD = 0;
+    Brain.parallelcheck = 0;
+    Brain.balanceoffense = 0;    
+    Brain.cumulative = 0;
+    Brain.MODbackup = 0;
+    Brain.MODmobility = 0;
+    
 }

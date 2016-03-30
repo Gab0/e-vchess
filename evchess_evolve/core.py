@@ -12,7 +12,7 @@ machine_dir = "/home/gabs/Desktop/e-vchess/machines"
 from evchess_evolve.machine import machine
 
 
-def populate(population,popsize):
+def populate(population,popsize, Randomize):
     NEWINDS = []
     for i in range(popsize):
         NEWINDS.append(machine(str(random.randrange(0,6489))+".mac")) 
@@ -20,7 +20,8 @@ def populate(population,popsize):
 
 
     for I in NEWINDS:
-        #I.randomize()
+        if Randomize:
+            I.randomize()
         population.append(I)
 
         
@@ -265,6 +266,8 @@ def deltheworst_clonethebest(population, action, MODlimit):
             for I in NEWINDS:
                 population.append(I)
 
+            
+                
     return population
 
 def create_hybrid(population):
