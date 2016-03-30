@@ -9,7 +9,6 @@ int fehn2board (char str[]) {
     int z=0;
     int i=0;
     int j=0;
-    int n=0;
     int number=0;
     int PL=0;
     fstring = strtok(str, " ");

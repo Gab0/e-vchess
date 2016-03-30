@@ -86,9 +86,6 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
         int i = 0;
         int j = 0;
         
-        int m_i = 0;
-        int m_j = 0;
-        
         int zeta = 0;
 
         int pawn_vector = -1;
@@ -103,9 +100,9 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
         
         
         forsquares{
-            if (!is_in(board->squares[i][j],pieces[PL],6)) continue;
+            if (!is_in(board->squares[i][j], Pieces[PL],6)) continue;
             
-            if (board->squares[i][j] == pieces[PL][0]) {
+            if (board->squares[i][j] == Pieces[PL][0]) {
 
                 if (i==6&&PL==1) {promote++; promote++;}
                 if (i==1&&PL==0) {promote++; promote++;}
@@ -113,16 +110,16 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
                 if (board->passantJ==j+1||board->passantJ==j-1)
                     if (board->passantJ>-1)
                         if ((i==3&&!PL)||(i==4&&PL)) 
-                            if (board->squares[i][board->passantJ]==pieces[1-PL][0]) 
+                            if (board->squares[i][board->passantJ]==Pieces[1-PL][0]) 
                                 append_move(board, moves, i*11,j,pawn_vector,board->passantJ-j,PL);
                         
                 
-                if ((is_in(board->squares[i+pawn_vector][j+1],pieces[EP],6)) && onboard(i+pawn_vector,j+1)) 
+                if ((is_in(board->squares[i+pawn_vector][j+1], Pieces[EP],6)) && onboard(i+pawn_vector,j+1)) 
               
                     append_move(board, moves,i,j,pawn_vector,1,promote);
                     
                 
-                if ((is_in(board->squares[i+pawn_vector][j-1],pieces[EP],6)) && onboard(i+pawn_vector,j-1))
+                if ((is_in(board->squares[i+pawn_vector][j-1], Pieces[EP],6)) && onboard(i+pawn_vector,j-1))
                     
                     append_move(board,moves,i,j,pawn_vector,-1,promote);
                                        
@@ -143,7 +140,7 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
             } 
             
   /*tower movements.*/          
-            if (board->squares[i][j] == pieces[PL][1]) {
+            if (board->squares[i][j] == Pieces[PL][1]) {
                /* printf("scanning tower moves\n");*/
 
         movement_generator(board,moves,0, '+', i, j, PL);
@@ -151,7 +148,7 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
             
             
       /*"horse" movements. note -(k_atk-2) is a mathematical expression to equal 0 if k_atk=2, or 1 if k_atk=1 */      
-     if(board->squares[i][j] == pieces[PL][2]){
+     if(board->squares[i][j] == Pieces[PL][2]){
         /* printf("scanning horse moves\n");*/
          zeta = 0;
          int HT[4][2] = {{1,2},{-1,2},{1,-2},{-1,-2}};
@@ -169,14 +166,14 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
          }
          
      /*bishop movements*/    
-     if(board->squares[i][j] == pieces[PL][3]){
+     if(board->squares[i][j] == Pieces[PL][3]){
         /* printf("scanning bishop moves\n");*/
 
          movement_generator(board,moves,0, 'X', i, j, PL);
                 
                 
      }
- if (board->squares[i][j] == pieces[PL][4]) {
+ if (board->squares[i][j] == Pieces[PL][4]) {
      /*printf("scanning queen moves.\n"); */          
 
      movement_generator(board,moves,0, '+', i, j, PL);
@@ -184,7 +181,7 @@ Device int legal_moves (struct board *board, struct movelist *moves, int PL, int
            
             }
             
-if (board->squares[i][j] == pieces[PL][5]){
+if (board->squares[i][j] == Pieces[PL][5]){
     /*printf("scanning king moves.\n");*/
     
      movement_generator(board,moves,1, '+', i, j, PL);
@@ -217,7 +214,7 @@ Device int mpc(char squares[8][8], int i, int j, int player) {
     if (onboard(i,j)) {
     if (squares[i][j] == 'x') {/*printf("mpc granted %i%i\n", i,j); */return 2;}
     
-    if (is_in(squares[i][j],pieces[enemy],6))
+    if (is_in(squares[i][j], Pieces[enemy],6))
     {/*printf("mpc granted %i%i\n", i,j); */return 1;}
     
     else return 0;
@@ -236,8 +233,8 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
     
     
     
-    
-    int i=0;
+
+
 
     tg_board->squares[to[0]][to[1]] = tg_board->squares[from[0]][from[1]];
     tg_board->squares[from[0]][from[1]] = 'x';
@@ -396,7 +393,7 @@ int history_rollback(int times) {
 
 
 Device int findking (char board[8][8], char YorX, int player) {
-    char KING = pieces[player][5];
+    char KING = Pieces[player][5];
  
     int i=0;
     int j=0;
@@ -423,7 +420,7 @@ Device int cancastle (struct board *board, int P, int direction) {
 
     
     if (board->castle[P][0] && direction==-1) {
-    if (board->squares[ROW][0] == pieces[P][1]  &&
+    if (board->squares[ROW][0] == Pieces[P][1]  &&
         board->squares[ROW][1]=='x' && !ifsquare_attacked(board->squares,ROW,1,P,0) &&
         board->squares[ROW][2]=='x' && !ifsquare_attacked(board->squares,ROW,2,P,0) &&
         board->squares[ROW][3]=='x' && !ifsquare_attacked(board->squares,ROW,3,P,0)) {
@@ -441,7 +438,7 @@ Device int cancastle (struct board *board, int P, int direction) {
     
     
     if (board->castle[P][2] && direction==1) {
-    if (board->squares[ROW][7] == pieces[P][1] &&
+    if (board->squares[ROW][7] == Pieces[P][1] &&
         board->squares[ROW][5]=='x' && !ifsquare_attacked(board->squares,ROW,5,P,0) &&
         board->squares[ROW][6]=='x' && !ifsquare_attacked(board->squares,ROW,6,P,0)){
         
@@ -499,12 +496,12 @@ Device void movement_generator(struct board *board, struct movelist *moves, int 
                    if (limit) q=0;
 
                }
-               if (is_in(board->squares[Ti][Tj],pieces[1-P],6)) {
+               if (is_in(board->squares[Ti][Tj], Pieces[1-P],6)) {
                    append_move(board, moves, i, j, Ti-i, Tj-j, P);
                    q=0;
                }
                
-               if (is_in(board->squares[Ti][Tj],pieces[P],6)) q=0;
+               if (is_in(board->squares[Ti][Tj], Pieces[P],6)) q=0;
                
                
            }

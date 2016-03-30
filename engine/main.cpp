@@ -5,7 +5,10 @@ struct board board;
 Device struct param Brain;
 struct movelist moves;
 
-Device char pieces[2][6] = {{'P','R','N','B','Q','K'},{'p','r','n','b','q','k'}};
+char pieces[2][6] = {{'P','R','N','B','Q','K'},
+                     {'p','r','n','b','q','k'}};
+Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
+                               {'p','r','n','b','q','k'}};
 
 bool computer_turn = false;
 

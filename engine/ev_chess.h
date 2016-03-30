@@ -4,7 +4,7 @@
  *
  * Created on September 21, 2015, 12:44 AM
  */
-
+//#define __CUDACC__
 
 #ifndef EV_CHESS_H
 #include <cstdlib>
@@ -35,6 +35,7 @@
 #define IFnotGPU(p)  
 #define IFGPU(p) p
 #define Machineplays GPUmachineplays
+#define Pieces GPUpieces
 
 #else
 #define Host 
@@ -44,6 +45,7 @@
 #define IFGPU(p)   
 #define IFnotGPU(p) p
 #define Machineplays machineplays
+#define Pieces pieces
 #endif
 
 
@@ -116,7 +118,8 @@ extern int hindex;
 using namespace std;
 
 //extern char squares[8][8];
-extern Device char pieces[2][6];
+extern Device char GPUpieces[2][6];
+extern char pieces[2][6];
 
 extern bool computer_turn;
 
@@ -181,7 +184,7 @@ Device void movement_generator(struct board *board, struct movelist *moves, int 
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
 
-Device bool is_in(char val, char arr[], int size);
+Host Device bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
 Device int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
@@ -214,7 +217,7 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP,
 float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 
-Global void kerneliterate(struct board *modelboard, struct move *move, int PL, int DEEP);
+Global void kerneliterate(struct board *modelboard, struct movelist *mainmove, int index, int PL, int DEEP);
 
 //functions from evolution.cpp;
 int loadmachine (int verbose, char *dir);

@@ -20,9 +20,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     long Beta = 1690000;
     
     struct movelist *moves = (struct movelist *) calloc(1, sizeof(struct movelist));
-    //moves->k = 0;
-    //moves->kad = 0;
-    
+
             
     legal_moves(_board, moves,PL, 0); 
     
@@ -33,27 +31,35 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     if (moves->k == 0) return -1;
     Vb printf("value of k is %i.\n",moves->k);
     
-    
-    
-    
     //infoMOVE = (char *)malloc(sizeof(char)*128);
-        
+    
+// cuda move evaluating.        
 #ifdef __CUDACC__        
     
 
     struct board *GPUboard;
-    struct moves *GPUmoves;
+    struct movelist *GPUmoves;
     
     GPUmachineplays = machineplays;
     
-    cudaMalloc((void**) &GPUboard, sizeof(struct board));
-    cudaMemcpy(&GPUboard, &_board, sizeof(struct board), cudaMemcpyHostToDevice);
+    //cudaMalloc((void**) &GPUboard, sizeof(struct board));
+    //cudaMemcpy(&GPUboard, &_board, sizeof(struct board), cudaMemcpyHostToDevice);
 
-    cudaMalloc((void**) &GPUmoves, sizeof(struct moves));
-    cudaMemcpy(&GPUmoves, moves, sizeof(struct moves), cudaMemcpyHostToDevice);
+    cudaMalloc((void**) &GPUmoves, sizeof(struct movelist));
+    cudaMemcpy(&GPUmoves, &moves, sizeof(struct movelist), cudaMemcpyHostToDevice);
     
-    kerneliterate <<<1, 35>>> (GPUboard, GPUmoves.movements[i], PL, DEEP);
+    
+    for (i=0;i<moves->k;i++) {
+           
+    cudaMalloc((void**) &GPUboard, sizeof(struct board));
+    cudaMemcpy(&GPUboard, &_board, sizeof(struct board), cudaMemcpyHostToDevice); 
         
+        
+        
+    kerneliterate <<<1, 35>>> (GPUboard, GPUmoves, i, PL, DEEP);
+    
+    cudaFree(GPUboard);
+    }
     
         
 // non cuda move evaluating mehthod.        
@@ -106,22 +112,21 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
    
 }
 #ifdef __CUDACC__
-Global void kerneliterate(struct board *modelboard, struct move *move, int PL, int DEEP) {
+Global void kerneliterate(struct board *workingboard, struct movelist *mainmove, int index, int PL, int DEEP) {
     
     
     
-    struct board *board;
     
-    
+    long Alpha = -16900;
+    long Beta = 16900;    
  
         
-    move_pc(board, move);
-    long Alpha = -16900;
-    long Beta = 16900;
-    move->score = thinkiterate(board, PL, DEEP, 0, Alpha, Beta);
-    undo_move(board, move);        
+    move_pc(workingboard, &mainmove->movements[index]);
+
+    mainmove->movements[index].score = thinkiterate(workingboard, PL, DEEP, 0, Alpha, Beta);
+    undo_move(workingboard, &mainmove->movements[index]);        
             
-    cudaFree(board);
+
 }
 
 #endif
@@ -250,7 +255,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
     forsquares {
         if (evalboard->squares[i][j] == 'x') continue;
-        L = getindex(evalboard->squares[i][j],pieces[PL],6);
+        L = getindex(evalboard->squares[i][j],Pieces[PL],6);
         if (L<0) continue;
         K = Brain.pvalues[L];
         
@@ -270,7 +275,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
         
         
      for (Z=0;Z<moves->kad;Z++) {
-        L= getindex(moves->defenders[Z][0],pieces[1-PL],6); 
+        L= getindex(moves->defenders[Z][0],Pieces[1-PL],6); 
         
         parallelatks = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
@@ -292,7 +297,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
                 
          score = score + Brain.pvalues[L]*Brain.seekatk;
          
-         L = getindex(moves->attackers[Z][0],pieces[PL],6);
+         L = getindex(moves->attackers[Z][0],Pieces[PL],6);
          score = score - Brain.pvalues[L] * Brain.balanceoffense;
          
          
@@ -348,9 +353,9 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
            if (DEEP>Brain.DEEP-2&&K>5) 
        forsquares {
                if (board->squares[i][j]!='x'&& 
-                   board->squares[i][j]!=pieces[P][0]&&
-                   !is_in(board->squares[i][j],pieces[1-P],6)) NullMove = 1;
-               if (board->squares[i][j]==pieces[P][5])
+                   board->squares[i][j]!=Pieces[P][0]&&
+                   !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
+               if (board->squares[i][j]==Pieces[P][5])
                    if (ifsquare_attacked (board->squares,i,j,P,0)){
                         NullMove=0;break;break;
                    }

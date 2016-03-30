@@ -25,7 +25,7 @@ void pos2cord (char out[]) {
 
 
 
-Device bool is_in(char val, char arr[], int size){
+Host Device bool is_in(char val, char arr[], int size){
     int i = 0;
     for (i=0; i < size; i++) {
         if (arr[i] == val)
@@ -98,7 +98,7 @@ Device int append_move(struct board *board, struct movelist *moves, int i,int j,
     moves->movements[moves->k].lostcastle = 0;
     
     if (moves->movements[moves->k].passant) 
-        moves->movements[moves->k].casualty = pieces[1-P][0];
+        moves->movements[moves->k].casualty = Pieces[1-P][0];
     
     
     if ((i==0 && P==1)||(i==7 && P==0)){
@@ -179,8 +179,8 @@ Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int v
         Vb printf("checking %i%i\n", aim_y,aim_x);
 
         
-        if (onboard(aim_y,aim_x) && is_in(squares[aim_y][aim_x], pieces[1-P],6)) {
-            offender = getindex(squares[aim_y][aim_x], pieces[1-P],6);
+        if (onboard(aim_y,aim_x) && is_in(squares[aim_y][aim_x], Pieces[1-P],6)) {
+            offender = getindex(squares[aim_y][aim_x], Pieces[1-P],6);
             Vb printf("y");
             //printf("kpos %i%i x=%i\n",aim_y,aim_x,x);
             
@@ -211,13 +211,13 @@ Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int v
         aim_y=target[0]+horse_matrix[1][n];
         aim_x=target[1]+horse_matrix[0][z];
         
-        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == pieces[1-P][2])) result++;
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Pieces[1-P][2])) result++;
              
   
         aim_y=target[0]+horse_matrix[0][n];
         aim_x=target[1]+horse_matrix[1][z];
                 
-        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == pieces[1-P][2])) result++;
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Pieces[1-P][2])) result++;
         
 
 
@@ -253,7 +253,7 @@ Device int check_move_check (struct board *tg_board, struct move *move, int P) {
     
     for (i=0;i<8;i++) for (j=0;j<8;j++){
          
-            if (tg_board->squares[i][j] == pieces[P][5]) {kpos[0]=i; kpos[1]=j;check++;}
+            if (tg_board->squares[i][j] == Pieces[P][5]) {kpos[0]=i; kpos[1]=j;check++;}
             
         }
     

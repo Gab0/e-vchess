@@ -1,6 +1,6 @@
 param_DEEP = 4
 
-eval_randomness = 33
+eval_randomness = 10
 
 param_evalmethod = 0
 
@@ -14,17 +14,92 @@ param_pawnrankMOD = 0
 
 param_parallelcheck = 0
 
-param_balanceoffense = 1
+param_balanceoffense = 0
 
-stat_games = 0 0
+param_MODbackup = 0
 
-stat_wins = 0 0
+param_MODmobility = 0
 
-stat_draws = 0 0
+stat_games = 2195 0
 
-stat_loss = 0 0
+stat_wins = 313 0
+
+stat_draws = 1528 0
+
+stat_loss = 354 0
 
 stat_K = 0 0
 
-stat_elo = 1000
+stat_elo = 865
 
+L
+K = -4
+
+D
+K = 4
+
+L
+K = -24
+
+L
+K = -4
+
+W
+K = 8
+
+D
+K = -4
+
+D
+K = 4
+
+D
+K = -8
+
+D
+K = 12
+
+L
+K = -28
+
+D
+K = 24
+
+D
+K = 8
+
+D
+K = -12
+
+D
+K = 20
+
+D
+K = 8
+
+D
+K = 4
+
+D
+K = -12
+
+L
+K = -12
+
+D
+K = 12
+
+D
+K = 0
+
+D
+K = 8
+
+D
+K = 8
+
+L
+K = 4
+
+L
+K = -28
