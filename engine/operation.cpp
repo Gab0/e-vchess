@@ -142,7 +142,7 @@ Device int append_move(struct board *board, struct movelist *moves, int i,int j,
 
 
 
-Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
+Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
     //show_board(squares);
     
     int i = 0;
@@ -234,7 +234,7 @@ Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int v
     return result;
 }
 
-Device int check_move_check (struct board *tg_board, struct move *move, int P) {
+Host Device int check_move_check (struct board *tg_board, struct move *move, int P) {
     
 
     int kpos[2];
@@ -277,7 +277,7 @@ Device int check_move_check (struct board *tg_board, struct move *move, int P) {
 }
 
 
-Device int getindex (char x, char array[],int size) {
+Host Device int getindex (char x, char array[],int size) {
     int i=0;
     for (i=0;i<size;i++) {
         if (array[i] == x) return i;
@@ -286,17 +286,12 @@ Device int getindex (char x, char array[],int size) {
     return -1;
 }
 
-Device struct board *makeparallelboard (struct board *model) {
-    int i=0;
-    int j=0;
-    int k=0;
-    
-    
+Host Device struct board *makeparallelboard (struct board *model) {
+    int i=0, j=0;
 
     struct board *_board = (struct board *)malloc(sizeof (struct board));
     
-    for (i=0;i<8;i++)
-        for (j=0;j<8;j++)
+    forsquares
             _board->squares[i][j] = model->squares[i][j];
             
             
@@ -418,14 +413,14 @@ Host Device void replicate_move(struct move *target, struct move *source) {
         target->score = 0;
 }
 
-Device int power(int base, unsigned int exp) {
+Host Device int power(int base, unsigned int exp) {
     int i, result = 1;
     for (i = 0; i < exp; i++)
         result *= base;
     return result;
  }
 
-Device void reorder_movelist(struct movelist *movelist) {
+Host Device void reorder_movelist(struct movelist *movelist) {
     int i=0;
     struct move temp;
     

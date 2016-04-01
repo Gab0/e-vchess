@@ -71,13 +71,13 @@ void show_board (char squares[8][8]) {
     
     }
 
-Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
+Host Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
     
     moves->k=0;
     moves->kad =0;
 
     //NullMove.
-    append_move(board, moves,9,6,6,6,PL);
+    //append_move(board, moves,9,6,6,6,PL);
     
     
     int EP = 1-PL;
@@ -206,7 +206,7 @@ if (board->squares[i][j] == Pieces[PL][5]){
         return 0;
         }
 
-Device int mpc(char squares[8][8], int i, int j, int player) {
+Host Device int mpc(char squares[8][8], int i, int j, int player) {
 
     int enemy = 1 - player;
 
@@ -225,8 +225,7 @@ Device int mpc(char squares[8][8], int i, int j, int player) {
 
 Host Device void move_pc(struct board *tg_board, struct move *movement) {
     
-    //Nullmove;
-    if (movement->from[0]==9) return;
+
     
     char from[2] = {movement->from[0], movement->from[1]};
     char to[2] = {movement->to[0], movement->to[1]};
@@ -254,7 +253,7 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
     }
   
     if(movement->passant) tg_board->squares[from[0]][to[1]] = 'x';
-        
+ 
     
     int cP =-1;
 
@@ -275,8 +274,6 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
 
 Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
-    //Nullmove;
-    if (movement->from[0]==9) return;
     
     char to[2] = {movement->from[0], movement->from[1]};
     char from[2] = {movement->to[0], movement->to[1]};
@@ -392,7 +389,7 @@ int history_rollback(int times) {
 
 
 
-Device int findking (char board[8][8], char YorX, int player) {
+Host Device int findking (char board[8][8], char YorX, int player) {
     char KING = Pieces[player][5];
  
     int i=0;
@@ -412,7 +409,7 @@ Device int findking (char board[8][8], char YorX, int player) {
     return -1;
 }
 
-Device int cancastle (struct board *board, int P, int direction) {
+Host Device int cancastle (struct board *board, int P, int direction) {
     if (!board->castle[P][1]) return 0;
     if (!allow_castling) return 0;
     int ROW = 7*(1-P);
@@ -450,7 +447,7 @@ Device int cancastle (struct board *board, int P, int direction) {
  
 }
 
-Device void movement_generator(struct board *board, struct movelist *moves, int limit, 
+Host Device void movement_generator(struct board *board, struct movelist *moves, int limit, 
                         char direction, int i, int j, int P) {
     int X=0, q=0;
     int Ti=0,Tj=0;

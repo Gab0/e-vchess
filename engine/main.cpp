@@ -2,9 +2,11 @@
 
 
 struct board board;
-Device struct param Brain;
+struct param Brain;
 struct movelist moves;
 
+Device struct param GBrain;
+        
 char pieces[2][6] = {{'P','R','N','B','Q','K'},
                      {'p','r','n','b','q','k'}};
 Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
@@ -40,6 +42,7 @@ int  infomoveINDEX;
 
 char *machinepath;
 
+bool Show_Info = false;
 Device bool show_info = false;
 
 bool againstHUMAN = false;
@@ -48,13 +51,50 @@ bool loadDEEP = true;
 
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
-int main(int argc, char** argv) {
+        
+        
+            //iniatializing variables with standard values.
+    
+    //pvalues is the value of each piece in centipawns. 
+    //order is pawn-rook-knight-bishop-queen-king.
 
-#ifdef __CUDACC__
-    standardBrain <<<1, 1>>> ();
-#else
-    standardBrain();
-#endif
+    
+    
+    
+    
+int main(int argc, char** argv) {
+    Brain.pvalues[0] = 100;
+    Brain.pvalues[1] = 500;
+    Brain.pvalues[2] = 300;
+    Brain.pvalues[3] = 300;
+    Brain.pvalues[4] = 900;
+    Brain.pvalues[5] = 2000;
+    
+    //randomness is the limit to the randomic small variability on the score, 
+    //in centipawns.
+    Brain.randomness = 10;
+    //seekmiddle augments the score for pieces in the center of the board.
+    Brain.seekmiddle = 0;
+    //DEEP is the number of future moves to be evaluated.
+    //must be an even number, in order to always end in a engine move.
+    Brain.DEEP = 4;
+    //seekpieces augments the score for attacked enemy pieces.
+    Brain.seekpieces = 1;
+    
+    Brain.deviationcalc = 0;
+    Brain.evalmethod = 0;
+    //seekatk augments the score for taken pieces.
+    Brain.seekatk = 0;
+    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
+    Brain.presumeOPPaggro = 1;
+    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
+    Brain.pawnrankMOD = 0;
+    Brain.parallelcheck = 0;
+    Brain.balanceoffense = 0;    
+    Brain.cumulative = 0;
+    Brain.MODbackup = 0;
+    Brain.MODmobility = 0;
+
     int i=0;
     signal(SIGINT, SIG_IGN);    
     signal(SIGTERM, SIG_IGN); 
@@ -80,7 +120,7 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "-MD") != NULL) {
             toloadmachine = true; machinepath = argv[i+1];}
         
-        if (strstr(argv[i], "--showinfo") != NULL) show_info = true;
+        if (strstr(argv[i], "--showinfo") != NULL) Show_Info = true;
         
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
@@ -99,10 +139,18 @@ int main(int argc, char** argv) {
     if (toloadmachine) loadmachine(0, machinepath);
     
 
+    #ifdef __CUDACC__
+    //UpdateGPUBrain <<<1, 1>>> ();
+    cudaMemcpy(&GBrain, &Brain, sizeof(struct param), cudaMemcpyHostToDevice);
+    cudaMemcpy(&show_info, &Show_Info, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(&GPUmachineplays, &machineplays, sizeof(int), cudaMemcpyHostToDevice);
+    #else
+    show_info = Show_Info;
+    #endif
+
     
     char testfehn[128] = "fen r3kb1r/pp1qpppp/2np4/1Np3Q1/4n3/5N2/PPPP1PPP/R1BK3R w kq - 0 1";
-    
-    
+        
 
     for (i=Brain.DEEP;i>=0;i--) 
         printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
@@ -112,10 +160,8 @@ int main(int argc, char** argv) {
 
     for (i=0;i<2018;i++) infomoveTABLE[i] = (char*)malloc(16 * sizeof(char));
     
-    
-    
-    
-    
+    //printf("brain.deep = %f", Brain.DEEP);
+    //read inputs loop.
     for (;;) {
     
     fflush(stdout);
@@ -141,7 +187,7 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "show") !=NULL) show_board(board.squares);
     
-    if (strstr(inp, "quit") !=NULL) return 0;
+    if (strstr(inp, "quit") !=NULL) break;
     
     if (strstr(inp, "new") != NULL) setup_board(1);
     
@@ -253,43 +299,44 @@ void SIGthink(int signum) {
     computer(1);
 }
 
-
-Host Device void standardBrain() {
+/*#ifdef __CUDACC__
+Global void UpdateGPUBrain() {
        
     //iniatializing variables with standard values.
     
     //pvalues is the value of each piece in centipawns. 
     //order is pawn-rook-knight-bishop-queen-king.
-    Brain.pvalues[0] = 100;
-    Brain.pvalues[1] = 500;
-    Brain.pvalues[2] = 300;
-    Brain.pvalues[3] = 300;
-    Brain.pvalues[4] = 900;
-    Brain.pvalues[5] = 2000;
+    GBrain.pvalues[0] = Brain.pvalues[0];
+    GBrain.pvalues[1] = Brain.pvalues[1];
+    GBrain.pvalues[2] = Brain.pvalues[2];
+    GBrain.pvalues[3] = Brain.pvalues[3];
+    GBrain.pvalues[4] = Brain.pvalues[4]; 
+    GBrain.pvalues[5] = Brain.pvalues[5];
     
     //randomness is the limit to the randomic small variability on the score, 
     //in centipawns.
-    Brain.randomness = 10;
+    GBrain.randomness = Brain.randomness;
     //seekmiddle augments the score for pieces in the center of the board.
-    Brain.seekmiddle = 0;
+    GBrain.seekmiddle = Brain.seekmiddle;
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 4;
+    GBrain.DEEP = Brain.DEEP;
     //seekpieces augments the score for attacked enemy pieces.
-    Brain.seekpieces = 1;
+    GBrain.seekpieces = Brain.seekpieces;
     
-    Brain.deviationcalc = 0;
-    Brain.evalmethod = 0;
+    GBrain.deviationcalc = Brain.deviationcalc;
+    GBrain.evalmethod = Brain.evalmethod;
     //seekatk augments the score for taken pieces.
-    Brain.seekatk = 0;
+    GBrain.seekatk = Brain.seekatk;
     //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    Brain.presumeOPPaggro = 1;
+    GBrain.presumeOPPaggro = Brain.presumeOPPaggro;
     //pawnrankMOD augments the score of the pawns, by the rank he occupies.
-    Brain.pawnrankMOD = 0;
-    Brain.parallelcheck = 0;
-    Brain.balanceoffense = 0;    
-    Brain.cumulative = 0;
-    Brain.MODbackup = 0;
-    Brain.MODmobility = 0;
+    GBrain.pawnrankMOD = Brain.pawnrankMOD;
+    GBrain.parallelcheck = Brain.parallelcheck;
+    GBrain.balanceoffense = Brain.balanceoffense;
+    GBrain.cumulative = Brain.cumulative;
+    GBrain.MODbackup = Brain.MODbackup;
+    GBrain.MODmobility = Brain.MODmobility;
     
 }
+#endif*/

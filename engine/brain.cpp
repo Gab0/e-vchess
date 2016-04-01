@@ -10,7 +10,7 @@
 int think (struct move *out, int PL, int DEEP, int verbose) {
     
     int i=0; int r=0;
-    
+    long score = 0;
     time_t startT = time(NULL);
 
     struct board *_board = makeparallelboard(&board);  
@@ -40,7 +40,16 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     struct board *GPUboard;
     struct movelist *GPUmoves;
     
-    GPUmachineplays = machineplays;
+    long *_Alpha;
+    long *_Beta;
+    
+    cudaMalloc((void**) &_Alpha, sizeof(long));
+    cudaMalloc((void**) &_Beta, sizeof(long));
+    
+    cudaMemcpy(&_Alpha, &Alpha, sizeof(long), cudaMemcpyHostToDevice);
+    cudaMemcpy(&_Beta, &Beta, sizeof(long), cudaMemcpyHostToDevice);
+    
+    
     
     //cudaMalloc((void**) &GPUboard, sizeof(struct board));
     //cudaMemcpy(&GPUboard, &_board, sizeof(struct board), cudaMemcpyHostToDevice);
@@ -56,19 +65,22 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
         
         
         
-    kerneliterate <<<1, 35>>> (GPUboard, GPUmoves, i, PL, DEEP);
+    kerneliterate <<<30, 500>>> (GPUboard, GPUmoves, i, PL, DEEP, _Alpha, _Beta);
     
     cudaFree(GPUboard);
     }
     
         
 // non cuda move evaluating mehthod.        
-#else
+#else           
+    if(canNullMove(DEEP, _board, moves->k, PL)) {
+               score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
+               Alpha, Beta);
+               if (PL==Machineplays) Alpha = score;
+               else Beta = score;
+               
+           }     
       for (i=0;i<moves->k;i++) {
-        if(i==0)
-           if(!canNullMove(DEEP, _board, moves->k, PL))
-               continue;       
-        
         
         //show_board(board.squares);
      Vb printf("new tree branching. i=%i\n",i);
@@ -111,8 +123,9 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
    return r;
    
 }
+
 #ifdef __CUDACC__
-Global void kerneliterate(struct board *workingboard, struct movelist *mainmove, int index, int PL, int DEEP) {
+Global void kerneliterate(struct board *workingboard, struct movelist *mainmove, int index, int PL, int DEEP, long *_Alpha, long *_Beta) {
     
     
     
@@ -156,7 +169,7 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
      if (moves.k == 1) {
          if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PL), 
                  findking(_board->squares, 'X', PL), PL, 0)) {
-            score = 13000 - 50*(Brain.DEEP-DEEP); 
+            score = 13000 - 50*(BRAIN.DEEP-DEEP); 
             if (PL == Machineplays) score = -score;
          }
           else score = 0;
@@ -174,13 +187,20 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
    if (DEEP>0) {
     reorder_movelist(&moves); 
     
-   //Movelist iteration.    
-   for(i=0;i<moves.k;i++) {
        //NULL MOVE: guaranteed as long as if PL is not in check,
        //and its not K+P endgame.
-       if(i==0)
-           if(!canNullMove(DEEP, _board, moves.k, PL))
-               continue;
+       if(DEEP > BRAIN.DEEP - 2)
+           if(canNullMove(DEEP, _board, moves.k, PL)) {
+               score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
+               Alpha, Beta);
+               if (PL==Machineplays) Alpha = score;
+               else Beta = score;}
+   //Movelist iteration.    
+   for(i=0;i<moves.k;i++) {
+
+               
+           
+               //continue;
        
        move_pc(_board, &moves.movements[i]);  
 
@@ -223,9 +243,9 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
      else {
      machine_score = evaluate(_board, &moves, Machineplays);
      enemy_score = evaluate(_board, &moves, 1-Machineplays);
-             
-     score = machine_score - enemy_score * Brain.presumeOPPaggro;
-     //printf("S=%i\n", score);
+     //show_board(_board->squares);
+     score = machine_score - enemy_score * BRAIN.presumeOPPaggro;
+     //printf("score = %i\n", score);
      //printf(">>>>>>%i.\n", PL);
     //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
    //machine_score, enemy_score);
@@ -240,13 +260,17 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
 Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     int score = 0;
     
-    int i = 0;
-    int j = 0;
+    int i=0, j=0;
+    
     int L=0,Z=0,K=0;
     
-    int chaos = rand() % (int)(Brain.randomness);   
-  
-    int deadpiece = 0;
+#ifdef __CUDA_ARCH__
+    int chaos = 1;   
+#else
+    int chaos = rand() % (int)(BRAIN.randomness); 
+#endif
+    
+    //int deadpiece = 0;
     int parallelatks = 0;
     int paralleldefenders = 0;
     
@@ -255,20 +279,20 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
     forsquares {
         if (evalboard->squares[i][j] == 'x') continue;
-        L = getindex(evalboard->squares[i][j],Pieces[PL],6);
-        if (L<0) continue;
-        K = Brain.pvalues[L];
+        L = getindex(evalboard->squares[i][j], Pieces[PL],6);
+        if (L < 0) continue;
+        K = BRAIN.pvalues[L];
         
         if (L==0) {
-         if (PL) K= K + i * Brain.pawnrankMOD;
-         else K = K + (7-i) * Brain.pawnrankMOD;
-        }  
+         if (PL) K += i * BRAIN.pawnrankMOD;
+         else K += (7-i) * BRAIN.pawnrankMOD;
+        }
             
             
    
-     score = score + K * Brain.seekpieces +
-        ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5))*Brain.seekmiddle;
-            
+     score += K * BRAIN.seekpieces + 
+        ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5)) * BRAIN.seekmiddle;
+          
 
 }
         
@@ -281,29 +305,29 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
         (evalboard->squares,moves->defenders[Z][1],
                             moves->defenders[Z][2], 1-PL,0);
                 
-     if (L==5 && Brain.parallelcheck) {
+     if (L==5 && BRAIN.parallelcheck) {
           if (parallelatks>1) 
-            score = score + (parallelatks) * Brain.parallelcheck;}
+            score = score + (parallelatks) * BRAIN.parallelcheck;}
      else {
         paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
                             moves->defenders[Z][2], PL,0);
         
-        score = score - paralleldefenders * Brain.MODbackup;
+       score = score - paralleldefenders * BRAIN.MODbackup;
          
          
      }       
                 
                 
-         score = score + Brain.pvalues[L]*Brain.seekatk;
+         score = score + BRAIN.pvalues[L]*BRAIN.seekatk;
          
          L = getindex(moves->attackers[Z][0],Pieces[PL],6);
-         score = score - Brain.pvalues[L] * Brain.balanceoffense;
+         //score = score - BRAIN.pvalues[L] * BRAIN.balanceoffense;
          
          
          }
-    score = score+chaos;       
-    score = score + moves->k * Brain.MODmobility;
+    score = score + chaos;       
+    score = score + moves->k * BRAIN.MODmobility;
     
     
     //printf("score: %i\n", score);
@@ -311,7 +335,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
 }
 
-float scoremod (int DEEP, int method) {
+Host Device float scoremod (int DEEP, int method) {
     
     float modifier = 0;
     float helper = 0;
@@ -321,15 +345,15 @@ float scoremod (int DEEP, int method) {
     
     if (method == 0) modifier = 1;
     
-    if (method == 1) modifier = 2*((DEEP+Brain.deviationcalc)/Brain.DEEP);
+    if (method == 1) modifier = 2*((DEEP+BRAIN.deviationcalc)/BRAIN.DEEP);
     
     if (method == 2) {
-        modifier = -power(DEEP,2)+Brain.DEEP*DEEP+2*Brain.DEEP;
+        modifier = -power(DEEP,2)+BRAIN.DEEP*DEEP+2*BRAIN.DEEP;
         
 
-    helper = Brain.DEEP/2;
+    helper = BRAIN.DEEP/2;
         
-            helper = -power(helper,2)+Brain.DEEP*helper+2*Brain.DEEP;
+            helper = -power(helper,2)+BRAIN.DEEP*helper+2*BRAIN.DEEP;
             
             modifier = modifier/(helper/1.1);
     }
@@ -337,7 +361,7 @@ float scoremod (int DEEP, int method) {
     
     if (method == 3) {
 
-        modifier = Brain.TIMEweight[(int)(Brain.DEEP-DEEP)];
+        modifier = BRAIN.TIMEweight[(int)(BRAIN.DEEP-DEEP)];
         
     }
     
@@ -350,16 +374,14 @@ float scoremod (int DEEP, int method) {
 
 Device int canNullMove (int DEEP, struct board *board, int K, int P) {
     int i=0,j=0,NullMove=0;
-           if (DEEP>Brain.DEEP-2&&K>5) 
+           if (DEEP>BRAIN.DEEP-2&&K>5) 
        forsquares {
                if (board->squares[i][j]!='x'&& 
                    board->squares[i][j]!=Pieces[P][0]&&
                    !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
                if (board->squares[i][j]==Pieces[P][5])
-                   if (ifsquare_attacked (board->squares,i,j,P,0)){
-                        NullMove=0;break;break;
-                   }
-       }
+                   if (ifsquare_attacked (board->squares,i,j,P,0)) return 0;                   }
+       
         return  NullMove;       
                
 }

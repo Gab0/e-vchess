@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <ctype.h>
-#define	EV_CHESS_H
+
 
 
 #define onboard(i,j) i >=0 && i < 8 && j >= 0 && j <8
@@ -32,24 +32,25 @@
 #define Host __host__
 #define Device __device__
 #define Global __global__
-#define IFnotGPU(p)  
-#define IFGPU(p) p
-#define Machineplays GPUmachineplays
-#define Pieces GPUpieces
-
 #else
 #define Host 
 #define Device  
 #define Global  
+#endif
 
+#ifdef __CUDA_ARCH__
+#define IFnotGPU(p)  
+#define IFGPU(p) p
+#define Machineplays GPUmachineplays
+#define Pieces GPUpieces
+#define BRAIN GBrain
+#else
 #define IFGPU(p)   
 #define IFnotGPU(p) p
 #define Machineplays machineplays
 #define Pieces pieces
+#define BRAIN Brain
 #endif
-
-
-
 
 struct move;
 struct move {
@@ -125,7 +126,8 @@ extern bool computer_turn;
 
 extern struct board board;
 
-extern Device struct param Brain;
+extern struct param Brain;
+IFGPU(extern __device__ struct param GBrain;)
 
 
 extern bool loadedmachine;
@@ -162,12 +164,14 @@ IFGPU( extern __device__ bool allow_castling; )
 //functions from main.cpp;
 void computer(int verbose);
 void SIGthink(int signum);
-Global void standardBrain();     
+//l void UpdateGPUBrain();     
+
 //functions from board.cpp;
 void setup_board(int setup);
 void show_board(char squares[8][8]);
-Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose);
-Device int mpc (char squares[8][8], int i, int j, int player);
+Host Device int legal_moves 
+(struct board *board, struct movelist *moves, int PL, int verbose);
+Host Device int mpc (char squares[8][8], int i, int j, int player);
 Host Device void move_pc(struct board *tg_board, struct move *movement);
 Host Device void undo_move(struct board *tg_board, struct move *movement);
 Device void attackers_defenders (char squares[8][8], struct movelist moves, int P);
@@ -175,10 +179,13 @@ void h_move_pc (struct board *board,char movement[][2]);
 int history_append(struct move *move);
 int history_rollback(int times);
 //void castle (struct board *board, int doundo, int PL, int side);
-Device int findking (char board[8][8], char YorX, int player);
-Device int cancastle (struct board *board, int P, int direction);
-Device void movement_generator(struct board *board, struct movelist *moves, int limit, 
-                        char direction, int i, int j, int P);
+Host Device int findking (char board[8][8], char YorX, int player);
+Host Device int cancastle 
+    (struct board *board, int P, int direction);
+Host Device void movement_generator
+    (struct board *board, struct movelist *moves, 
+            int limit, char direction, int i, int j, int P);
+
 
 //functions from operation.cpp;
 void cord2pos (char out[]); 
@@ -186,18 +193,20 @@ void pos2cord (char out[]);
 
 Host Device bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
-Device int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P);
+Host Device int append_move
+    (struct board *board, struct movelist *moves, 
+        int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
-Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
-Device int check_move_check (struct board *tg_board, struct move *move, int P);
-Device int getindex (char x, char array[],int size);
-Device struct board *makeparallelboard (struct board *board);
+Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
+Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
+Host Device int getindex (char x, char array[],int size);
+Host Device struct board *makeparallelboard (struct board *board);
 Device void select_top (struct move *array, int size, int target[], int quant);
 Host Device void replicate_move(struct move *target, struct move *source);
 
 //void freeboard (struct board *target);
-Device int power(int base, unsigned int exp);
-Device void reorder_movelist(struct movelist *movelist); 
+Host Device int power(int base, unsigned int exp);
+Host Device void reorder_movelist(struct movelist *movelist); 
 
 
 
@@ -214,10 +223,10 @@ int think (struct move *out, int PL, int DEEP, int verbose);
 Device int evaluate(struct board *evalboard, struct movelist *moves, int PL);
 Device long thinkiterate(struct board *feed, int PL, int DEEP, 
         int verbose, long Alpha, long Beta);
-float scoremod (int DEEP, int method);
+Host Device float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 
-Global void kerneliterate(struct board *modelboard, struct movelist *mainmove, int index, int PL, int DEEP);
+Global void kerneliterate(struct board *workingboard, struct movelist *mainmove, int index, int PL, int DEEP, long *_Alpha, long *_Beta);
 
 //functions from evolution.cpp;
 int loadmachine (int verbose, char *dir);
@@ -226,5 +235,5 @@ int countpieces (void);
 float readparam(char *line, int verbose);
 void dump_history();
 void chesslog(char *location, const char content[]);
-
+#define	EV_CHESS_H
 #endif	/* BOARD_H */

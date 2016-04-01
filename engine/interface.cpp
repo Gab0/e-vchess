@@ -178,14 +178,14 @@ int parse_move (struct move *target, char *s, int P) {
 }   
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
     struct move showmovebuff;
-    
+
     time_t elapsedT = time(NULL) - startT;
     replicate_move(&showmovebuff, move);
 
      cord2pos(showmovebuff.from);
      cord2pos(showmovebuff.to);
        
-            asprintf(&output, "%i %i %ld %i %c%c%c%c\n", DEEP, move->score, elapsedT, P, 
+            asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, elapsedT, P, 
               showmovebuff.from[0], showmovebuff.from[1],
               showmovebuff.to[0], showmovebuff.to[1]);
      write(1, output, strlen(output));   
