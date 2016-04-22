@@ -1,4 +1,4 @@
-#!/bin/python
+    #!/bin/python
 
 import chess
 import shlex
@@ -24,7 +24,7 @@ from psutil import *
 import gc
 
 # path to e-vchess executable and the directory where machines are stored, respectively.
-evchessP = "engine/dist/Release/GNU-Linux/e-vchess"
+evchessP = "engine/e-vchess"
 machineDIR =  "machines"
 
 evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "4"]
@@ -308,7 +308,9 @@ class table(Frame):
         self.MACHINE = []
         
         self.consec_failure=0
-  
+
+        self.Damaged = 0
+        
         self.turn = 0
         self.number = len(TABLEBOARD)
 
@@ -581,6 +583,7 @@ class table(Frame):
                 except BrokenPipeError:
                     print("broken pipe @ " + str(self.number) + " while receiving move.")
                     self.log("broken pipe while receiving move.", self.number)
+                    self.log(self.Board, self.Board.fullmove_number)
                     self.endgame()
                     return
             else:
@@ -622,6 +625,7 @@ class table(Frame):
                     self.MACHINE[1-self.turn].stdin.write(bytearray('sorry\n', 'utf-8'))
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',COLOR[self.turn])
+                    self.DUMPmovehistory("inactivity")
                     self.endgame()
             if GUI:
                 self.setlimit["text"] = str(self.consec_failure)
@@ -643,6 +647,7 @@ class table(Frame):
         
     def endgame(self):
         self.flagged_toend=0
+        self.Damaged = 0
         for machine in self.MACHINE:
             #print('killing %s' % machine.pid)
             call(['kill', '-9', str(machine.pid)])
@@ -843,8 +848,36 @@ class table(Frame):
             
 
             print(ELO)
-                               
+
+    def DUMPmovehistory(self, reason):
         
+        Fname = 'log/log_%s_%i.txt' % (reason, self.arena.ROUND)
+        FLOG = open(Fname, 'w+')
+        FLOG.write(reason)
+        try:
+            self.MACHINE[self.turn].stdin.write(bytearray('dump\n','utf-8'))
+            self.MACHINE[self.turn].stdin.flush()
+            sleep(1)    
+            Hdump = self.MACHINE[self.turn].stdout.read().decode('utf-8')
+
+            FLOG.write('')
+            FLOG.write(Hdump)
+
+        except:
+            if self.Damaged:
+                FLOG.close()
+                pass
+            else:
+                self.turn = 1-self.turn
+                self.Damaged = 1
+                FLOG.write(str(self.board))
+                FLOG.close()
+                self.DUMPmovehistory("%s_opponent" % reason)
+                pass
+            
+        FLOG.write(str(self.board))
+        FLOG.close()
+
 if GUI:
     print('good')    
     #root = Tk()

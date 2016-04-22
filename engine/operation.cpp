@@ -313,7 +313,7 @@ void freeboard (struct board *target) {
     }
 }
 
-Device void select_top (struct move *array, int size, int target[], int quant) {
+Host Device void select_top (struct move *array, int size, int target[], int quant) {
     int i = 0;
     int qu=0;
     int win[16][2]={0};

@@ -74,7 +74,7 @@ void show_board (char squares[8][8]) {
 Host Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
     
     moves->k=0;
-    moves->kad =0;
+    moves->kad=0;
 
     //NullMove.
     //append_move(board, moves,9,6,6,6,PL);

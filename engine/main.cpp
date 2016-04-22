@@ -141,9 +141,9 @@ int main(int argc, char** argv) {
 
     #ifdef __CUDACC__
     //UpdateGPUBrain <<<1, 1>>> ();
-    cudaMemcpy(&GBrain, &Brain, sizeof(struct param), cudaMemcpyHostToDevice);
-    cudaMemcpy(&show_info, &Show_Info, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(&GPUmachineplays, &machineplays, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(GBrain, &Brain, sizeof(struct param),0, cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(show_info, &Show_Info, sizeof(bool),0, cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(GPUmachineplays, &machineplays, sizeof(int),0, cudaMemcpyHostToDevice);
     #else
     show_info = Show_Info;
     #endif

@@ -28,7 +28,16 @@ chess_arena.py requires:<br>
 <a href="https://github.com/niklasf/python-chess">python-chess</a><br>
 psutil<br>
 
+##CUDA:
 
+ The engine code is filled with strange stuff such as 'Host', 'Device' macro keywords, and strange functions. They are related to the eval method I tried to implement,
+ using Nvidia GPU CUDA.<br>
+ As I found out, along with many people who walked this way, GPUs can't proccess chess engines coded on the traditional way. <br>
+ A cuda thread have memory to barely hold a movelist, so some bizarre data fragmentation and paralellization must be made, a totally new engine mechanism, probably resulting
+ in a very good performance.<br>
+ Current CUDA implementation on this engine would be fully functional, if the kernel launches didn't hang on initialization... it just ...non-useful... right now.
+ 
+ 
 ##TODO:
 
 -> Better evolutionary approach on the machines, probably using DEAP module.<br>

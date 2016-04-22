@@ -197,11 +197,12 @@ Host Device int append_move
     (struct board *board, struct movelist *moves, 
         int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
-Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) ; 
+Host Device int ifsquare_attacked (char squares[8][8],
+				   int TGi, int TGj, int P, int verbose); 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
 Host Device int getindex (char x, char array[],int size);
 Host Device struct board *makeparallelboard (struct board *board);
-Device void select_top (struct move *array, int size, int target[], int quant);
+Host Device void select_top (struct move *array, int size, int target[], int quant);
 Host Device void replicate_move(struct move *target, struct move *source);
 
 //void freeboard (struct board *target);
@@ -226,7 +227,17 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP,
 Host Device float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 
-Global void kerneliterate(struct board *workingboard, struct movelist *mainmove, int index, int PL, int DEEP, long *_Alpha, long *_Beta);
+Global void kerneliterate(struct board *workingboard,
+			  struct movelist *mainmove,
+			  int PL, int DEEP, int *Test, long *_Beta);
+
+Global void Testkernel(int *Test);
+Device void Testdevice(int *Test);
+Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
+
+
+
+
 
 //functions from evolution.cpp;
 int loadmachine (int verbose, char *dir);
