@@ -116,8 +116,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     if(canNullMove(DEEP, _board, moves->k, PL)) {
                score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
                Alpha, Beta);
-               if (PL==Machineplays) Alpha = score;
-               else Beta = score;
+               if (PL==Machineplays && score > Alpha) Alpha = score;
+               if (PL!=Machineplays && score < Beta)  Beta = score;
                
            }     
       for (i=0;i<moves->k;i++) {
@@ -128,7 +128,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      printf("Alpha = %i\n", Alpha);
      
      move_pc(_board, &moves->movements[i]);    
-     moves->movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, 1,
+     moves->movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
              Alpha, Beta);
      
      if (moves->movements[i].score > Alpha) {
@@ -365,12 +365,12 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
      machine_score = evaluate(_board, &moves, Machineplays);
      enemy_score = evaluate(_board, &moves, 1-Machineplays);
      //show_board(_board->squares);
-     score = machine_score - enemy_score * BRAIN.presumeOPPaggro;
+     score = machine_score - enemy_score * (1 + BRAIN.presumeOPPaggro);
      //printf("score = %i\n", score);
-     //printf(">>>>>>%i.\n", PL);
-    //printf("score of %i //     machine = %i     enemy = %i;\n", score, 
-   //machine_score, enemy_score);
-     IFnotGPU( Vb if (show_info) eval_info_move(&moves.movements[i], DEEP, 0, PL); )
+     //Vb printf(">>>>>>%i.\n", PL);
+     //Vb printf("score of %i //     machine = %i     enemy = %i;\n", score, 
+     //machine_score, enemy_score);
+     //IFnotGPU( Vb if (show_info) eval_info_move(&moves.movements[i], DEEP, 0, PL); )
      
      DUMP(_board);
      return score;
@@ -401,8 +401,6 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     int paralleldefenders = 0;
     
     
-
-    
     forsquares {
         if (evalboard->squares[i][j] == 'x') continue;
         L = getindex(evalboard->squares[i][j], Pieces[PL],6);
@@ -417,7 +415,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
             
    
      score += K * BRAIN.seekpieces + 
-        ((-power(j,2)+7*j-5)+(-power(i,2)+7*i-5)) * BRAIN.seekmiddle;
+        ((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) * BRAIN.seekmiddle;
           
 
 }
@@ -433,7 +431,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
                 
      if (L==5 && BRAIN.parallelcheck) {
           if (parallelatks>1) 
-            score = score + (parallelatks) * BRAIN.parallelcheck;}
+            score += parallelatks * BRAIN.parallelcheck;}
      else {
         paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
@@ -444,15 +442,15 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
          
      }       
                                
-         score = score + BRAIN.pvalues[L]*BRAIN.seekatk;
+         score += BRAIN.pvalues[L]*BRAIN.seekatk;
          
          L = getindex(moves->attackers[Z][0],Pieces[PL],6);
-         //score = score - BRAIN.pvalues[L] * BRAIN.balanceoffense;
+         score -= BRAIN.pvalues[L] * BRAIN.balanceoffense;
          
          
          }
-    score = score + chaos;       
-    score = score + moves->k * BRAIN.MODmobility;
+    score += chaos;       
+    score += moves->k * BRAIN.MODmobility;
     
     
     //printf("score: %i\n", score);

@@ -13,6 +13,7 @@ from os import remove
 from os import path
 
 from evchess_evolve.core import *
+from evchess_evolve.management import *
 
 
 
@@ -464,7 +465,7 @@ class Application(Frame):
         self.VIEWDUMPscrollbar.grid(column=6,row=0, sticky=NSEW, rowspan=10)
         
         
-        self.blackboard = Text(self, font=("Helvetica",16))
+        self.blackboard = Text(self, font=("Helvetica",13), width=23)
         self.blackboard.grid(column=5,row=0, sticky=NSEW,rowspan=10)
 
         

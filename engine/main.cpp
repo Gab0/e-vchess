@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
     #endif
 
     
-    char testfehn[128] = "fen r3kb1r/pp1qpppp/2np4/1Np3Q1/4n3/5N2/PPPP1PPP/R1BK3R w kq - 0 1";
+    char testfehn[128] = "fen r3kbr1/3bp2p/1pN3p1/1B1pQ3/PP2p3/7P/5qPR/RNK5 b - - 2 26";
         
 
     for (i=Brain.DEEP;i>=0;i--) 
@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "dump") != NULL) dump_history();
     
-    if (strstr(inp, "go") != NULL) computer(machineplays);
+    if (strstr(inp, "go") != NULL) computer(1);
     
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
     }
     
     if (read_movelines(inp,0)) {
-       computer(0);
+       computer(1);
         
 
     }
@@ -270,7 +270,7 @@ void computer(int verbose) {
     struct move move;
 
     
-    if (think(&move, P , Brain.DEEP, 0) < 0) {
+    if (think(&move, P , Brain.DEEP, verbose) < 0) {
         printf("puta merda.\n");return;}
     //sleep(1);
     move_pc(&board, &move);

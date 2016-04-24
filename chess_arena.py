@@ -16,6 +16,7 @@ import threading
 import sys
 
 from evchess_evolve.core import *
+from evchess_evolve.management import *
 from evchess_evolve.advanced import * 
 from random import randrange
 
@@ -88,6 +89,8 @@ class Application():
         #self.config(menu=self.menubar)
         self.setlooplimit(0)
 
+        self.EvolveRatio = 250
+        
         self.setcounter_illegalmove=0
         self.setcounter_draws=0
         self.setcounter_checkmate=0
@@ -111,7 +114,7 @@ class Application():
         
     def gocycle(self):
         SLEEPTIME = 1
-        if SLEEPTIME < 1: SLEEPTIME = 1.3
+
         self.ROUND=0
         self.Cycle = True
         
@@ -130,7 +133,7 @@ class Application():
 
             
             if TABLERESPONSE < 0.42: SLEEPTIME += 0.1
-            if (TABLERESPONSE > 0.81) and (SLEEPTIME > 0.5): SLEEPTIME -= 0.1
+            if (TABLERESPONSE > 0.81 and SLEEPTIME >= 0.1): SLEEPTIME -= 0.1
             SLEEPTIME = round(SLEEPTIME,1)
             
             #update window name to reflect current values.
@@ -139,12 +142,12 @@ class Application():
 
             #each N rounds, do maintenance management in order to get best evolving performance.
             #also prints running info to log.
-            if (self.ROUND) and not (self.ROUND % 10):
+            if (self.ROUND) and not (self.ROUND % self.EvolveRatio):
                 LEVEL = ""
                 
-                if not self.ROUND % 1250: LEVEL += "A"
-                if not self.ROUND % 2500: LEVEL += "B"
-                if not self.ROUND % 5000: LEVEL += "C" 
+                if not self.ROUND % self.EvolveRatio: LEVEL += "A"
+                if not self.ROUND % (self.EvolveRatio * 2): LEVEL += "B"
+                if not self.ROUND % (self.EvolveRatio * 3): LEVEL += "C" 
 
                 if len(LEVEL): self.routine_pop_management(LEVEL)
             
@@ -224,29 +227,39 @@ class Application():
         #    CHILD = create_hybrid(population)
         #    if CHILD: population.append(CHILD)
 
-
+        X = round(originalPOPLEN/8)
         if "A" in LEVEL:
-            for k in range(2): population = mutatemachines(1,population)
+            if randrange(10) > 8:
+                for k in range(1): population = mutatemachines(1,population)
 
         if "B" in LEVEL:
             MODscorelimit = 2
-            X = round(originalPOPLEN/8)
-            population = deltheworst_clonethebest(population, -X-3, MODscorelimit)
+            
+            population = deltheworst_clonethebest(population, -2*X-3, MODscorelimit)
 
             population = populate(population, X, 1)
 
             population = replicate_best_inds(population, 3)
 
+
+            population += Mate(select_best_inds(population, 3), X)
+
+            
             population = deltheworst_clonethebest(population,
                                                  originalPOPLEN-len(population),
                                                  MODscorelimit)
             
             for k in range(2): population = mutatemachines(1, population)
 
+        if "C" in LEVEL:
+            population = EliminateEquals(population, X)
+            population = populate(population, originalPOPLEN - len(population), 1)
+
+            
         #setmachines need to happen before management level C, which is advanced and loads
             #the population by it's own method.
         setmachines(population)
-        if "C" in LEVEL:
+        if "E" in LEVEL:
              ADVmanagement()
                 
         totalgames = (self.setcounter_illegalmove
@@ -582,6 +595,7 @@ class table(Frame):
                     self.MACHINE[self.turn].stdin.flush()
                 except BrokenPipeError:
                     print("broken pipe @ " + str(self.number) + " while receiving move.")
+                    self.arena.setcounter_inactivity += 1
                     self.log("broken pipe while receiving move.", self.number)
                     self.log(self.Board, self.Board.fullmove_number)
                     self.endgame()
@@ -626,6 +640,7 @@ class table(Frame):
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',COLOR[self.turn])
                     self.DUMPmovehistory("inactivity")
+                    self.arena.setcounter_inactivity += 1
                     self.endgame()
             if GUI:
                 self.setlimit["text"] = str(self.consec_failure)
@@ -853,7 +868,7 @@ class table(Frame):
         
         Fname = 'log/log_%s_%i.txt' % (reason, self.arena.ROUND)
         FLOG = open(Fname, 'w+')
-        FLOG.write(reason)
+        FLOG.write("%s\n" % reason)
         try:
             self.MACHINE[self.turn].stdin.write(bytearray('dump\n','utf-8'))
             self.MACHINE[self.turn].stdin.flush()
@@ -866,15 +881,15 @@ class table(Frame):
         except:
             if self.Damaged:
                 FLOG.close()
-                pass
+
             else:
                 self.turn = 1-self.turn
                 self.Damaged = 1
                 FLOG.write(str(self.board))
                 FLOG.close()
                 self.DUMPmovehistory("%s_opponent" % reason)
-                pass
-            
+                
+            return
         FLOG.write(str(self.board))
         FLOG.close()
 

@@ -2,12 +2,12 @@
 import random
 
 class parameter():
-    def __init__(self, name, dumpable, Cparam, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
+    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
         
         self.name = name
         self.marks_dumpable = dumpable
         
-        self.Cparam = 50
+        self.chanceMutate = chanceMutate
 
         self.stdvalue = value
      
@@ -137,11 +137,11 @@ class parameter():
 
         
         elif not type(self.value) == list:
-            self.value += self.getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
+            self.value += self.getP_act(self.chanceMutate, eMOD) * random.randrange(0,AGR) * self.INCR
 
         else:
             for kk in range(len(self.value)):
-                self.value[kk] += self.getP_act(self.Cparam, eMOD) * random.randrange(0,AGR) * self.INCR
+                self.value[kk] += self.getP_act(self.chanceMutate, eMOD) * random.randrange(0,AGR) * self.INCR
                 
 
 

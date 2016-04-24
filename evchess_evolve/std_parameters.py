@@ -17,7 +17,7 @@ def STDPARAMETERS():
 
         parameter("param_seekmiddle", 0, 30, 3, LIM = 5),
 
-        parameter("param_presumeOPPaggro", 0, 50, 1, LIM=1.1, bLIM=1, INCR=0.1),
+        parameter("param_presumeOPPaggro", 0, 50, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
         parameter("param_pawnrankMOD", 0, 30, 0, LIM=37),
 

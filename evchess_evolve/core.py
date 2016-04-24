@@ -310,6 +310,15 @@ def select_best_inds(population, NUMBER):
 
     return TOP
 
+def Mate(individuals, nchild):
+    Children = []
+    for N in range(nchild):
+        Child = machine(NewMacName())
+        for P in range(len(Child.PARAMETERS)):
+            Child.PARAMETERS[P] = copy.deepcopy(random.choice(individuals).PARAMETERS[P])
+        Children.append(Child)
+
+    return Children
 
 def replicate_best_inds(population, NUMBER):
     TOP = select_best_inds(population, NUMBER)
@@ -350,7 +359,27 @@ def clone_from_template():
 def NewMacName():
     return "%i.mac" % random.randrange(0,6489)
 
+def IsEqual(model, against):
+    for P in range(len(model.PARAMETERS)):
+        if not model.PARAMETERS[P].value == against.PARAMETERS[P].value:
+            return 0
 
+    return 1
+
+def EliminateEquals(population, Range):
+    for I in range(Range, len(population)):
+        if population[I] == 0:
+            continue
+        for T in range(I + 1, len(population)):
+            if population[T] == 0:
+                continue
+            if IsEqual(population[I], population[T]):
+                population[T] = 0
+
+    return list(filter((0).__ne__, population))
+    
+                
+    
 def Triangulate_value(values):
     if len(values) == 0: return 0
     
@@ -466,34 +495,6 @@ def PrepareCyclingStatLock(population):
             
     return population
 
-
-def PurgeMachines(population):
-    print('Purging machines. is this OK? (type OK')
-    RLY = input()
-    if not 'OK' in RLY: return population
-    for file in os.listdir(Fdir):
-
-        if file.endswith(".mac"): os.remove("%s/%s" % (Fdir,file))
-    os.remove(Fdir+'/machines.list')
-
-    population = populate([],1)
-    setmachines(population)
-    return population
-
-def ReleaseOrphan():
-    Fo = open("%s/machines.list" % Fdir, 'r')
-    mLIST = Fo.readlines()
-    Fo.close
-
-    
-    for file in os.listdir(Fdir):
-        if file.endswith('.mac'):
-            FOUND = 0
-            for guest in mLIST:
-                if file in guest: FOUND = 1
-            if not FOUND:
-                os.remove("%s/%s" % (Fdir, file))
-                print('Deleted orphan: %s.' % file)
 
 
             
