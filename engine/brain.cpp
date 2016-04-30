@@ -10,19 +10,24 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     long score = 0;
     time_t startT = time(NULL);
 
-    struct board *_board = makeparallelboard(&board);  
-    Vb printf("Master Address: %p\n", (void *)_board); 
+    struct board *_board = makeparallelboard(&board);
+    struct board *dummyboard = makeparallelboard(&board);
+    
+    
+    //Vb printf("Master Address: %p\n", (void *)_board); 
     
     long Alpha = -1690000;
     long Beta = 1690000;
     
     struct movelist *moves = (struct movelist *) calloc(1, sizeof(struct movelist));
-
+    
             
     legal_moves(_board, moves, PL, 0); 
     
     reorder_movelist(moves);
-    
+
+    struct board *finalboardsArray =
+      (struct board*) calloc(moves->k, sizeof(struct board));
     
     Vb printf("thinking r:%i  k:%i DEEP:%i.\n",r,moves->k,DEEP);
     if (moves->k == 0) return -1;
@@ -33,89 +38,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 //#define __CUDACC__    
 // cuda move evaluating.        
 #ifdef __CUDACC__        
-    
+    #include "brain_cuda0.cpp"
 
-    struct board *GPUboard;
-    struct movelist *GPUmoves;
-    
-    long *_Alpha;
-    long *_Beta;
-
-    
-    cudaMalloc((void**) &_Alpha, sizeof(long));
-    cudaMalloc((void**) &_Beta, sizeof(long));
-    
-    cudaMemcpy(_Alpha, &Alpha, sizeof(long), cudaMemcpyHostToDevice);
-    cudaMemcpy(_Beta, &Beta, sizeof(long), cudaMemcpyHostToDevice);
-    
-    cudaMalloc((void**) &GPUmoves, sizeof(struct movelist));
-    cudaMemcpy(GPUmoves, moves, sizeof(struct movelist), cudaMemcpyHostToDevice);
-    
-    
-    
-    //array of boards GPU allocation.
-    /*cudaMalloc((void**) &GPUboard, sizeof(struct board*) * moves->k);
-    for (i=0;i<moves->k;i++) {
-        cudaMalloc((void**) &GPUboard[i], sizeof(struct board));
-        cudaMemcpy(GPUboard[i], _board, sizeof(struct board), cudaMemcpyHostToDevice); 
-        printf("I=%p\n", GPUboard[i]);  
-	}*/
-
-    cudaMalloc((void**) &GPUboard, sizeof(struct board));
-    cudaMemcpy(GPUboard, _board, sizeof(struct board), cudaMemcpyHostToDevice);
-
-    
-    int *CTest = (int*)calloc(moves->k, sizeof(int));
-    int *Test;
-    cudaMalloc((void**) &Test, moves->k * sizeof(int));
-    
-    cudaMemcpy(Test, CTest, sizeof(int) * moves->k, cudaMemcpyHostToDevice);
-    dim3 threadsPerBlock(1, 1); 
-    dim3 numBlocks(moves->k, 1);  
-    kerneliterate <<<numBlocks, threadsPerBlock>>>(GPUboard, GPUmoves, PL, DEEP, Test, _Beta);
-
-
-    
-
-    
-    //Testkernel <<<moves->k, 1>>> (Test);
-    //cudaDeviceSynchronize();
-    //cudaFree(GPUboard);
-    
-    //kernel error debug;
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess) 
-    printf("Error: %s\n", cudaGetErrorString(err));
-
-    //cudaMemcpy(CTest, Test, moves->k * sizeof(int), cudaMemcpyDeviceToHost);
-    
-    
-    int R[2];
-
-    printf("GPUMOVES = %p\n", GPUmoves);
-    cudaMemcpy(moves, GPUmoves, sizeof(struct movelist), cudaMemcpyDeviceToHost);
-    
-    
-    
-    
-    select_top(moves->movements, moves->k, R, 1);
-    r = R[0];
-    
-    
-    for (i=0;i<moves->k;i++){
-      printf("score for i=%i is %i\n", i , moves->movements[i].score);
-      printf("TEST %i = %i\n", i, CTest[i]);
-    }
-    printf("but the GPU chose move n=%i\n", r);
-    
-    cudaFree(GPUmoves);
-    cudaFree(GPUboard);
-    
 // non cuda move evaluating mehthod.        
 #else           
     if(canNullMove(DEEP, _board, moves->k, PL)) {
-               score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
-               Alpha, Beta);
+      score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
+			   dummyboard, Alpha, Beta);
                if (PL==Machineplays && score > Alpha) Alpha = score;
                if (PL!=Machineplays && score < Beta)  Beta = score;
                
@@ -129,7 +58,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      
      move_pc(_board, &moves->movements[i]);    
      moves->movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
-             Alpha, Beta);
+					      &finalboardsArray[i], Alpha, Beta);
      
      if (moves->movements[i].score > Alpha) {
          Alpha = moves->movements[i].score;
@@ -141,25 +70,88 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      undo_move(_board, &moves->movements[i]); 
 
      
-     Vb printf("analyzed i=%i; score is %ld.\n",i, moves->movements[i].score);
-     IFnotGPU( Vb if (show_info) printf(">>>>>>>>\n"); )
-     IFnotGPU( if (show_info) eval_info_move(&moves->movements[i],DEEP, startT, PL); )              
+     //Vb printf("analyzed i=%i; score is %ld.\n",i, moves->movements[i].score);
+     //IFnotGPU( Vb if (show_info) printf(">>>>>>>>\n"); )
+     IFnotGPU( /*if (show_info)*/ eval_info_move(&moves->movements[i],DEEP, startT, PL); )              
       }     
              
 #endif
+
+
+      //second-level deepness move search schematics;################################
      
+      int T = moves->k;
+      if (T>4) T=12;
 
-    
-    
+      int secondTOP[T], I=0, M=0, s=0;
+
+     long sessionSCORE = -16000;
+     long individualSCORE = 0;
+     int individualINDEX = 0;
+     selectBestMoves(moves->movements, moves->k, secondTOP, T);
+
+     struct movelist *nextlevelMovelist =
+       (struct movelist*) calloc(T, sizeof(struct movelist));
+     
+     printf("\n\n");
+     for (i=0;i<T;i++){
+       I = secondTOP[i];
+       
+       //printf("original R: %i\n", I);
+       //show_board(finalboardsArray[I].squares);
+       
+       legal_moves(&finalboardsArray[I], &nextlevelMovelist[i], PL, 0);
+       reorder_movelist(&nextlevelMovelist[i]);
+
+       if (nextlevelMovelist[i].k)
+       for (M=0;M<nextlevelMovelist[i].k;M++) {
+	 move_pc(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
+	 
+	 nextlevelMovelist[i].movements[M].score =
+	   thinkiterate(&finalboardsArray[I], 1-PL, DEEP-1, 0,
+			dummyboard, Alpha, Beta);
+	 
+	 undo_move(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
+	 
+	   
+	 if (nextlevelMovelist[i].movements[M].score > Alpha)
+	   Alpha = nextlevelMovelist[i].movements[M].score;
+
+	 if (nextlevelMovelist[i].movements[M].score > sessionSCORE)
+	   {
+	   sessionSCORE = nextlevelMovelist[i].movements[M].score;
+	   
+	   r = I;
+	   s = M;}
+
+	  
+	 
+       }
+
+       else {
+	 if (moves->movements[I].score > sessionSCORE) {
+	 sessionSCORE = moves->movements[I].score;
+	 r = I;
+	 s = i;
+	 }
+	   }
 
 
+       
+       //selectBestMoves(nextlevelMovelist[i].movements, nextlevelMovelist[i].k, individualINDEX, 1);
+       //if (nextlevelMovelist[individualINDEX].score) > sessionSCORE) {sessionSCORE = nextlevelMovelist[individualINDEX].score; r = I;}
+       IFnotGPU( /*if (show_info)*/ eval_info_group_move(&moves->movements[I], &nextlevelMovelist[i].movements[s], 2*DEEP, startT, PL); )
+       
+     }
     replicate_move(out, &moves->movements[r]);
-    print_movement(out,1);
+    //print_movement(out,1);
    
    Vb printf("r = %i\n", r);
    
    DUMP(moves);
    DUMP(_board);
+   DUMP(finalboardsArray);
+   DUMP(nextlevelMovelist);
    return r;
    
 }
@@ -167,99 +159,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 //CUDA kernel functions.
 //#####################################################################
 #ifdef __CUDACC__
-Global void kerneliterate(struct board *workingboard,
-			  struct movelist *mainmoves,
-			  int PL, int DEEP, int *Test, long *_Beta) {
-
-    long Alpha = -16900;
-    long Beta = 16900;    
-    int Index = blockIdx.x;
-
-    printf("kernel online D%i.\n", DEEP);
-    struct board *_board = makeparallelboard(workingboard);
-
-    //Test[Index] = PL + DEEP;//power(Index, 2);
-    //mainmove->movements[Index].score =
-
-      //canNullMove(15, workingboard, 19, PL);
-
-
-    //legal_moves(_board, mainmove, PL, 0);
-
-
-    //append_move(_board, mainmove,1,3,1,-1, 0);
-    //check_move_check(_board, &mainmove->movements[0], PL);
-      // _board->passantJ;
-
-    
-      // 
-    //Testdevice(&Test[Index]);
-    move_pc(_board, &mainmoves->movements[Index]);
-    
-
-    if (DEEP > 0) {
-
-    struct movelist *nextmoves = (struct movelist *)malloc (sizeof(struct movelist));
-
-    legal_moves(_board, nextmoves, 1-PL, 0);
-    
-    //cudaDeviceSynchronize();
-
-    kerneliterate <<<nextmoves->k,1>>>(_board, nextmoves, 1-PL, DEEP -1, Test, _Beta);
-
-    int TOP[2];
-    select_top(nextmoves->movements, nextmoves->k, TOP, 1);
-    mainmoves->movements[Index].score = nextmoves->movements[TOP[0]].score;
-      //reorder_movelist(mainmove);
-      //findking(_board->squares, 'X', PL);
-      //thinkiterate(_board, PL, DEEP, 0, Alpha, Beta);
-      //evaluate(_board, mainmove, PL);
-      //ifsquare_attacked(_board->squares, 3, 3, PL, 0);
-      
-    printf("K %i\n",Index);
-	//cudaDeviceSynchronize();        
-    //printf("x%ld\n", mainmove->movements[Index].score);
-
-    free(nextmoves);
-    }
-
-    
-    else {
-      evalkernel <<<1,1>>> (&mainmoves->movements[Index].score, _board, mainmoves);
-      //mainmoves->movements[Index].score = playerscore - enemyscore;
-
-    }
-    
-    free(_board);
-}
-
-Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves) {
-
-  int playerscore = evaluate(board, moves, Machineplays);
-  int enemyscore = evaluate(board, moves, Machineplays);
-
-  *VALUE = playerscore - enemyscore;
-}
-
-Global void Testkernel(int *Test) {
-
-  int Index = blockIdx.x;
-  Test[Index] = 3 * Index;
-
-  int *P= (int*)malloc(sizeof(int));
-  printf("CAPETA %p\n", P);
-}
-
-Device void Testdevice(int *Test) {
-  int x = blockIdx.x;
-    *Test = x * 3;
-    }
+#include "brain_cuda1.cpp"
 #endif
 //#####################################################################
 
 
 Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
-        long Alpha, long Beta) {
+			 struct board *finalboard,  long Alpha, long Beta) {
 
     int i=0, r=0;
     
@@ -293,8 +199,8 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
             if (PL == Machineplays) score = -score;
          }
           else score = 0;
-        
-       Vb printf("check/stalemate.\n");
+	 cloneboard(_board, finalboard);
+	 //Vb printf("check/stalemate.\n");
         DUMP(_board);
        return score;
          
@@ -310,8 +216,8 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
        //and its not K+P endgame.
        if(DEEP > BRAIN.DEEP - 2)
            if(canNullMove(DEEP, _board, moves.k, PL)) {
-	     score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
-	      Alpha, Beta);
+	     score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
+				  0, Alpha, Beta);
                if (PL==Machineplays && score > Alpha) Alpha = score;
                if (PL!=Machineplays && score < Beta ) Beta  = score;}
 
@@ -325,18 +231,19 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
        
        move_pc(_board, &moves.movements[i]);  
 
-       moves.movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, verbose, 
-       Alpha, Beta);
+       moves.movements[i].score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
+					       finalboard, Alpha, Beta);
        
        //eval_info_move(&_board->movelist[i],DEEP, PL);
        //show_board(_board->squares);
-       undo_move(_board, &moves.movements[i]);
+       
        
        //if (show_info) eval_info_move(&_board->movelist[i],DEEP, PL);  
        
        if (PL==Machineplays) 
            if (moves.movements[i].score > Alpha) {
                //printf("*.\n");
+	     if (DEEP==1&&finalboard) cloneboard(_board, finalboard);
                Alpha = moves.movements[i].score; r=i;
            
            if(Beta<=Alpha) ABcutoff=1;}
@@ -345,7 +252,7 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
             if (moves.movements[i].score < Beta) {
                //printf("*.\n");
                Beta = moves.movements[i].score; r=i;
-            
+	       if (DEEP==1&&finalboard) cloneboard(_board, finalboard);
             if(Beta<=Alpha) ABcutoff=1;
             }
               
@@ -354,6 +261,8 @@ Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
              DUMP(_board);
             return score;
         }
+
+	undo_move(_board, &moves.movements[i]);
      }
 
      score = moves.movements[r].score;  

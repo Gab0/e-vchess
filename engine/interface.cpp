@@ -190,3 +190,27 @@ void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
               showmovebuff.to[0], showmovebuff.to[1]);
      write(1, output, strlen(output));   
 }
+
+void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P) {
+  struct move primarybuff;
+  struct move secondarybuff;
+
+  time_t elapsedT = time(NULL) - startT;
+  
+  replicate_move(&primarybuff, primary);
+  replicate_move(&secondarybuff, secondary);
+
+  cord2pos(primarybuff.from);
+    cord2pos(primarybuff.to);
+      cord2pos(secondarybuff.from);
+        cord2pos(secondarybuff.to);
+
+
+	asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, secondary->score, elapsedT, P,
+		 primarybuff.from[0], primarybuff.from[1],
+		 primarybuff.to[0], primarybuff.to[1],
+		 secondarybuff.from[0], secondarybuff.from[1],
+		 secondarybuff.to[0], secondarybuff.to[1]);
+	write(1, output, strlen(output));
+
+}

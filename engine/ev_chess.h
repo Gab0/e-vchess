@@ -187,7 +187,7 @@ Host Device void movement_generator
             int limit, char direction, int i, int j, int P);
 
 
-//functions from operation.cpp;
+//functions from operation.cpp;##################################################
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
 
@@ -201,8 +201,11 @@ Host Device int ifsquare_attacked (char squares[8][8],
 				   int TGi, int TGj, int P, int verbose); 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
 Host Device int getindex (char x, char array[],int size);
+
 Host Device struct board *makeparallelboard (struct board *board);
-Host Device void select_top (struct move *array, int size, int target[], int quant);
+Host Device void cloneboard (struct board *model, struct board *target);
+
+Host Device void selectBestMoves (struct move *array, int size, int target[], int quant);
 Host Device void replicate_move(struct move *target, struct move *source);
 
 //void freeboard (struct board *target);
@@ -211,19 +214,20 @@ Host Device void reorder_movelist(struct movelist *movelist);
 
 
 
-//functions from interface.cpp;
+//functions from interface.cpp;##################################################
 int parse_move (struct move *target, char *s, int P);
 void print_movement (struct move *move, int full);
 int read_movelines (char txt[128], int verbose);
 int fehn2board (char str[]);
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P);
+void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P);
 
 
-//functions from brain.cpp;
+//functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 Device int evaluate(struct board *evalboard, struct movelist *moves, int PL);
-Device long thinkiterate(struct board *feed, int PL, int DEEP, 
-        int verbose, long Alpha, long Beta);
+Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
+			 struct board *finalboard, long Alpha, long Beta);
 Host Device float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 

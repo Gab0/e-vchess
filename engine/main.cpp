@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     //seekatk augments the score for taken pieces.
     Brain.seekatk = 0;
     //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    Brain.presumeOPPaggro = 1;
+    Brain.presumeOPPaggro = 0;
     //pawnrankMOD augments the score of the pawns, by the rank he occupies.
     Brain.pawnrankMOD = 0;
     Brain.parallelcheck = 0;

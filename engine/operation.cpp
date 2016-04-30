@@ -303,6 +303,20 @@ Host Device struct board *makeparallelboard (struct board *model) {
     return _board;
 }
 
+Host Device void cloneboard (struct board *model, struct board *target) {
+  int i=0, j=0;
+  
+  forsquares
+    target->squares[i][j] = model->squares[i][j];
+
+
+  target->passantJ = model->passantJ;
+
+  for(i=0;i<2;i++) for(j=0;j<3;j++) target->castle[i][j] = model->castle[i][j];
+
+
+}
+
 //LEGACY FUNCTION
 void freeboard (struct board *target) {
     
@@ -313,7 +327,7 @@ void freeboard (struct board *target) {
     }
 }
 
-Host Device void select_top (struct move *array, int size, int target[], int quant) {
+Host Device void selectBestMoves (struct move *array, int size, int target[], int quant) {
     int i = 0;
     int qu=0;
     int win[16][2]={0};
@@ -360,13 +374,14 @@ Host Device void select_top (struct move *array, int size, int target[], int qua
     else {
     for (qu=0;qu<quant;qu++) {
         win[qu][1] = -16700;
+	win[qu][0] = 0;
         
     for (i=0;i<size;i++) {
-        if (!is_in(i,forbid,f_index+1)) {
+        if (!is_in(i, forbid, f_index+1)) {
             
         
 
-        if (array[i].score > win[qu][1]){ 
+        if (array[i].score >= win[qu][1]){ 
             win[qu][1] = array[i].score;
             win[qu][0] = i;
             forbid[f_index] = i;  
