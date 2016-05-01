@@ -25,6 +25,7 @@
 #define print_play_cord(p) printf("from %c%c to %c%c\n", p.from[0],p.from[1],p.to[0],p.to[1])
 #define expand_play(p) p.from[0],p.from[1],p.to[0],p.to[1]
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
+#define flip(x) x = 1 - x
 
 #define Vb if (verbose)
 
@@ -69,6 +70,7 @@ struct move {
     int passantJ[2];
     int passant;
 };
+
 struct movelist;
 struct movelist {
     struct move movements[128];
@@ -88,6 +90,7 @@ struct board;
       int castle[2][3];
       
       int passantJ;
+      int whoplays;
    }; 
    
   
@@ -161,12 +164,12 @@ extern bool loadDEEP;
 
 IFnotGPU( extern bool allow_castling; )
 IFGPU( extern __device__ bool allow_castling; )
-//functions from main.cpp;
+//functions from main.cpp;#######################################################
 void computer(int verbose);
 void SIGthink(int signum);
 //l void UpdateGPUBrain();     
 
-//functions from board.cpp;
+//functions from board.cpp;######################################################
 void setup_board(int setup);
 void show_board(char squares[8][8]);
 Host Device int legal_moves 

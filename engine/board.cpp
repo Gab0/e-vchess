@@ -40,7 +40,7 @@ void setup_board (int setup) {
 	board.squares[7][4] = 'K';								/* black king */
 	
         for(i=0;i<3;i++) {board.castle[0][i]=1; board.castle[1][i]=1;}
-        
+        board.whoplays = 0;
    }
     
    else {
@@ -268,7 +268,7 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
 
     tg_board->passantJ=movement->passantJ[1];
 
-    
+    tg_board->whoplays = 1 - tg_board->whoplays;
     
 }
 
@@ -325,6 +325,7 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
     tg_board->passantJ=movement->passantJ[0];
     
+    tg_board->whoplays = 1 - tg_board->whoplays;    
     
 }
 
