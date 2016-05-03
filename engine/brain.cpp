@@ -35,7 +35,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     
     //infoMOVE = (char *)malloc(sizeof(char)*128);
     
-//#define __CUDACC__    
+ 
 // cuda move evaluating.        
 #ifdef __CUDACC__        
     #include "brain_cuda0.cpp"
@@ -45,7 +45,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     if(canNullMove(DEEP, _board, moves->k, PL)) {
       flip(_board->whoplays);
       score = thinkiterate(_board, 1-PL, DEEP-1, verbose,
-			   dummyboard, Alpha, Beta);
+			   0, Alpha, Beta);
       flip(_board->whoplays);
                if (PL==Machineplays && score > Alpha) Alpha = score;
                if (PL!=Machineplays && score < Beta)  Beta = score;
@@ -87,69 +87,125 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
       int secondTOP[T], I=0, M=0, s=0;
 
-     long sessionSCORE = -16000;
-     long individualSCORE = 0;
-     int individualINDEX = 0;
+     long sessionSCOREa=0, sessionSCOREb=0;
+
+     int mAlpha=0, mBeta=0;
+     int rAlpha=0, rBeta=0;
+     //long individualSCORE = 0;
+     //int individualINDEX = 0;
+     
      selectBestMoves(moves->movements, moves->k, secondTOP, T);
 
      struct movelist *nextlevelMovelist =
-       (struct movelist*) calloc(T*2, sizeof(struct movelist));
-     
+       (struct movelist*) calloc(T, sizeof(struct movelist));
+
+
+     int R=0;
+     int Lever=0;
+     for (R=0;R<BRAIN.xDEEP;R++) {
+
+      
+           mAlpha = mBeta = rAlpha = rBeta = 0;
+           sessionSCOREa = -170000;
+      sessionSCOREb = 170000;
+       //Alpha = -17000;
+       //Beta = 17000;
+      
      printf("\n\n");
      for (i=0;i<T;i++){
+       Lever = 1;
+
+      
        I = secondTOP[i];
        
-       //printf("original R: %i\n", I);
-       //show_board(finalboardsArray[I].squares);
+       printf("original R: %i\n", I);
+       show_board(finalboardsArray[I].squares);
 
        PL = finalboardsArray[I].whoplays;
+
+       if (PL != Machineplays)  Lever = 0;
+	 
+
+       
        legal_moves(&finalboardsArray[I], &nextlevelMovelist[i], PL, 0);
        reorder_movelist(&nextlevelMovelist[i]);
 
-       if (nextlevelMovelist[i].k)
+       if (nextlevelMovelist[i].k) {
        for (M=0;M<nextlevelMovelist[i].k;M++) {
 	 move_pc(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
 	 
 	 nextlevelMovelist[i].movements[M].score =
-	   thinkiterate(&finalboardsArray[I], 1-PL, DEEP-1, 0,
+	   thinkiterate(&finalboardsArray[I], 1-PL, DEEP-Lever, 0,
 			dummyboard, Alpha, Beta);
 	 
 	 undo_move(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
-	 
-	   
-	 if (nextlevelMovelist[i].movements[M].score > Alpha)// && PL == Machineplays)
-	   Alpha = nextlevelMovelist[i].movements[M].score;
-	 //if (nextlevelMovelist[i].movements[M].score < Beta && PL != Machineplays)
-	 //  Beta = nextlevelMovelist[i].movements[M].score;
-	 if ((nextlevelMovelist[i].movements[M].score > sessionSCORE))// && PL == Machineplays) ||
-	   // (nextlevelMovelist[i].movements[M].score < sessionSCORE && PL != Machineplays))
-	   {
-	   sessionSCORE = nextlevelMovelist[i].movements[M].score;
-	   //if (sessionSCORE > moves->movements[r].score) {//??? profitable???
-	   r = I;
-	   s = M;
-	   //}
-	   }
 
-	  
-	 
+	   
+	 //	 if (PL == Machineplays) {
+	 //if (nextlevelMovelist[i].movements[M].score > Alpha)
+	     //Alpha = nextlevelMovelist[i].movements[M].score;
+
+	   if (nextlevelMovelist[i].movements[M].score > sessionSCOREa) {
+	     sessionSCOREa = nextlevelMovelist[i].movements[M].score;
+	     moves->movements[I].score = sessionSCOREa;
+	     mAlpha = M;
+	     rAlpha = I;
+	   }
+	   //  }
+	   
+	   /* if (PL != Machineplays) {
+
+	    //nextlevelMovelist[i].movements[M].score
+
+
+	    
+	   if (nextlevelMovelist[i].movements[M].score < Beta)
+	     Beta = nextlevelMovelist[i].movements[M].score;
+	   
+	   if (nextlevelMovelist[i].movements[M].score < sessionSCOREb) {
+	     sessionSCOREb = nextlevelMovelist[i].movements[M].score;
+	     mBeta = M;
+	     rBeta = I;
+	   }	 
+	     }
+
+	   */
        }
 
+       // if (dummyboard->whoplays == Machineplays) {
+       s = mAlpha; r = rAlpha; moves->movements[I].score = sessionSCOREa;//}
+       //else {s = mBeta; r = rBeta; moves->movements[I].score = sessionSCOREb;}
+
+       
+     }
        else {
-	 if ((moves->movements[I].score > sessionSCORE))// && PL == Machineplays)) || (moves->movements[I].score < sessionSCORE && PL != Machineplays))
-	   {
-	 sessionSCORE = moves->movements[I].score;
-	 r = I;
-	 s = 0;
+	 if (moves->movements[I].score > moves->movements[r].score)
+	 {
+
+	 sessionSCOREa = moves->movements[I].score;
+ 	 r = I;
+	 s = 63;
 	 }
+
+	 /*if (moves->movements[I].score < moves->movements[r].score)
+	{
+
+	 sessionSCOREb = moves->movements[I].score;
+ 	 r = I;
+	 s = 63;
+
+
+	 }  */ 
 	   }
 
-
+       cloneboard(dummyboard, &finalboardsArray[I]);
        
        //selectBestMoves(nextlevelMovelist[i].movements, nextlevelMovelist[i].k, individualINDEX, 1);
        //if (nextlevelMovelist[individualINDEX].score) > sessionSCORE) {sessionSCORE = nextlevelMovelist[individualINDEX].score; r = I;}
-       IFnotGPU( /*if (show_info)*/ eval_info_group_move(&moves->movements[I], &nextlevelMovelist[i].movements[s], 2*DEEP, startT, PL); )
+       IFnotGPU( /*if (show_info)*/ eval_info_group_move(&moves->movements[I], &nextlevelMovelist[i].movements[s], (2+R)*DEEP, startT, PL); )
        
+     }
+
      }
     replicate_move(out, &moves->movements[r]);
     //print_movement(out,1);

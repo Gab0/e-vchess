@@ -101,6 +101,7 @@ struct param;
     float randomness;
     float seekmiddle;
     float DEEP;
+    float xDEEP;
     float seekpieces;
     float deviationcalc;
     float evalmethod;

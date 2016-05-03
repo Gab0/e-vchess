@@ -47,7 +47,9 @@ Device bool show_info = false;
 
 bool againstHUMAN = false;
 bool toloadmachine = false;
+
 bool loadDEEP = true;
+bool loadxDEEP = true;
 
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
@@ -78,6 +80,9 @@ int main(int argc, char** argv) {
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
     Brain.DEEP = 4;
+    //xDEEP is the number of evaluations on top of the original one will be made,
+    //'artificially' increasing total ply deepnes by xDEEP * DEEP;
+    Brain.xDEEP = 1;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -128,7 +133,12 @@ int main(int argc, char** argv) {
             Brain.DEEP = (float)atof(argv[i+1]);
             loadDEEP = false;
         }
-     }  
+	if (strstr(argv[i], "--xdeep") != NULL) {
+	  Brain.xDEEP = (float)atof(argv[i+1]);
+	  loadxDEEP = false;
+	}
+	
+        }  
     
         
     
@@ -140,7 +150,6 @@ int main(int argc, char** argv) {
     
 
     #ifdef __CUDACC__
-    //UpdateGPUBrain <<<1, 1>>> ();
     cudaMemcpyToSymbol(GBrain, &Brain, sizeof(struct param),0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(show_info, &Show_Info, sizeof(bool),0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(GPUmachineplays, &machineplays, sizeof(int),0, cudaMemcpyHostToDevice);
