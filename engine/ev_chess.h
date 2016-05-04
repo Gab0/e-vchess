@@ -91,6 +91,8 @@ struct board;
       
       int passantJ;
       int whoplays;
+
+     long score;
    }; 
    
   
