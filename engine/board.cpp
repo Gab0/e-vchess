@@ -57,17 +57,25 @@ void setup_board (int setup) {
     }
 
 void show_board (char squares[8][8]) {
-    int i,j;
+  int i, j, X;
+    char BoardDraw[91];
 
+    BoardDraw[X] =  '\n';
+    X++;
     for(i=0;i<8;i++){
-        for(j=0;j<8;j++)
-            printf("%c ", squares[i][j]);
-      
-        printf("\n");}
+      for(j=0;j<8;j++){
+	  
+	BoardDraw[X] = squares[i][j]; X++;
+      }
+    BoardDraw[X] = '\n'; X++;
+    }
     //if (full){
    //     printf("")
    // }
     
+    BoardDraw[X] = '\n';
+    fprintf(stderr, "%s", BoardDraw);
+
     
     }
 
@@ -268,7 +276,8 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
 
     tg_board->passantJ=movement->passantJ[1];
 
-    tg_board->whoplays = 1 - tg_board->whoplays;
+    flip(tg_board->whoplays);
+    tg_board->Nmoved += 1;
     
 }
 
@@ -325,7 +334,8 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
     tg_board->passantJ=movement->passantJ[0];
     
-    tg_board->whoplays = 1 - tg_board->whoplays;    
+    flip(tg_board->whoplays);
+    tg_board->Nmoved -= 1;
     
 }
 

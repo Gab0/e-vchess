@@ -185,7 +185,7 @@ void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
      cord2pos(showmovebuff.from);
      cord2pos(showmovebuff.to);
        
-            asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, elapsedT, P, 
+     asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, 0/*elapsedT*/, P, 
               showmovebuff.from[0], showmovebuff.from[1],
               showmovebuff.to[0], showmovebuff.to[1]);
      write(1, output, strlen(output));   
@@ -206,11 +206,17 @@ void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP
         cord2pos(secondarybuff.to);
 
 
-	asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, secondary->score, elapsedT, P,
+	asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, primary->score, elapsedT, P,
 		 primarybuff.from[0], primarybuff.from[1],
 		 primarybuff.to[0], primarybuff.to[1],
 		 secondarybuff.from[0], secondarybuff.from[1],
 		 secondarybuff.to[0], secondarybuff.to[1]);
 	write(1, output, strlen(output));
 
+}
+
+
+void stdoutWrite(const char * text) {
+  asprintf(&output, text);
+  write(1, output, strlen(output));
 }

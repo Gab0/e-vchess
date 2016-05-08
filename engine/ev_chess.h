@@ -93,6 +93,7 @@ struct board;
       int whoplays;
 
      long score;
+     int Nmoved;
    }; 
    
   
@@ -227,13 +228,14 @@ int read_movelines (char txt[128], int verbose);
 int fehn2board (char str[]);
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P);
 void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P);
+void stdoutWrite(const char * text);
 
 
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 Device int evaluate(struct board *evalboard, struct movelist *moves, int PL);
-Device long thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
-			 struct board *finalboard, long Alpha, long Beta);
+Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
+				  long Alpha, long Beta, int AllowCutoff);
 Host Device float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 
