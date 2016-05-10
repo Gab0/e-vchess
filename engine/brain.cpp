@@ -353,10 +353,12 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 	   //if(Buffer->score != BoardBuffer->score) printf("FAIL a !\n");
 	   //printf("%i\n", Buffer->score);
 	   
-           if (Beta<=Alpha)
+           if (Beta<=Alpha) {
 	     if (AllowCutoff)
 	       ABcutoff=1;
+	   else if (Buffer->score - 10 > Alpha) ABcutoff=1;
 
+	  }
 	 }
 	}
 
@@ -371,13 +373,15 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 	   //cloneboard(Buffer, BoardBuffer);
   	   //if(Buffer->score != BoardBuffer->score) printf("FAIL b !\n");
 
-	    if (Beta<=Alpha)
+	   if (Beta<=Alpha) {
 	      if (AllowCutoff)
 		ABcutoff=1;
-
-      
-            }
-        }      
+	   else if (Buffer->score + 10 < Beta) ABcutoff=1;
+	      
+	  }      
+         }
+        }
+	
         DUMP(Buffer);
 	if (ABcutoff) {
 	  
