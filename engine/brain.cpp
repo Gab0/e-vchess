@@ -128,8 +128,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        Lever = 1;
        
        movelistSCORE = -17000;
-       //Alpha = -17000;
-       //Beta = 17000;
+       Alpha = -17000;
+       Beta = 17000;
        I = secondTOP[i];
        
        if (finalboardsArray[I].betaCut) continue;
@@ -153,8 +153,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        dummyboard = 0;
        
        if (nextlevelMovelist[i].k) {
-       Alpha = -17000;
-       Beta = 17000;
+	 //Alpha = -17000;
+       //Beta = 17000;
        for (M=0;M<nextlevelMovelist[i].k;M++) {
 	 move_pc(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
 
