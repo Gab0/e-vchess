@@ -385,7 +385,7 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 		   OAlpha, Alpha, OBeta, Beta, moves.movements[i].score);
 		   write(1, output, strlen(output));*/
 	  //if(PL==Machineplays) fprintf(stderr, "*%i\n", PL);
-	  if (!AllowCutoff &&)
+
 	  break;
 	}	
 	undo_move(_board, &moves.movements[i]);
