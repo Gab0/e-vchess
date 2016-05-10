@@ -58,7 +58,7 @@ void setup_board (int setup) {
 
 void show_board (char squares[8][8]) {
   int i, j, X;
-    char BoardDraw[91];
+    char BoardDraw[15];
 
     BoardDraw[X] =  '\n';
     X++;
@@ -66,15 +66,21 @@ void show_board (char squares[8][8]) {
       for(j=0;j<8;j++){
 	  
 	BoardDraw[X] = squares[i][j]; X++;
+	if (j!=7)BoardDraw[X] = ' '; X++;
       }
-    BoardDraw[X] = '\n'; X++;
+
+      fprintf(stderr, "%s", BoardDraw);
+      X=0;
+      //BoardDraw[X] = '\n'; X++;
+      //BoardDraw[X] = '\n'; X++;
+    
     }
     //if (full){
    //     printf("")
    // }
     
-    BoardDraw[X] = '\n';
-    fprintf(stderr, "%s", BoardDraw);
+   // BoardDraw[X] = '\n';
+   // fprintf(stderr, "%s", BoardDraw);
 
     
     }

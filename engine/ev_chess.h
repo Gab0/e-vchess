@@ -93,7 +93,9 @@ struct board;
       int whoplays;
 
      long score;
+     
      int Nmoved;
+     int betaCut;
    }; 
    
   

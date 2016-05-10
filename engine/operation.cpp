@@ -299,6 +299,7 @@ Host Device struct board *makeparallelboard (struct board *model) {
     _board->whoplays = model->whoplays;
     _board->Nmoved = model->Nmoved;
     _board->score = model->score;
+    _board->betaCut = model->betaCut;
     
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
@@ -317,6 +318,7 @@ Host Device void cloneboard (struct board *model, struct board *target) {
   target->whoplays = model->whoplays;
   target->score = model->score;
   target->Nmoved = model->Nmoved;
+  target->betaCut = model->betaCut;
   
   for(i=0;i<2;i++) for(j=0;j<3;j++) target->castle[i][j] = model->castle[i][j];
 
