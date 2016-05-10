@@ -63,7 +63,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      //Vb printf("Alpha = %i\n", Alpha);
      
      move_pc(_board, &moves->movements[i]);    
-     BufferBoard = thinkiterate(_board, 1-PL, DEEP-1, verbose, Alpha, Beta, 0);
+     BufferBoard = thinkiterate(_board, 1-PL, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
 
 
      
@@ -349,7 +349,7 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 	   Alpha = moves.movements[i].score;
 	   //printf("gg\n");
 	   //printf("%i\n", Buffer->score);
-	   cloneboard(Buffer, BoardBuffer);
+	   //cloneboard(Buffer, BoardBuffer);
 	   //if(Buffer->score != BoardBuffer->score) printf("FAIL a !\n");
 	   //printf("%i\n", Buffer->score);
 	   
@@ -368,16 +368,14 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 	   //OBeta = Beta;    
            Beta = moves.movements[i].score;
 
-	   cloneboard(Buffer, BoardBuffer);
+	   //cloneboard(Buffer, BoardBuffer);
   	   //if(Buffer->score != BoardBuffer->score) printf("FAIL b !\n");
 
 	    if (Beta<=Alpha)
-	      if (AllowCutoff){
+	      if (AllowCutoff)
 		ABcutoff=1;
 
-		//if (BoardBuffer->Nmoved < 3)  BoardBuffer->betaCut=1;
-
-	      }
+      
             }
         }      
         DUMP(Buffer);
@@ -387,7 +385,7 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 		   OAlpha, Alpha, OBeta, Beta, moves.movements[i].score);
 		   write(1, output, strlen(output));*/
 	  //if(PL==Machineplays) fprintf(stderr, "*%i\n", PL);
-
+	  if (!AllowCutoff &&)
 	  break;
 	}	
 	undo_move(_board, &moves.movements[i]);
