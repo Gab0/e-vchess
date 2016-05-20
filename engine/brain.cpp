@@ -70,7 +70,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
      moves->movements[i].score = BufferBoard->score;
      cloneboard(BufferBoard, &finalboardsArray[i]);
      //printf("SCR %i %i\n", BufferBoard->score, &finalboardsArray[i].score);
-     fprintf(stderr, "FNM: %i\n", BufferBoard->Nmoved);
+     //fprintf(stderr, "FNM: %i\n", BufferBoard->Nmoved);
      DUMP(BufferBoard);
      
      if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;

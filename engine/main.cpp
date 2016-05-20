@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     Brain.DEEP = 4;
     //xDEEP is the number of evaluations on top of the original one will be made,
     //'artificially' increasing total ply deepnes by xDEEP * DEEP;
-    Brain.xDEEP = 2;
+    Brain.xDEEP = 0;
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
