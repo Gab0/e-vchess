@@ -9,10 +9,12 @@ from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, system
 
 from chessArena.settings import *
+
 class Table(Frame):
     def __init__(self, arena, master=None):
         if GUI:
             Frame.__init__(self, master)
+            
         self.board = chess.Board()
         self.online = 0
         self.movelist=[]
@@ -43,28 +45,22 @@ class Table(Frame):
         self.startThread = None
 
         self.initialize=0
-    def newmatch_thread(self):
-        if (self.initialize == 0) and (self.online == 0) and (self.startThread):
-            self.startThread.join(0)
-            self.startThread = None
-            
-        elif not (self.startThread) and (self.initialize):
-            self.initialize = 0
         
+    def newmatch_thread(self):
 
-        elif (self.startThread) and (self.initialize == 0):
-            self.startThread.join(0)
-            self.startThread = None
-            
-        else:
+        if not self.online and not self.initialize and not self.startThread:
             try:
-                if not self.startThread and not self.online:
-                    self.startThread = Thread(target=self.newmatch)
-                    self.startThread.start()
+                self.startThread = Thread(target=self.newmatch)
+                self.startThread.start()
             except RuntimeError:
                 print('Error starting match.')
-
-            
+                
+        elif not self.initialize:
+            self.endgame()
+            if self.startThread:
+                self.startThread.join()
+                self.startThreead = None
+                
     def newmatch(self):
         if self.initialize: return
         
@@ -90,7 +86,6 @@ class Table(Frame):
             # raise
             #for M in self.MACHINE:
             #    M.kill()
-            self.initialize=0
             self.endgame()
             return
 
@@ -170,9 +165,6 @@ class Table(Frame):
             self.initialize = 0
             return
 
-        self.online = 1
-        self.turn = 0      
-        self.initialize=0
 
         if GUI:
             self.Maximize["background"] = "grey"
@@ -182,6 +174,9 @@ class Table(Frame):
             self.switch["command"]
             self.setlimit["text"] = "0"
 
+        self.online = 1
+        self.turn = 0      
+        self.initialize=0
             
 
         self.startThread = None
@@ -376,6 +371,7 @@ class Table(Frame):
             call(['kill', '-9', str(machine.pid)])
             machine.terminate()
         self.MACHINE = []
+
 
 
         self.online = 0

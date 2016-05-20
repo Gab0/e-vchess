@@ -4,7 +4,6 @@ import shlex
 from time import *
 import sys
 
-from psutil import *
 import threading
 import gc
 

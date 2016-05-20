@@ -1,19 +1,18 @@
+from random import randrange
 from time import time, strftime, sleep
+
 from tkinter import *
 
+from threading import Thread
 from subprocess import *
-import threading
-from chessArena.table import Table
-
-from psutil import virtual_memory
 
 from chessArena.settings import *
+from chessArena.table import Table
 
+from evchess_evolve.advanced import *
 from evchess_evolve.core import *
 from evchess_evolve.management import *
-from evchess_evolve.advanced import *
 
-from random import randrange
 
 class Arena():
 
@@ -77,7 +76,7 @@ class Arena():
 
     def startcycle(self):
 
-        self.CYCLE = threading.Thread(target=self.gocycle)
+        self.CYCLE = Thread(target=self.gocycle)
         self.CYCLE.start()
         
     def gocycle(self):
@@ -133,17 +132,13 @@ class Arena():
                 TABLERESPONSE*100
             ))
             for t in range(self.looplimit+1):
-                if virtual_memory()[2] > 97: self.memorylimit=1
-                else: self.memorylimit=0
-
                 if self.Cycle:
                     if self.TABLEBOARD[t].online == 1:
                         self.TABLEBOARD[t].readmove()
                     else:
-                        if not self.memorylimit:
-                            self.TABLEBOARD[t].newmatch_thread()
-                            if virtual_memory()[2] > 97: self.memorylimit=1
+                        self.TABLEBOARD[t].newmatch_thread()
 
+                            
             if self.ROUND == 0:
                 sleep(7)
             self.ROUND+=1
@@ -270,14 +265,9 @@ class Arena():
 
         self.showhide_= 1 - self.showhide_
 
-
-
-
     def shrinkloop(self):
         self.looplimit-=3
         self.killunused()
-
-
 
     def log(self, event):
         LOG = open("log.txt", "a+")
