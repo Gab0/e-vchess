@@ -9,6 +9,12 @@ from psutil import virtual_memory
 
 from chessArena.settings import *
 
+from evchess_evolve.core import *
+from evchess_evolve.management import *
+from evchess_evolve.advanced import *
+
+from random import randrange
+
 class Arena():
 
     def __init__(self):
@@ -16,11 +22,7 @@ class Arena():
         self.Cycle = False
         self.looplimit = 0
 
-        #sets the number of simultaneous chess tables to be created and played.
-        self.TABLECOUNT = 32
-        #number of tables to be shown on each row of machines.
-        TABLEonROW = 8
-
+        
         self.TIME = time()
         k=0
         j=0
@@ -65,7 +67,7 @@ class Arena():
 
 
         if (len(sys.argv) > 0) and ('--go' in sys.argv):
-            self.setlooplimit(self.TABLECOUNT-1)
+            self.setlooplimit(TABLECOUNT-1)
             self.startcycle()
 
         self.Title = "arenaArray"
