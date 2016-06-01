@@ -1,6 +1,6 @@
 def initialize():
     global COLOR
-    global evchessARGS
+    global engineARGS
     global GUI
 
     global TABLECOUNT
@@ -11,10 +11,10 @@ def initialize():
     
     # path to e-vchess executable,
     # and the directory where machines are stored, respectively.
-    evchessP = "engine/e-vchess"
+    enginebin = "engine/e-vchess"
     machineDIR =  "machines"
 
-    evchessARGS = [evchessP, "-MD", machineDIR, "--deep", "4"]
+    engineARGS = [enginebin, "-MD", machineDIR, "--deep", "4"]
     GUI = 1
     
     #sets the number of simultaneous chess tables to be created and played.

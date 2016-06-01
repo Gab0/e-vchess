@@ -132,24 +132,23 @@ class parameter():
         if self.name == 'param_TIMEweight':
             self.value = setTIMEweight(self.value)
             return
-
-        
-
         
         elif not type(self.value) == list:
-            self.value += self.getP_act(self.chanceMutate, eMOD) * random.randrange(0,AGR) * self.INCR
+            self.value += self.mutateDecideIfProceed\
+                          (self.chanceMutate - 3*self.value, eMOD) * random.randrange(0,AGR) * self.INCR
+            self.value = self.putonlimits(self.value)
+            self.value = round(self.value, 3)
 
         else:
             for kk in range(len(self.value)):
-                self.value[kk] += self.getP_act(self.chanceMutate, eMOD) * random.randrange(0,AGR) * self.INCR
-                
+                self.value[kk] += self.mutateDecideIfProceed\
+                                  (self.chanceMutate - 3*self.value[kk], eMOD) * random.randrange(0,AGR) * self.INCR
+                self.value[kk] = self.putonlimits(self.value)
+                self.value = round(self.value, 3)
 
 
-        self.value = self.putonlimits(self.value)
-        if type (self.value) == float:
-            self.value = round(self.value, 3)
-
-    def getP_act(self, chance, eMOD):
+    def mutateDecideIfProceed(self, chance, eMOD):
+        
         result = random.randrange(0,100)+(50-eMOD)
         if result > chance: return 0
         elif result < chance/2:

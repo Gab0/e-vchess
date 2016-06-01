@@ -172,7 +172,7 @@ def read_param_dump(parameter):
 
     DUMP = ["reading " + parameter + ":  W D L G"]
     tree = ET.parse(Fdir + "/paramstats.xml")
-    root = tree.getroot()
+    root = tree.getoot()
 
     for child in root:
         #print(child.tag)

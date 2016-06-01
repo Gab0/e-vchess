@@ -51,6 +51,9 @@ bool toloadmachine = false;
 bool loadDEEP = true;
 bool loadxDEEP = true;
 
+
+int NODEcount;
+
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
         

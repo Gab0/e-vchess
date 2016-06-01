@@ -12,6 +12,7 @@ from chessArena.settings import *
 
 class Table(Frame):
     def __init__(self, arena, master=None):
+        
         if GUI:
             Frame.__init__(self, master)
             
@@ -34,7 +35,8 @@ class Table(Frame):
         self.rounds_played=0
         
         self.visible = 0
-   
+
+        self.LastFlush = ""
 
         self.flagged_toend = 0
         
@@ -77,13 +79,14 @@ class Table(Frame):
         
 
         try:
-            self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
+            self.MACHINE.append(Popen(engineARGS, stdin=PIPE, stdout=PIPE))
 
-            self.MACHINE.append(Popen(evchessARGS, stdin=PIPE, stdout=PIPE))
-        except:
+            self.MACHINE.append(Popen(engineARGS, stdin=PIPE, stdout=PIPE))
+        except Exception as e:
             self.log('exception', '#1')
             print("Initializing failed.")
-            # raise
+            print(e.strerror)
+            #raise
             #for M in self.MACHINE:
             #    M.kill()
             self.endgame()
@@ -219,6 +222,7 @@ class Table(Frame):
         
         
         try:
+            self.LastFlush = self.MACHINE[self.turn].stdout.readlines()
             self.MACHINE[self.turn].stdout.flush()
 
         except BrokenPipeError:
@@ -235,16 +239,24 @@ class Table(Frame):
         self.movereadbuff = []
 
 
-        for line in self.MACHINE[self.turn].stdout.readlines():
+        # for line in self.MACHINE[self.turn].stdout.readlines():
+        for line in self.LastFlush:
             #print(line.decode('utf-8'))
             line = line.decode('utf-8', 'ignore')[:-1]
+            if "move" not in line:
+                continue
 
             L = line.split(" ")
+            
             if ("move" in L[0]) and (len(L)>1):
                     #print(">>>> %s"%L[1])
                     MOVE = L[1]
                     break
-            else: self.movereadbuff.append(line)
+            elif ("move" in L[1]):
+                MOVE = L[-1]
+                break
+            else:
+                self.movereadbuff.append(line)
                     
 
         if MOVE:
@@ -256,7 +268,8 @@ class Table(Frame):
                     self.board.push(chess.Move.from_uci(MOVE))
                     self.arena.move_read_reliability += 1
                     self.consec_failure=0
-                    if GUI: self.setlimit["text"] = "0"
+                    if GUI:
+                        self.setlimit["text"] = "0"
                     print("move done " + MOVE + "\n")
                 except TypeError:
                     self.log("BOARD.PUSH ERROR.", MOVE)
@@ -525,7 +538,7 @@ class Table(Frame):
             
     def show_status(self):
         print(" -- table %i" % self.number)
-        print(evchessARGS)
+        print(engineARGS)
         print("online: %i" %self.online)
         print(self.MACHINE)
         print("startThread: %s" % self.startThread)

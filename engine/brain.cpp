@@ -37,7 +37,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     //infoMOVE = (char *)malloc(sizeof(char)*128);
 
     int AllowCutoff = 1;
-    if (BRAIN.xDEEP) AllowCutoff = 0;
+    //if (BRAIN.xDEEP) AllowCutoff = 0;
  
 // cuda move evaluating.        
 #ifdef __CUDACC__        
@@ -146,7 +146,12 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
        if (finalboardsArray[I].score != moves->movements[I].score) fprintf(stderr, "DANGER wp%i    %i||%i\n", PL, finalboardsArray[I].score, moves->movements[I].score);
 
-       //if (PL != Machineplays) exit(-1);// Lever = 2;
+       if (PL != Machineplays) { //exit(-1);// Lever = 2;
+
+	 dummyboard = thinkiterate(&finalboardsArray[I], 1-PL, 1, 0, Alpha, Beta, AllowCutoff);
+	 cloneboard(dummyboard, &finalboardsArray[I]);
+
+       }
        
        legal_moves(&finalboardsArray[I], &nextlevelMovelist[i], PL, 0);
        reorder_movelist(&nextlevelMovelist[i]);
@@ -188,6 +193,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	 if (movelistSCORE > sessionSCORE) {
 	   r = I;
 	   sessionSCORE = movelistSCORE;
+	   
 	   fprintf(stderr, "CHOSEN\n", r);
 	 }
 
@@ -356,7 +362,7 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
            if (Beta<=Alpha) {
 	     if (AllowCutoff)
 	       ABcutoff=1;
-	   else if (Buffer->score - 10 > Alpha) ABcutoff=1;
+	     //else if (Buffer->score - 10 > Alpha) ABcutoff=1;
 
 	  }
 	 }
@@ -376,7 +382,7 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
 	   if (Beta<=Alpha) {
 	      if (AllowCutoff)
 		ABcutoff=1;
-	   else if (Buffer->score + 10 < Beta) ABcutoff=1;
+	      //else if (Buffer->score + 10 < Beta) ABcutoff=1;
 	      
 	  }      
          }
@@ -399,9 +405,9 @@ Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verb
      }
 
    //score = moves.movements[r].score;
-   
+
     DUMP(_board);
-    
+
     return BoardBuffer;
     
    }
