@@ -236,7 +236,7 @@ void stdoutWrite(const char * text);
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 Device int evaluate(struct board *evalboard, struct movelist *moves, int PL);
-Device struct board *thinkiterate(struct board *feed, int PL, int DEEP, int verbose,
+Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				  long Alpha, long Beta, int AllowCutoff);
 Host Device float scoremod (int DEEP, int method);
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
