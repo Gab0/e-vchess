@@ -12,9 +12,14 @@ from shutil import *
 from os import remove
 from os import path
 
+from threading import Thread
+from subprocess import call
+
 from evchess_evolve.core import *
 from evchess_evolve.management import *
 
+from chessArena import settings
+settings.initialize()
 
 
 
@@ -54,16 +59,23 @@ class Application(Frame):
         self.winrate["text"] = str(round(self.machines[self.N].TPARAMETERS[1].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
         self.drawrate["text"] = str(round(self.machines[self.N].TPARAMETERS[2].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
 
-
+        UNCONFORMITY = 0
         self.paramNAMES = []
         for VW in range(len(self.paramVIEWER)):
-            
-            self.paramVIEWER[VW][1]['text'] = self.machines[self.N].PARAMETERS[VW].value
+            VAL = self.machines[self.N].PARAMETERS[VW].value
+            if VAL:
+                UNCONFORMITY += 1
+            self.paramVIEWER[VW][1]['text'] = VAL
             if self.machines[self.N].PARAMETERS[VW].locked: self.paramVIEWER[VW][1]['bg'] = 'red'
+            
+        if UNCONFORMITY >= len(self.HealthPallete):
+            UNCONFORMITY = len(self.HealthPallete) - 1
+        self.marker["bg"] = self.HealthPallete[UNCONFORMITY]
 
-     
+
+
     def scrollmachinesU(self):
-     
+
         self.N+=1
         if self.N >= len(self.machines): self.N=0
 
@@ -238,6 +250,18 @@ class Application(Frame):
         self.save["command"] = self.savemac
         self.save.grid(column=5,row=11, sticky=NSEW, padx=3, pady=4)
 
+        self.HealthPallete = ['#000000',
+                              '#191919',
+                              '#323232',
+                              '#4c4c4c',
+                              '#666666',
+                              '#7f7f7f',
+                              '#999999',
+                              '#b2b2b2',
+                              '#cccccc',
+                              '#e5e5e5',
+                              '#ffffff']
+        
         self.Logo = PhotoImage()
 
         self.Logo.configure(data=LOGO)
@@ -285,6 +309,8 @@ class Application(Frame):
         self.machinemenu.add_command(label="Randomize Machine", command = lambda: self.machines[self.N].randomize())
         self.machinemenu.add_command(label="Send to TOP", command = lambda: self.sendtobest(self.N))
         self.machinemenu.add_command(label="DELETE machine", command = self.delete_machine)
+        self.machinemenu.add_separator()
+        self.machinemenu.add_command(label="Launch Machine", command = self.TOLaunchMachine)
         self.menubar.add_cascade(label="MACHINE", menu = self.machinemenu)
 
         self.actionmenu.add_command(label="Switch to Statlock Cycle.", command = self.TOswitchstatlock)
@@ -415,6 +441,21 @@ class Application(Frame):
     def TOpurge(self):
         self.machines=PurgeMachines(self.machines)
 
+    def TOLaunchMachine(self):
+        Kommand = ""
+
+        
+        LaunchEngineArgs = settings.engineARGS + ['--specific', self.machines[self.N].filename]
+
+        for K in LaunchEngineArgs:
+            Kommand += "%s" % K
+            Kommand += " "
+
+        command = ['xboard', '-fcp', '"%s"' % " ".join(LaunchEngineArgs)]
+        call(command)
+
+
+        
 
     def renew_VIEWDUMP_canvas(self, alreadyexists):
         if alreadyexists==1:

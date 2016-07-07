@@ -37,9 +37,10 @@ int loadmachine (int verbose, char *dir) {
 
        
        
-       printf("ok  %s\n", filename);
+       printf("loaded machine list:  %s\n", filename);
+
        
-       
+
        fp = fopen(filename, "r");
 
        while(!feof(fp)) {ch = fgetc(fp); if(ch == '\n') Nmachines++;}
@@ -62,7 +63,17 @@ int loadmachine (int verbose, char *dir) {
        printf("MACname > %s\n",line);
        strtok(line, "\n");
        sprintf(filename, "%s/%s", dir, line);
-       
+
+
+       // loading user-defined machine!
+       /*
+        if (strstr(specificMachine, ".mac") != NULL)
+	 {
+	 sprintf(filename, "%s/%s", dir, specificMachine);
+ 	 printf("ok but plans changed as we loaded user-defined machine!  %s\n", filename);
+	 }
+*/
+	
        
        Vb printf("opening machine: %s\n",filename);
        fp = fopen(filename, "r");
@@ -144,6 +155,11 @@ int loadmachine (int verbose, char *dir) {
        if (againstHUMAN) {
            chesslog(dir,machinepath);
        }
+
+
+       if (!Brain.randomness) Brain.randomness = 10;
+
+
        
        return 0;
     

@@ -32,7 +32,8 @@ def loadmachines():
         k=0
 
         machinelist = "%s/machines.list" % machine_dir
-        if not os.path.isfile(machinelist): return population
+        if not os.path.isfile(machinelist):
+            return population
         Fo = open(machinelist,'r')
         mLIST = Fo.readlines()
         Fo.close()
@@ -99,13 +100,20 @@ def p100():
     return random.randrange(0,100)
 
 
-def mutatemachines(AGR, population):
+def mutatemachines(Aggro, population):
 
+    ELOsum = 0
+    for IND in population:
+        ELOsum += IND.ELO
+
+    averageELO = ELOsum // len(population)
 
     for i in range(len(population)):
-            eMOD = 100-population[i].ELO/25
-
-            population[i].mutate(eMOD, AGR)
+        diff = population[i].ELO - averageELO
+        
+        MutateProbabilityDamper = diff//6
+        
+        population[i].mutate(MutateProbabilityDamper, Aggro)
                 
 
 
@@ -242,15 +250,17 @@ def deltheworst_clonethebest(population, action, MODlimit):
                                     CURRENT_SCORE[1] = population[k].ELO
 
                                     
-
-                print('subject deleted. ' + population[CURRENT_SCORE[0]].filename)
+                try:
+                    print('subject deleted. ' + population[ CURRENT_SCORE[0] ].filename)
+                except AttributeError:
+                    print("ERROR on Delete the Worst/Clone the Best")
+                    pass
                 """try:
                     os.remove(Fdir+'/'+population[CURRENT_SCORE[0]].filename)
                 except FileNotFoundError:
                     print("can't find machine file, but it's ok.")"""
                 population[CURRENT_SCORE[0]] = 0
-
-            population = [x for x in population if x != 0]
+                population = [x for x in population if x != 0]
 
 
 

@@ -91,6 +91,7 @@ class Arena():
             
         TIME = time()
         self.TABLEBOARD[0].log("\n\n\nSTARTING CYCLE", str(strftime("%d/%b - %H:%M:%S")))
+        
 
         #arena/cycle main loop. Important functions and values.
         while self.Cycle:
@@ -125,9 +126,8 @@ class Arena():
                 if len(LEVEL): self.routine_pop_management(LEVEL)
             
             self.move_read_reliability = 0
-            print("ROUND %i  T=%i  S=%f  APR=%i%% >>>>>>>>" % (
+            print(" < ROUND %i   %.1fs  Active: %.2f%% > " % (
                 self.ROUND,
-                round(TIME),
                 SLEEPTIME,
                 TABLERESPONSE*100
             ))
@@ -202,9 +202,6 @@ class Arena():
         #    if CHILD: population.append(CHILD)
 
         X = round(originalPOPLEN/8)
-        if "A" in LEVEL:
-            if randrange(10) > 8:
-                for k in range(1): population = mutatemachines(1,population)
 
         if "B" in LEVEL:
             MODscorelimit = 2
@@ -241,6 +238,16 @@ class Arena():
                      +self.setcounter_checkmate
                      +self.setcounter_draws+1)   
 
+        if "A" in LEVEL:
+            if randrange(10) > 8:
+                for k in range(1):
+                    population = mutatemachines(1, population)
+
+        AverageElo = 0
+        for I in population:
+            AverageElo += I.ELO
+        AverageElo //= len(population)
+
         
         self.log('')
         self.log('>>>>ROUTINE MANAGEMENT %s' % LEVEL)
@@ -250,6 +257,9 @@ class Arena():
                  % (originalPOPLEN,len(population)))
         self.log('Illegal move percentage is %f %%.'
                  % (self.setcounter_illegalmove*100/totalgames))
+        self.log('Average games per round equals to %i.'
+                 %  (totalgames // self.ROUND))
+        self.log("Average ELO is %i" % AverageElo)
         self.log('')
         print('routine management done.')
 

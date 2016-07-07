@@ -132,7 +132,7 @@ class Table(Frame):
                     if "MACname > " in line.decode('utf-8'):
                         self.MACnames[i] = line.decode('utf-8')[10:-1] 
 
-            sleep(3)            
+            sleep(5)            
 
 
             
@@ -141,10 +141,10 @@ class Table(Frame):
             
             self.MACHINE[0].stdin.write(bytearray('new\n','utf-8'))
             self.MACHINE[0].stdin.flush()
-            sleep(0.3)
+            sleep(0.6)
             self.MACHINE[0].stdin.write(bytearray('white\n','utf-8'))
             self.MACHINE[0].stdin.flush()
-            sleep(0.3)
+            sleep(0.6)
             self.MACHINE[0].stdin.write(bytearray('go\n','utf-8'))                
             self.MACHINE[0].stdin.flush()
             
@@ -153,19 +153,17 @@ class Table(Frame):
             print("broken pipe @ "+str(self.number) + " while starting.")
             #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
             
-            if (self.startuplog[0]): self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
-            if (self.startuplog[1]): self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+            if self.startuplog[0]:
+                self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
+            if self.startuplog[1]:
+                self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+                
             self.initialize = 0
             return
 
         if GUI: self.Maximize["background"] = "brown"
-  
 
-        try:
-            for NAME in self.MACnames: self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
-        except FileNotFoundError:
-            self.log("filename not found. Maybe coudn't be read properly by arena.","")
-            self.initialize = 0
+        if not self.ReadMachineTextContent():
             return
 
 
@@ -183,7 +181,17 @@ class Table(Frame):
             
 
         self.startThread = None
-        
+
+    def ReadMachineTextContent(self):
+        try:
+            self.MACcontent = []
+            for NAME in self.MACnames:
+                self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
+            return 1
+        except FileNotFoundError:
+            self.log("filename not found. Maybe coudn't be read properly by arena.","")
+            self.initialize = 0
+            return 0
 
         
     def Pout(self, readobj):
@@ -203,8 +211,8 @@ class Table(Frame):
             self.endgame()
             return
 
-        
-        print(COLOR[self.turn] + " @  table " + str(self.number))
+        if VerboseMove:
+            print(COLOR[self.turn] + " @  table " + str(self.number))
         
         if GUI:
             self.setlimit["background"] = "white"
@@ -212,15 +220,6 @@ class Table(Frame):
             
         self.movelist = []
 
-
-
-
-        """if (self.rounds_played % 17 == 0) and (self.rounds_played>3):
-            print('chk')
-            self.check_engine_health()"""
-
-        
-        
         try:
             self.LastFlush = self.MACHINE[self.turn].stdout.readlines()
             self.MACHINE[self.turn].stdout.flush()
@@ -263,14 +262,14 @@ class Table(Frame):
             for move in self.board.legal_moves:
                 self.movelist.append(str(move))
             if MOVE in self.movelist:
-
                 try:
                     self.board.push(chess.Move.from_uci(MOVE))
                     self.arena.move_read_reliability += 1
                     self.consec_failure=0
                     if GUI:
                         self.setlimit["text"] = "0"
-                    print("move done " + MOVE + "\n")
+                    if VerboseMove:
+                        print("move done " + MOVE + "\n")
                 except TypeError:
                     self.log("BOARD.PUSH ERROR.", MOVE)
                     print("BOARD.PUSH ERROR!.")
@@ -554,33 +553,62 @@ class Table(Frame):
 
         ELO = []
         index = []
-        for C in range(len(self.MACcontent)):
-            for L in range(len(self.MACcontent[C])):
-                if 'stat_elo' in self.MACcontent[C][L].split(' = ')[0]:
-                    ELO.append(int(self.MACcontent[C][L].split(' = ')[1][:-1]))
-                    index.append(L)
+        
+        if not self.ReadMachineTextContent():
+            print("ERROR reading machine text content.")
+            
+        for macIndex in range(len(self.MACcontent)):
+            for lineIndex in range(len(self.MACcontent[macIndex])):
+                if 'stat_elo' in self.MACcontent[macIndex][lineIndex].split(' = ')[0]:
+                    ELO.append(int(self.MACcontent[macIndex][lineIndex].split(' = ')[1][:-1]))
+                    index.append(lineIndex)
+                    
+
+        Draw = False
         if len(ELO) == 2:
             if winner == 0.5:
                 winner = 0
                 base = 0
-            else: base = 32
+                Draw = True
+
+            else:
+                base = 28
                 
                 
-            DIF = ELO[winner] - ELO[1-winner]
+            deltaELO = ELO[winner] - ELO[1-winner]
 
-            DIF = -round(DIF/16)
+            deltaELO = base - deltaELO//18
 
-            DIF += base
+            newELO = [ 0, 0 ]
+            if not Draw and deltaELO < 0:
+                deltaELO = 0
 
-            ELO[winner] += DIF
-            ELO[1-winner] -= DIF
+            else:
+                newELO[winner] = ELO[winner] + deltaELO
+                newELO[1-winner] = ELO[1-winner] - deltaELO
 
+            ScoreString = [ ]
+            for score in [ 0,1 ]:
+                ScoreString.append("%s (%i -> %i)" % (COLOR[score],
+                                                      ELO[score],
+                                                      newELO[score]))
+
+            if Draw:
+                print("Draw. %s; %s.    delta: %i"\
+                    % (ScoreString[winner],
+                     ScoreString[1-winner],
+                     deltaELO) )
+            else:                       
+                print("Winner is %s. %s lost.    delta: %i"\
+                      % (ScoreString[winner],
+                         ScoreString[1-winner],
+                         deltaELO) )
             
             try:
-                for C in range(len(self.MACcontent)):
-                    self.MACcontent[C][index[C]] = "stat_elo = %i\n"  % ELO[C]
-                    F = open('machines/%s' % self.MACnames[C], 'w')
-                    for line in self.MACcontent[C]:
+                for macIndex in range(len(self.MACcontent)):
+                    self.MACcontent[macIndex][index[macIndex]] = "stat_elo = %i\n"  % newELO[macIndex]
+                    F = open('machines/%s' % self.MACnames[macIndex], 'w')
+                    for line in self.MACcontent[macIndex]:
                         F.write(line)
                     F.close()
 
@@ -588,8 +616,6 @@ class Table(Frame):
                 self.log('sending ELO failed.', '')
 
             
-
-            print(ELO)
 
     def DUMPmovehistory(self, reason):
         

@@ -21,13 +21,13 @@ def STDPARAMETERS():
 
         parameter("param_pawnrankMOD", 0, 30, 0, LIM=37),
 
-        parameter("param_parallelcheck", 0, 80, 0,LIM=21, bLIM=0),
+        parameter("param_parallelcheck", 0, 80, 0, LIM=21, bLIM=0),
 
-        parameter("param_balanceoffense", 0, 80, 0,LIM=5, bLIM=0, INCR=0.25),
+        parameter("param_balanceoffense", 0, 80, 0, LIM=5, bLIM=-0.2, INCR=0.2),
 
-        parameter("param_MODbackup", 0, 50, 0, LIM=3,bLIM=0,INCR=0.25),
+        parameter("param_MODbackup", 0, 50, 0, LIM=3, bLIM=-0.2, INCR=0.2),
 
-        parameter("param_MODmobility", 0, 50, 0, LIM=3,bLIM=0,INCR=0.25)
+        parameter("param_MODmobility", 0, 50, 0, LIM=3, bLIM=-0.2,INCR=0.2)
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
         

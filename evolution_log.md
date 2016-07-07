@@ -6,3 +6,4 @@
 -> Added Alpha-Beta prunning scheme. Going past DEEP 3 was impossible because of the thinking time involved.
 -> param_aperture deprecated in favour of AB pruning.
 -> Proper move ordering before iteration, so to help the AB prunning.
+-> Post re-evaluation, doing other round of the full DEEP value of movements in alpha-beta pruning evaluation starting resulting best move-value board of prior result.

@@ -135,12 +135,12 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        
        //if (finalboardsArray[I].betaCut) continue;
 
-       fprintf(stderr, "----------------------------------------------------------\n");
-       fprintf(stderr, "Nm: %i || original R: %i || current R: %i\n", finalboardsArray[I].Nmoved, I, r);
-       fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I].whoplays, I);
+       Vb fprintf(stderr, "----------------------------------------------------------\n");
+       Vb fprintf(stderr, "Nm: %i || original R: %i || current R: %i\n", finalboardsArray[I].Nmoved, I, r);
+       Vb fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I].whoplays, I);
        if (finalboardsArray[I].Nmoved % 4) {
 	 //Lever -= (BRAIN.DEEP-finalboardsArray[I].Nmoved);
-       printf("DISCREPANCY DETECTED ~~~~~~~~~~~~~~~~~~~%i~~~~~~~%i~~~~~\n", finalboardsArray[I].Nmoved, Lever);}
+       Vb printf("DISCREPANCY DETECTED ~~~~~~~~~~~~~~~~~~~%i~~~~~~~%i~~~~~\n", finalboardsArray[I].Nmoved, Lever);}
        //show_board(finalboardsArray[I].squares);
 
        int PLAYER = finalboardsArray[I].whoplays;
@@ -153,7 +153,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	 cloneboard(dummyboard, &finalboardsArray[I]);
 	 eval_info_move(&moves->movements[I], 9666, 666, PLAYER);
 
-	 fprintf(stderr, "Fixing saved board last movement. >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+	 Vb fprintf(stderr, "Fixing saved board last movement. >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
        }
 
@@ -202,11 +202,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	   r = I;
 	   sessionSCORE = movelistSCORE;
 	   
-	   fprintf(stderr, "CHOSEN\n", r);
+	   Vb fprintf(stderr, "CHOSEN\n", r);
 	 }
       
 
-       fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I].Nmoved, finalboardsArray[I].whoplays);
+       Vb fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I].Nmoved, finalboardsArray[I].whoplays);
        
        //cloneboard(dummyboard, &finalboardsArray[I]);
        
@@ -436,13 +436,13 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
     int L=0,Z=0,K=0;
     
-#ifdef __CUDA_ARCH__
+
     int chaos = 1;   
-#else
-    int chaos = rand() % (int)(BRAIN.randomness);
+
+    if (BRAIN.randomness) chaos = rand() % (int)(BRAIN.randomness);
 
     attackers_defenders(evalboard->squares, *moves, PL);
-#endif
+
     
     //int deadpiece = 0;
     int parallelatks = 0;

@@ -37,7 +37,7 @@ class machine():
         self.dumped_K = 0   
 
     def read(self, split_line):
-        for parameter in self.TPARAMETERS+self.PARAMETERS:
+        for parameter in self.TPARAMETERS + self.PARAMETERS:
             if len(split_line) < 2:
                 if split_line[0] == 'W':
                     self.TPARAMETERS[1].value +=1
@@ -71,11 +71,12 @@ class machine():
         Fo.close()
 
 
-    def mutate(self, eMOD, AGR):
-        print('mutating ' + self.filename)
+    def mutate(self, MutateProbabilityDamper, Aggro):
+        print("mutating %s [ MPD: %i, ELO: %i ] " % (self.filename,
+                                                     MutateProbabilityDamper,
+                                                     self.ELO) )
         for parameter in self.PARAMETERS:
-            parameter.mutate(eMOD,AGR)
-            parameter.value = parameter.putonlimits(parameter.value)
+            parameter.mutate(MutateProbabilityDamper, Aggro)
 
     def dump_parameter_stat(self):
         for parameter in self.PARAMETERS:

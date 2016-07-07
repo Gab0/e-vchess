@@ -165,7 +165,9 @@ extern Device int GPUmachineplays;
 extern char *machinepath;
 
 extern bool againstHUMAN;
+
 extern bool toloadmachine;
+extern char *specificMachine;
 extern bool loadDEEP;
 
 IFnotGPU( extern bool allow_castling; )

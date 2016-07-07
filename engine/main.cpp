@@ -19,10 +19,12 @@ char *output = (char *)malloc(256 * sizeof(char));
 int machineplays = 1;
 Device int GPUmachineplays = 1;
 
+
 bool loadedmachine = false;
+char *specificMachine = (char *)malloc(64 * sizeof(char));
+
 
 char *infoAUX = (char *)malloc(256 * sizeof(char));
-
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
 
 struct move movehistory[512];
@@ -48,8 +50,8 @@ Device bool show_info = false;
 bool againstHUMAN = false;
 bool toloadmachine = false;
 
-bool loadDEEP = true;
-bool loadxDEEP = true;
+bool loadDEEP = false;
+bool loadxDEEP = false;
 
 
 int NODEcount;
@@ -77,7 +79,7 @@ int main(int argc, char** argv) {
     
     //randomness is the limit to the randomic small variability on the score, 
     //in centipawns.
-    Brain.randomness = 10;
+    Brain.randomness = 50;
     //seekmiddle augments the score for pieces in the center of the board.
     Brain.seekmiddle = 0;
     //DEEP is the number of future moves to be evaluated.
@@ -123,10 +125,18 @@ int main(int argc, char** argv) {
         
             
         if (strstr(argv[i], "-TOP") != NULL)
-                                    selectTOPmachines = true;   
+                                    selectTOPmachines = true;
+	
+	/*if (strstr(argv[i], "--specific") != NULL)
+	  {
+	  selectTOPmachines = true;
+	  sprintf(specificMachine, "%s", argv[i+1]);
+	  }*/
             
         if (strstr(argv[i], "-MD") != NULL) {
-            toloadmachine = true; machinepath = argv[i+1];}
+            toloadmachine = true;
+	    machinepath = argv[i+1];
+	}
         
         if (strstr(argv[i], "--showinfo") != NULL) Show_Info = true;
         
@@ -136,7 +146,8 @@ int main(int argc, char** argv) {
             Brain.DEEP = (float)atof(argv[i+1]);
             loadDEEP = false;
         }
-	if (strstr(argv[i], "--xdeep") != NULL) {
+	if (strstr(argv[i], "--xdeep") != NULL)
+	  {
 	  Brain.xDEEP = (float)atof(argv[i+1]);
 	  loadxDEEP = false;
 	}
@@ -215,7 +226,7 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "dump") != NULL) dump_history();
     
-    if (strstr(inp, "go") != NULL) computer(1);
+    if (strstr(inp, "go") != NULL) computer(0);
     
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
@@ -261,7 +272,7 @@ int main(int argc, char** argv) {
     }
     
     if (read_movelines(inp,0)) {
-       computer(1);
+       computer(0);
         
 
     }

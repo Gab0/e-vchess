@@ -2,14 +2,14 @@
 import random
 
 class parameter():
-    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0):
+    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0, stdvalue=0):
         
         self.name = name
         self.marks_dumpable = dumpable
         
         self.chanceMutate = chanceMutate
 
-        self.stdvalue = value
+        self.stdvalue = stdvalue
      
         self.value = value
         self.dumpedvalue = 0
@@ -23,21 +23,18 @@ class parameter():
         
         
     def read(self, split_line):
-        if self.locked: return
+        if self.locked:
+            return
         try:
             if self.name in split_line[0]:
-                if split_line[0] == "|": self.locked = 1
+                if split_line[0] == "|":
+                    self.locked = 1
+                    print("locked.")
                 
 
                 if self.marks_dumpable:
                     self.value = int(split_line[2])
                     self.dumpedvalue = int(split_line[3])
-
-                elif type(self.value) == int:
-                    self.value = int(float(split_line[2]))
-
-                elif type(self.value) == float:
-                    self.value = round(float(split_line[2]),3)
 
                 elif type(self.value) == list:
 
@@ -51,6 +48,9 @@ class parameter():
                         self.value = []
                         for z in range(2, len(split_line)):
                             self.value.append(float(split_line[z]))
+
+                else:
+                    self.value = round(float(split_line[2]),3)
 
         except ValueError:
             print('fail to read %s.' % self.name)
@@ -77,88 +77,79 @@ class parameter():
 
 
 
-    def putonlimits(self, value):
-        TYPE = type(value)
-        if TYPE == list:
-            for X in range(len(value)):
-                value[X] = self.putonlimits(value[X])
-            return value
+    def putonlimits(self):
 
-
-        if self.LIM: LIM = self.LIM
-        else: LIM = 0
-        if self.bLIM: bLIM = self.bLIM
-        else: bLIM = 0
-
-
-        if type(self.stdvalue) == list:
-            stdvalue = self.stdvalue[0]
-        else: stdvalue = self.stdvalue
-
+        TYPE = type(self.value)
         
-                
-        if self.LIM != None:
-            if value > LIM: value = random.uniform(stdvalue ,LIM)
-        if self.bLIM != None:
-            if value < bLIM: value = random.uniform(bLIM, stdvalue)
-
-
-        if self.alwaysPOSITIVE: value = abs(value)
-
-        if TYPE == float:
-            value = round(value, 2)
-
-
-        if not value % self.INCR == 0:
-            if random.randrange(9) < 5:
+        def RUN(self, value):
+            if self.LIM:
+                if value > self.LIM: value = random.uniform(self.stdvalue, self.LIM)
                 value -= value % self.INCR
-            else:
-                value += value % self.INCR
+            if self.bLIM:
+                if value < self.bLIM: value = random.uniform(self.bLIM, self.stdvalue)
+                value -= value % self.INCR
+            if self.alwaysPOSITIVE:
+                value = abs(value)
 
-        if TYPE == float:
-            value = round(value, 2)
+            if type(value) == float:
+                value = round(value, 2)
 
-        if TYPE == int:
-            value = int(round(value))
-
-
-        return value
+            elif type(value) == int:
+                value = int(round(value))
+                
+            return value
+        
+        if TYPE == list:
+            for X in range(len(self.value)):
+                self.value[X] = RUN(self, self.value[X])
+                
+        else:
+            self.value = RUN(self, self.value)
 
     
-    def mutate(self, eMOD, AGR):
+    def mutate(self, MutateProbabilityDamper, Aggro):
         if (self.marks_dumpable) or (self.locked):
             return
 
         if self.name == 'param_TIMEweight':
             self.value = setTIMEweight(self.value)
             return
-        
-        elif not type(self.value) == list:
+
+        AggroModifier = random.randrange(1, Aggro) if Aggro > 1 else 1
+        if type(self.value) == list:
+            for V in range(len(self.value)):
+
+                self.value[V] += self.mutateDecideIfProceed\
+                                 (self.chanceMutate, MutateProbabilityDamper)\
+                                 * AggroModifier * self.INCR 
+               
+        else:
+
             self.value += self.mutateDecideIfProceed\
-                          (self.chanceMutate - 3*self.value, eMOD) * random.randrange(0,AGR) * self.INCR
-            self.value = self.putonlimits(self.value)
-            self.value = round(self.value, 3)
-
-        else:
-            for kk in range(len(self.value)):
-                self.value[kk] += self.mutateDecideIfProceed\
-                                  (self.chanceMutate - 3*self.value[kk], eMOD) * random.randrange(0,AGR) * self.INCR
-                self.value[kk] = self.putonlimits(self.value)
-                self.value = round(self.value, 3)
+                           (self.chanceMutate, MutateProbabilityDamper)\
+                           * AggroModifier * self.INCR
+            
+        self.putonlimits()
 
 
-    def mutateDecideIfProceed(self, chance, eMOD):
+    def mutateDecideIfProceed(self, chance, MutateProbabilityDamper):
         
-        result = random.randrange(0,100)+(50-eMOD)
-        if result > chance: return 0
-        elif result < chance/2:
-            print('mutated-')
-            return -1
-        else:
-            print('mutated+')
-            return 1
-        
+        result = random.randrange(100) + MutateProbabilityDamper
+        if result > chance:
+            return 0
 
+        GRAPHIC = [ '-', '+' ]
+        VALUE = [ -1, 1 ]
+
+        x = 1 if self.value >= 0 else 0
+
+        if MutateProbabilityDamper < 0:
+            x = 1 - x
+      
+        print("mutated %c" % GRAPHIC[x])
+        return VALUE[x]
+
+    
     def dump_parameter_stat(self, individual):
         parameter = self.name
 
@@ -249,10 +240,11 @@ class parameter():
 
         self.value = VAL*self.INCR + MIN
 
-        self.value = self.putonlimits(self.value)
+        self.putonlimits()
 
     def lock(self, value):
-        self.value = self.putonlimits(value)
+        self.value = value
+        self.putonlimits()
         self.locked = 1
         
     def unlock(self, rnd):
