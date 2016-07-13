@@ -201,27 +201,25 @@ class Arena():
         #    CHILD = create_hybrid(population)
         #    if CHILD: population.append(CHILD)
 
-        X = round(originalPOPLEN/8)
+        X = originalPOPLEN // 8
 
         if "B" in LEVEL:
             MODscorelimit = 2
             
-            population = deltheworst_clonethebest(population, -2*X-3, MODscorelimit)
+            population = deltheworst_clonethebest(population, -2*X, MODscorelimit)
 
             population = populate(population, X, 1)
 
-            population = replicate_best_inds(population, 3)
+            population = replicate_best_inds(population, X//2)
 
 
-            population += Mate(select_best_inds(population, 3), X)
+            population += Mate(select_best_inds(population, X//2), X)
 
             
             population = deltheworst_clonethebest(population,
                                                  originalPOPLEN-len(population),
                                                  MODscorelimit)
-            
-            for k in range(2): population = mutatemachines(1, population)
-
+                        
         if "C" in LEVEL:
             population = EliminateEquals(population, X)
             population = populate(population, originalPOPLEN - len(population), 1)
@@ -261,7 +259,7 @@ class Arena():
                  %  (totalgames // self.ROUND))
         self.log("Average ELO is %i" % AverageElo)
         self.log('')
-        print('routine management done.')
+        print( 'routine management %s done. Average ELO: %i' % (LEVEL, AverageElo) )
 
 
     def showhideall(self):

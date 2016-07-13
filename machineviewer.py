@@ -442,16 +442,13 @@ class Application(Frame):
         self.machines=PurgeMachines(self.machines)
 
     def TOLaunchMachine(self):
-        Kommand = ""
+
 
         
         LaunchEngineArgs = settings.engineARGS + ['--specific', self.machines[self.N].filename]
 
-        for K in LaunchEngineArgs:
-            Kommand += "%s" % K
-            Kommand += " "
-
-        command = ['xboard', '-fcp', '"%s"' % " ".join(LaunchEngineArgs)]
+        
+        command = ['xboard', '-fcp', " ".join(LaunchEngineArgs)]
         call(command)
 
 

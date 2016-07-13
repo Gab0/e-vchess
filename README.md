@@ -4,11 +4,10 @@
  To have the best strategic thinking and results, the parameters must be in tune with each other.<br>
  To get to the viable combinations of parameters, a basic implementation of evolutionary algorythm is employed, in the form of two satellite python scripts.<br>
  Arena_array.py creates some virtual chess tables, each to be played by two instances of E-Vchess loaded with different parameters. The parameter kit to be loaded by E_Vchess is called a 'machine', and stored in the 'machines' folder as text files. 
-After many cycles in the arena_array, machines will have their ELO rating stored in themselves, that will indicate their power as a set of parameters.<br>
+After some thousands cycles in the arena_array, machines will have their ELO rating stored in themselves, that will indicate their power as a set of parameters.<br>
  Machineviewer.py script can manipulate machine files and the whole population.<br>
  The engine is basic, it uses alpha-beta pruning to evaluate the pool of moves. No bitmasks, opening books nor other advanced chess engine apparatus.<br>
- The simplest machine (standard.mac) has a playing strenght of like 800 ELO in online chess. It is set to ignore every aspect of position evaluation besides the value of each piece on the board. When the evolution starts to drift most
-of the parameters from zero, the engine will also take number of possible moves in given position, number of attackers, and other stuff into consideration.<br>
+ The simplest machine (standard.mac) has a playing strenght of like 800 ELO in online chess. It is set to ignore every aspect of position evaluation besides the value of each piece on the board. Each parameter is actually a weight for some aspect of the evaluation function to be weighted, so while evolution drifts those parameters from zero, the engine will account more aspects of the position into consideration, like the numberr of possible moves in given position, number of attackers...<br>
 
 ##Usage:
  You can just play against the engine on Xboard.<br>
@@ -19,8 +18,14 @@ of the parameters from zero, the engine will also take number of possible moves 
  3) Send some machines on the 1200's or 1300's ELO to the top machines.<br>
  3) Run xboard or other chess interface, loading the engine with --TOP arg.<br>
 	`$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 4 --xdeep 2'`<br>
- 4) If you can't win, try to understand this repo and contribute to it. If you can, run 10k more cycles of chess_arena and try again.<br>
- 
+ 4) If you can't win, try to understand the engine and contribute to it. If you can, run 10k more cycles of chess_arena and play again.<br>
+
+##Commands:
+ The main shell script can call useful stuff:<br>
+    evc play - Load xboard with the engine, and choose a machine from the hall of fame.<br>
+    evc view - Population manager.<br>
+    evc arena - Load some dozens of engines and let them play against each other so they can evolve.<br>
+    
 ##Dependencies:
 
 chess_arena.py requires:<br>

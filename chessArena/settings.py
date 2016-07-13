@@ -7,15 +7,21 @@ def initialize():
 
     global TABLECOUNT
     global TABLEonROW
-    
+
+    global machineDIR
+    global TOPmachineDIR
+
+    global enginebin
+
     COLOR = {0: 'WHITE', 1: 'BLACK'}
 
     
     # path to e-vchess executable.    
     enginebin = "engine/e-vchess"
     
-    # path to the directory where machines are stored.
-    machineDIR =  "machines"
+    # paths to the directories where machines are stored.
+    machineDIR = "machines"
+    TOPmachineDIR = machineDIR + "/top_machines"# % machineDIR
 
     # path and arguments to run those chess engines.
     engineARGS = [enginebin, "-MD", machineDIR, "--deep", "4", "--xdeep", "0"]

@@ -320,6 +320,20 @@ def select_best_inds(population, NUMBER):
 
     return TOP
 
+
+def crossover(population, indexA, indexB):
+    pA = random.randrange(len(population[indexA].PARAMETERS))
+    pB = random.randrange(len(population[indexB].PARAMETERS))
+
+
+    Buffer = population[indexA].PARAMETERS[pA].value
+
+    population[indexA].PARAMETERS[pA].value = population[indexB].PARAMETERS[pB].value
+    population[indexB].PARAMETERS[pB].value = Buffer
+
+    return population
+
+
 def Mate(individuals, nchild):
     Children = []
     for N in range(nchild):
@@ -367,7 +381,13 @@ def clone_from_template():
 
 
 def NewMacName():
-    return "%i.mac" % random.randrange(0,6489)
+    letters = ""
+    for k in range(3):
+        x=random.randrange(65,91)
+        letters += chr(x)
+        
+    numbers = random.randrange(0,6489)
+    return "%s%i.mac" % (letters, numbers)
 
 def IsEqual(model, against):
     for P in range(len(model.PARAMETERS)):
