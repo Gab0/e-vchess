@@ -10,7 +10,7 @@ unsigned long long rndseed(){
     return ((unsigned long long)hi << 32) | lo;
 }
 
-int loadmachine (int verbose, char *dir) {
+int loadmachine (int verbose, char *MachineDir) {
   
     
     
@@ -19,9 +19,9 @@ int loadmachine (int verbose, char *dir) {
        char * line = NULL;
        size_t len = 0;
        ssize_t read;
-       char *reading = (char *) malloc(64);
+       char *reading = (char *) malloc(128 * sizeof(char));
        
-       char *filename = (char *) malloc(64);
+       char *filename = (char *) malloc(128 * sizeof(char));
        
        int V = 1;//verbose;
        
@@ -31,14 +31,15 @@ int loadmachine (int verbose, char *dir) {
        int i=0;
        
        
-       if (selectTOPmachines) sprintf(dir, "%s/top_machines", dir);
-       
-       sprintf(filename, "%s/machines.list", dir);
+       if (selectTOPmachines)
+	 sprintf(MachineDir, "%s/top_machines", MachineDir);
 
-       
+
+       if (strstr(specificMachine, ".mac") == NULL) {
+       sprintf(filename, "%s/machines.list", MachineDir);
+  
        
        printf("loaded machine list:  %s\n", filename);
-
        
 
        fp = fopen(filename, "r");
@@ -46,13 +47,14 @@ int loadmachine (int verbose, char *dir) {
        while(!feof(fp)) {ch = fgetc(fp); if(ch == '\n') Nmachines++;}
        fclose(fp);
 
-       
+ 
        
        fp = fopen(filename, "r");
         srand ( rndseed() );
        Nchosenmachine = rand() % Nmachines;
 
-       Vb printf("number of machines on list: %i    (%ith was chosen)\n", Nmachines,Nchosenmachine);
+       Vb printf("number of machines on list: %i    (%ith was chosen)\n",
+		 Nmachines,Nchosenmachine);
        
        
        
@@ -60,22 +62,24 @@ int loadmachine (int verbose, char *dir) {
        
        fclose(fp);
        
-       printf("MACname > %s\n",line);
+       printf("MACname > %s\n", line);
        strtok(line, "\n");
-       sprintf(filename, "%s/%s", dir, line);
-
+       sprintf(filename, "%s/%s", MachineDir, line);
+       }
 
        // loading user-defined machine!
-       /*
-        if (strstr(specificMachine, ".mac") != NULL)
-	 {
-	 sprintf(filename, "%s/%s", dir, specificMachine);
+
+       else {
+	 sprintf(filename, "%s/%s", MachineDir, specificMachine);
  	 printf("ok but plans changed as we loaded user-defined machine!  %s\n", filename);
 	 }
-*/
+       
+
 	
        
-       Vb printf("opening machine: %s\n",filename);
+       printf("opening machine: %s\n", filename);
+
+       // printf("MACname > %s\n",line);
        fp = fopen(filename, "r");
        if (fp == NULL)
            exit(EXIT_FAILURE);
@@ -88,7 +92,7 @@ int loadmachine (int verbose, char *dir) {
            
            
            if (strstr(line, "pvalues")!=NULL) {
-            reading = strtok(line, " ");   
+	    reading = strtok(line, " ");   
             reading = strtok(NULL, " ");
             reading = strtok(NULL, " ");
            
@@ -152,17 +156,15 @@ int loadmachine (int verbose, char *dir) {
        
        loadedmachine = true;
        
-       if (againstHUMAN) {
-           chesslog(dir,machinepath);
-       }
-
-
-       if (!Brain.randomness) Brain.randomness = 10;
-
-
+       if (againstHUMAN) 
+	 chesslog(MachineDir, machinepath);
        
+
+       if (!Brain.randomness)
+	 Brain.randomness = 10;
+      
        return 0;
-    
+   
     
 }
 

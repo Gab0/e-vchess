@@ -8,6 +8,7 @@ from subprocess import *
 
 from chessArena.settings import *
 from chessArena.table import Table
+from chessArena.tournament import Tournament
 
 from evchess_evolve.advanced import *
 from evchess_evolve.core import *
@@ -53,7 +54,6 @@ class Arena():
 
         self.move_read_reliability = 0
 
-        #self.config(menu=self.menubar)
         self.setlooplimit(0)
 
         self.EvolveRatio = 250
@@ -121,8 +121,12 @@ class Arena():
                 
                 if not self.ROUND % self.EvolveRatio: LEVEL += "A"
                 if not self.ROUND % (self.EvolveRatio * 2): LEVEL += "B"
-                if not self.ROUND % (self.EvolveRatio * 3): LEVEL += "C" 
+                if not self.ROUND % (self.EvolveRatio * 3): LEVEL += "C"
 
+                if not self.ROUND % (self.EvolveRatio * 250):
+                    sendtoHallOfFame( select_best_inds(population, 1)[0] )
+                    self.Tournament = Tournament(1,1)
+                    self.log('RUNNING TOURNAMENT!')
                 if len(LEVEL): self.routine_pop_management(LEVEL)
             
             self.move_read_reliability = 0
@@ -203,6 +207,7 @@ class Arena():
 
         X = originalPOPLEN // 8
 
+        
         if "B" in LEVEL:
             MODscorelimit = 2
             

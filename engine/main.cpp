@@ -42,7 +42,7 @@ bool selectTOPmachines = false;
 
 int  infomoveINDEX;
 
-char *machinepath;
+char *machinepath = (char *)malloc(sizeof(char)*128);
 
 bool Show_Info = false;
 Device bool show_info = false;
@@ -125,17 +125,15 @@ int main(int argc, char** argv) {
         
             
         if (strstr(argv[i], "-TOP") != NULL)
-                                    selectTOPmachines = true;
-	
-	/*if (strstr(argv[i], "--specific") != NULL)
-	  {
 	  selectTOPmachines = true;
+	
+	if (strstr(argv[i], "--specific") != NULL)
 	  sprintf(specificMachine, "%s", argv[i+1]);
-	  }*/
+
             
         if (strstr(argv[i], "-MD") != NULL) {
-            toloadmachine = true;
-	    machinepath = argv[i+1];
+	  toloadmachine = true;
+	  machinepath = argv[i+1];
 	}
         
         if (strstr(argv[i], "--showinfo") != NULL) Show_Info = true;

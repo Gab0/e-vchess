@@ -22,7 +22,6 @@ from chessArena import settings
 settings.initialize()
 
 
-
 class Application(Frame):
 
     def show_machine(self):
@@ -307,7 +306,7 @@ class Application(Frame):
         self.menubar.add_cascade(label="POPULATION", menu = self.popmenu)
 
         self.machinemenu.add_command(label="Randomize Machine", command = lambda: self.machines[self.N].randomize())
-        self.machinemenu.add_command(label="Send to TOP", command = lambda: self.sendtobest(self.N))
+        self.machinemenu.add_command(label="Send to TOP", command = lambda: sendtoHallOfFame( self.machines[ self.N ] ))
         self.machinemenu.add_command(label="DELETE machine", command = self.delete_machine)
         self.machinemenu.add_separator()
         self.machinemenu.add_command(label="Launch Machine", command = self.TOLaunchMachine)
@@ -338,20 +337,6 @@ class Application(Frame):
             self.paramVIEWER[i][0].grid(column=3, row=i)
             self.paramVIEWER[i][1].grid(column=4, row=i)
             
-
-
-
-    def sendtobest(self, N):
-        copyfile(self.DIR+'/'+self.machines[N].filename, self.DIR+'/top_machines/'+self.machines[N].filename)
-        Fo = open(self.DIR+'/top_machines/machines.list', 'a+')
-        Fo.write(self.machines[N].filename+'\n')
-        print('machine %s sent to top.' % self.machines[N].filename)
-        self.machines[N].onTOP=1
-        self.machines[N].write()
-        
-
-
-
 
 
 
@@ -414,7 +399,7 @@ class Application(Frame):
 
     def TOautotop(self):
         for IND in select_best_inds(self.machines):
-            self.sendtobest(IND)
+            sendtoHallOfFame(IND)
             
 
     def TOcreatehybrid(self, NUM):

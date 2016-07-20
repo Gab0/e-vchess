@@ -5,6 +5,7 @@ import random
 import xml.etree.ElementTree as ET
 import copy
 
+from shutil import copyfile
 #machine directory.
 Fdir = "/home/gabs/Desktop/e-vchess/machines"
 machine_dir = "/home/gabs/Desktop/e-vchess/machines"
@@ -315,8 +316,7 @@ def select_best_inds(population, NUMBER):
                 SCORE = SCR
                 LASTSCORE = SCR
 
-    for i in reversed(range(len(TOP))):
-        if TOP[i] == 0: TOP.pop(i)
+    TOP = [x for x in TOP if x]
 
     return TOP
 
@@ -526,5 +526,15 @@ def PrepareCyclingStatLock(population):
     return population
 
 
+
+def sendtoHallOfFame(MACHINE):
+    
+    copyfile(machine_dir + '/' + MACHINE.filename, machine_dir + '/top_machines/' + MACHINE.filename)
+    Fo = open(machine_dir + '/top_machines/machines.list', 'a+')
+    Fo.write(MACHINE.filename+'\n')
+    print('machine %s sent to top.' % MACHINE.filename)
+    MACHINE.onTOP=1
+    MACHINE.write()
+        
 
             

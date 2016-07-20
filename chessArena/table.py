@@ -11,17 +11,20 @@ from os import O_NONBLOCK, read, system
 from chessArena.settings import *
 
 class Table(Frame):
-    def __init__(self, arena, master=None):
+    def __init__(self, arena, master=None, forceNoGUI=False):
         
-        if GUI:
+        if GUI and not forceNoGUI:
             Frame.__init__(self, master)
+            self.GUI = 1
+        else:
+            self.GUI = 0
             
         self.board = chess.Board()
         self.online = 0
         self.movelist=[]
 
 
-        self.arena = arena
+        self.arena = arena 
 
         self.MACHINE = []
         
@@ -30,7 +33,10 @@ class Table(Frame):
         self.Damaged = 0
         
         self.turn = 0
-        self.number = len(arena.TABLEBOARD)
+        self.number = len(arena.TABLEBOARD) if self.arena else 0
+
+        if not self.arena:
+            self.result = None
 
         self.rounds_played=0
         
@@ -40,7 +46,7 @@ class Table(Frame):
 
         self.flagged_toend = 0
         
-        if GUI:
+        if self.GUI:
             self.setWidgets()
 
 
@@ -48,11 +54,11 @@ class Table(Frame):
 
         self.initialize=0
         
-    def newmatch_thread(self):
+    def newmatch_thread(self, specificMatch=None):
 
         if not self.online and not self.initialize and not self.startThread:
             try:
-                self.startThread = Thread(target=self.newmatch)
+                self.startThread = Thread(target=self.newmatch, kwargs={'specificMatch': specificMatch})
                 self.startThread.start()
             except RuntimeError:
                 print('Error starting match.')
@@ -63,8 +69,9 @@ class Table(Frame):
                 self.startThread.join()
                 self.startThreead = None
                 
-    def newmatch(self):
-        if self.initialize: return
+    def newmatch(self, specificMatch=None):
+        if self.initialize:
+            return
         
         while len(self.MACHINE)>0: self.MACHINE[0].kill()
         
@@ -74,26 +81,39 @@ class Table(Frame):
         self.rounds_played=0
         
         self.initialize = 1
-        if GUI:
+        if self.GUI:
             self.Maximize["background"] = "purple"
-        
+
+        if specificMatch:
+            MachineDirectory = "machines/top_machines/"
+        else:
+            MachineDirectory = "machines/"
 
         try:
-            self.MACHINE.append(Popen(engineARGS, stdin=PIPE, stdout=PIPE))
+            if specificMatch:
+                CURRENTengineARGS = engineARGS + ["-TOP", "--specific", specificMatch[0]]
+                # print(' '.join(CURRENTengineARGS))
+            else:
+                CURRENTengineARGS = engineARGS
+                
+            self.MACHINE.append(Popen(CURRENTengineARGS, stdin=PIPE, stdout=PIPE))
 
-            self.MACHINE.append(Popen(engineARGS, stdin=PIPE, stdout=PIPE))
+            if specificMatch:
+                CURRENTengineARGS = engineARGS + ["-TOP", "--specific", specificMatch[1]]
+            else:
+                CURRENTengineARGS = engineARGS
+                
+            self.MACHINE.append(Popen(CURRENTengineARGS, stdin=PIPE, stdout=PIPE))
         except Exception as e:
             self.log('exception', '#1')
             print("Initializing failed.")
             print(e.strerror)
-            #raise
-            #for M in self.MACHINE:
-            #    M.kill()
+
             self.endgame()
             return
 
         sleep(4)
-        if GUI:
+        if self.GUI:
             self.Maximize["background"] = "gold"
         try:
             self.MACnames = ['zero','zero']
@@ -113,7 +133,7 @@ class Table(Frame):
         
         
         
-        if GUI: self.Maximize["background"] = "brown"
+        if self.GUI: self.Maximize["background"] = "brown"
         #self.Pout(self.Wmachine.stdout.readlines())
         #self.Pout(self.Bmachine.stdout.readlines())
         
@@ -128,9 +148,13 @@ class Table(Frame):
 
             for i in [0,1]:
                 for line in self.MACHINE[i].stdout.readlines():
-                    #print(line.decode('utf-8'))
-                    if "MACname > " in line.decode('utf-8'):
-                        self.MACnames[i] = line.decode('utf-8')[10:-1] 
+                    L = line.decode('utf-8')
+                    # print(L)
+                    if "MACname > " in L:
+                        self.MACnames[i] = L[10:-1]
+                        
+                    if "opening machine:" in L:
+                        self.MACnames[i] = L.split('/')[-1][:-1]
 
             sleep(5)            
 
@@ -152,22 +176,25 @@ class Table(Frame):
         except BrokenPipeError:
             print("broken pipe @ "+str(self.number) + " while starting.")
             #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
-            
-            if self.startuplog[0]:
-                self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
-            if self.startuplog[1]:
-                self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+            try:
+                if self.startuplog[0]:
+                    self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
+                if self.startuplog[1]:
+                    self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+            except:
+                print("Startuplog logging failed.")
+                pass
                 
             self.initialize = 0
             return
 
-        if GUI: self.Maximize["background"] = "brown"
+        if self.GUI: self.Maximize["background"] = "brown"
 
-        if not self.ReadMachineTextContent():
+        if not self.ReadMachineTextContent(MachineDirectory):
             return
 
 
-        if GUI:
+        if self.GUI:
             self.Maximize["background"] = "grey"
             self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
             self.visor.delete('1.0', END)
@@ -182,14 +209,18 @@ class Table(Frame):
 
         self.startThread = None
 
-    def ReadMachineTextContent(self):
+    def ReadMachineTextContent(self, MachineLocation):
         try:
             self.MACcontent = []
             for NAME in self.MACnames:
-                self.MACcontent.append(open('machines/%s' % NAME, 'r').readlines())
+                MachinePath = "%s%s" % (MachineLocation, NAME)
+                self.MACcontent.append(open(MachinePath, 'r').readlines())
             return 1
         except FileNotFoundError:
-            self.log("filename not found. Maybe coudn't be read properly by arena.","")
+            self.log(
+                "filename not found ( %s ). " % MachinePath +\
+                "Maybe coudn't be read properly by arena." , "" )
+            
             self.initialize = 0
             return 0
 
@@ -200,6 +231,8 @@ class Table(Frame):
 
         
     def readmove(self):
+        SUCCEED = 0
+        
         if self.flagged_toend == 1:
             self.endgame()
             return
@@ -214,7 +247,7 @@ class Table(Frame):
         if VerboseMove:
             print(COLOR[self.turn] + " @  table " + str(self.number))
         
-        if GUI:
+        if self.GUI:
             self.setlimit["background"] = "white"
             self.Maximize["background"] = "black"
             
@@ -264,9 +297,11 @@ class Table(Frame):
             if MOVE in self.movelist:
                 try:
                     self.board.push(chess.Move.from_uci(MOVE))
-                    self.arena.move_read_reliability += 1
+                    SUCCEED = 1
+                    if self.arena:
+                        self.arena.move_read_reliability += 1
                     self.consec_failure=0
-                    if GUI:
+                    if self.GUI:
                         self.setlimit["text"] = "0"
                     if VerboseMove:
                         print("move done " + MOVE + "\n")
@@ -275,7 +310,7 @@ class Table(Frame):
                     print("BOARD.PUSH ERROR!.")
                     self.endgame()
                     
-                if GUI: self.Vrefresh()
+                if self.GUI: self.Vrefresh()
                 
                 if self.board.is_checkmate():
                     self.sendresult(self.turn)
@@ -310,7 +345,10 @@ class Table(Frame):
                     self.MACHINE[self.turn].stdin.flush()
                 except BrokenPipeError:
                     print("broken pipe @ " + str(self.number) + " while receiving move.")
-                    self.arena.setcounter_inactivity += 1
+
+                    if self.arena:
+                        self.arena.setcounter_inactivity += 1
+                        
                     self.log("broken pipe while receiving move.", self.number)
                     self.log(self.Board, self.Board.fullmove_number)
                     self.endgame()
@@ -318,7 +356,8 @@ class Table(Frame):
             else:
                 print("error! Illegal move! "+ MOVE)
                 self.log("error! Illegal move! "+ MOVE,0)
-                self.arena.setcounter_illegalmove+=1
+                if self.arena:
+                    self.arena.setcounter_illegalmove+=1
                 
                 #self.log(str(self.board),0)
                 #self.log('engine internal board >>>>',0)
@@ -328,19 +367,21 @@ class Table(Frame):
                 sleep(1)    
                 try:
                     Hdump = self.MACHINE[self.turn].stdout.read().decode('utf-8')
-                    
-                    FLOG = open('log/log_illegal%i.txt' % self.arena.ROUND,'w+')
-                    FLOG.write('illegal move. by %s. %s -> %s\n' % (COLOR[self.turn], self.MACnames[self.turn], MOVE))
-                    FLOG.write('')
-                    FLOG.write(Hdump)
-                    FLOG.write(str(self.board))
-                    FLOG.close()
+
+                    if self.arena:
+                        FLOG = open('log/log_illegal%i.txt' % self.arena.ROUND,'w+')
+                        FLOG.write('illegal move. by %s. %s -> %s\n' % (COLOR[self.turn], self.MACnames[self.turn], MOVE))
+                        FLOG.write('')
+                        FLOG.write(Hdump)
+                        FLOG.write(str(self.board))
+                        FLOG.close()
                     
                 except AttributeError:
                     pass
 
                 self.endgame()
-                return
+                return 0
+
         else:#no move read this turn.
             #for line in self.movereadbuff:
             #    self.log(line,'<<<<< %i' % len(self.movereadbuff))
@@ -355,25 +396,27 @@ class Table(Frame):
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',COLOR[self.turn])
                     self.DUMPmovehistory("inactivity")
-                    self.arena.setcounter_inactivity += 1
+                    if self.arena:
+                        self.arena.setcounter_inactivity += 1
                     self.endgame()
-            if GUI:
+            if self.GUI:
                 self.setlimit["text"] = str(self.consec_failure)
             
             if self.consec_failure > 27:
                 print("restarting due to inactivity.")
-                self.arena.setcounter_inactivity+=1
+                if self.arena:
+                    self.arena.setcounter_inactivity+=1
                 self.consec_failure = 0
                 
                 self.endgame()
                 
-        if GUI:
+        if self.GUI and self.arena:
             if self.number <= self.arena.looplimit:
                 self.setlimit["background"] = "green"
                 self.Maximize['background'] = "grey"
             else: self.setlimit["background"] = "red"
                 
-
+        return SUCCEED
         
     def endgame(self):
         self.flagged_toend=0
@@ -388,7 +431,7 @@ class Table(Frame):
 
         self.online = 0
         self.initialize = 0
-        if GUI:
+        if self.GUI:
             self.switch["text"] = "off"
             self.switch["command"] = self.turnon
             self.Mnames["text"] = "idle"
@@ -398,6 +441,11 @@ class Table(Frame):
     def sendresult(self, result):
         print("game ends @ " + str(self.number))
 
+        if not self.arena:
+            self.result = result
+            self.endgame()
+            return
+        
         if result == 0.5:
             self.arena.setcounter_draws+=1
         else:
@@ -412,17 +460,17 @@ class Table(Frame):
         
         if result > 0.5:
             result = '0-1'
-            if GUI: self.visor.insert('10.1', 'checkmate. black wins')
+            if self.GUI: self.visor.insert('10.1', 'checkmate. black wins')
             #self.log('checkmate', self.MACnames[1])
             
         elif result < 0.5:
             result = '1-0'
-            if GUI: self.visor.insert('10.1', 'checkmate. white wins')
+            if self.GUI: self.visor.insert('10.1', 'checkmate. white wins')
             #self.log('checkmate', self.MACnames[0])
             
         elif result == 0.5:
             result = '1/2-1/2'
-            if GUI: self.visor.insert('10.1', 'draw.')
+            if self.GUI: self.visor.insert('10.1', 'draw.')
             #self.log('draw', '1/2')
             
 
@@ -466,7 +514,7 @@ class Table(Frame):
     def turnon(self):
         self.newmatch_thread()
         
-        if GUI:
+        if self.GUI:
             self.switch["text"] = "on"
             self.switch["command"] = self.endgame
         
@@ -554,7 +602,7 @@ class Table(Frame):
         ELO = []
         index = []
         
-        if not self.ReadMachineTextContent():
+        if not self.ReadMachineTextContent("machines/"):
             print("ERROR reading machine text content.")
             
         for macIndex in range(len(self.MACcontent)):
