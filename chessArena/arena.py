@@ -21,7 +21,6 @@ class Arena():
 
         self.Cycle = False
         self.looplimit = 0
-
         
         self.TIME = time()
         k=0
@@ -33,7 +32,8 @@ class Arena():
         
         for i in range(TABLECOUNT):
             self.TABLEBOARD.append(Table(self, master=self.root))
-            if GUI: self.TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
+            if GUI:
+                self.TABLEBOARD[i].grid(column=k,row=j,stick=NSEW)
             k+=1
             if k == TABLEonROW:
                 k=0
@@ -105,7 +105,7 @@ class Arena():
             SLEEPTIME = round(SLEEPTIME,1)
             
             #update window name to reflect current values.
-            if self.ROUND % 3 == 0:                
+            if not self.ROUND % 3:                
                 self.root.wm_title("%s  T=%s|R=%s|I=%i" % (
                     self.Title,
                     round(SLEEPTIME, 1),
@@ -119,15 +119,18 @@ class Arena():
             if (self.ROUND) and not (self.ROUND % self.EvolveRatio):
                 LEVEL = ""
                 
-                if not self.ROUND % self.EvolveRatio: LEVEL += "A"
-                if not self.ROUND % (self.EvolveRatio * 2): LEVEL += "B"
-                if not self.ROUND % (self.EvolveRatio * 3): LEVEL += "C"
-
-                if not self.ROUND % (self.EvolveRatio * 250):
-                    sendtoHallOfFame( select_best_inds(population, 1)[0] )
-                    self.Tournament = Tournament(1,1)
-                    self.log('RUNNING TOURNAMENT!')
-                if len(LEVEL): self.routine_pop_management(LEVEL)
+                if not self.ROUND % self.EvolveRatio:
+                    LEVEL += "A"
+                if not self.ROUND % (self.EvolveRatio * 2):
+                    LEVEL += "B"
+                if not self.ROUND % (self.EvolveRatio * 3):
+                    LEVEL += "C"
+                if not self.ROUND % (self.EvolveRatio * 20):
+                    #LEVEL += "T"
+                    pass
+                    
+                if LEVEL:
+                    self.routine_pop_management(LEVEL)
             
             self.move_read_reliability = 0
             print(" < ROUND %i   %.1fs  Active: %.2f%% > " % (
@@ -143,8 +146,9 @@ class Arena():
                         self.TABLEBOARD[t].newmatch_thread()
 
                             
-            if self.ROUND == 0:
+            if not self.ROUND:
                 sleep(7)
+                
             self.ROUND+=1
 
             if self.ROUND > 100000: i=0
@@ -205,20 +209,27 @@ class Arena():
         #    CHILD = create_hybrid(population)
         #    if CHILD: population.append(CHILD)
 
-        X = originalPOPLEN // 8
+        DELTAind = originalPOPLEN // 8
 
-        
+        if "T" in LEVEL:
+            sendtoHallOfFame( select_best_inds(population, 1)[0] )
+            self.Tournament = Tournament(1,1)
+            self.log('RUNNING TOURNAMENT!')
+            
         if "B" in LEVEL:
             MODscorelimit = 2
             
-            population = deltheworst_clonethebest(population, -2*X, MODscorelimit)
+            population = deltheworst_clonethebest(population,
+                                                  -2 * DELTAind,
+                                                  MODscorelimit)
 
-            population = populate(population, X, 1)
+            population = populate(population, DELTAind, 1)
 
-            population = replicate_best_inds(population, X//2)
+            population = replicate_best_inds(population,
+                                             DELTAind//2)
 
 
-            population += Mate(select_best_inds(population, X//2), X)
+            population += Mate(select_best_inds(population, DELTAind//2), DELTAind)
 
             
             population = deltheworst_clonethebest(population,

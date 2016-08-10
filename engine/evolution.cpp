@@ -81,9 +81,11 @@ int loadmachine (int verbose, char *MachineDir) {
 
        // printf("MACname > %s\n",line);
        fp = fopen(filename, "r");
-       if (fp == NULL)
-           exit(EXIT_FAILURE);
-       
+       if (fp == NULL) {
+	 printf("ERROR: failed to load machine [null file].\n");
+	 return 0;
+	 //exit(EXIT_FAILURE);
+	 }
        while ((read = getline(&line, &len, fp)) != -1) {
            i=0;
            

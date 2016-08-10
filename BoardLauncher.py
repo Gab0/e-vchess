@@ -44,7 +44,7 @@ class DuelTable():
 
         X = call(Command)
 
-        print("Did this machine have win the game? [y/n]")
+        print("Did this machine win the game? [y/n]")
 
         FeedBack = self.CollectInput( ['y', 'n'] )
 

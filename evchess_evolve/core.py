@@ -348,7 +348,6 @@ def replicate_best_inds(population, NUMBER):
     TOP = select_best_inds(population, NUMBER)
 
 
-    
     for IND in TOP:
         for N in range(NUMBER):
             IND.filename = NewMacName()
@@ -396,6 +395,7 @@ def IsEqual(model, against):
 
     return 1
 
+
 def EliminateEquals(population, Range):
     for I in range(Range, len(population)):
         if population[I] == 0:
@@ -407,11 +407,11 @@ def EliminateEquals(population, Range):
                 population[T] = 0
 
     return list(filter((0).__ne__, population))
-    
-                
-    
+
+
 def Triangulate_value(values):
-    if len(values) == 0: return 0
+    if len(values) == 0:
+        return 0
     
     BUFFER=0
     #for value in values: BUFFER+=value
@@ -422,109 +422,6 @@ def Triangulate_value(values):
     
 
     return values[X]
-
-
-
-def CyclingStatLock(population):
-    DB = "%s/CyclingLockDB" % Fdir
-    if not os.path.isfile(DB): return population
-
-    ACTIVE = 0
-    NEXT = 0
-    CYCLE_PARAMETERS = []
-    DataBase = open(DB, 'r').readlines()
-    for line in DataBase:
-        L = line.split(" = ")
-        if len(L) > 1:
-            CYCLE_PARAMETERS.append([L[0], float(L[1])])
-    for P in range(len(CYCLE_PARAMETERS)):
-        if CYCLE_PARAMETERS[P][0][0] == ">":
-            CYCLE_PARAMETERS[P][0] = CYCLE_PARAMETERS[P][0][1:]
-            ACTIVE = P
-            
-            
-    if ACTIVE+1<len(CYCLE_PARAMETERS): NEXT = ACTIVE+1
-
-    
-    TOP = select_best_inds(population,3)
-    
-    print(TOP)#TEMP
-    
-    for P in range(len(TOP[0].PARAMETERS)):
-        if TOP[0].PARAMETERS[P].name in CYCLE_PARAMETERS[ACTIVE][0]:
-            ACTIVE_index = P
-
-        if CYCLE_PARAMETERS[NEXT][0] in TOP[0].PARAMETERS[P].name:
-            NEXT_index = P
-
-    APPLIEDvalue = []
-    for T in TOP:
-        #print(T)#TEMP
-        APPLIEDvalue.append(T.PARAMETERS[ACTIVE_index].value)
-
-
-    APPLIEDvalue = Triangulate_value(APPLIEDvalue)
-    CYCLE_PARAMETERS[ACTIVE][1] = APPLIEDvalue
-
-    
-
-    
-    for IND in population:
-                IND.PARAMETERS[NEXT_index].unlock(1)
-                IND.PARAMETERS[ACTIVE_index].lock(APPLIEDvalue)
-                
-
-    DataBase = open(DB, 'w+')
-    for P in range(len(CYCLE_PARAMETERS)):
-        string = "%s = %f\n" % (CYCLE_PARAMETERS[P][0], CYCLE_PARAMETERS[P][1])
-        if P == NEXT: string = ">"+string
-        DataBase.write(string)
-    
-    
-    
-    return population   
-    
-
-def PrepareCyclingStatLock(population):
-    DB = "%s/CyclingLockDB" % Fdir
-    if not os.path.isfile(DB): return population
-
-    ACTIVE = 0
-    NEXT = 0
-    CYCLE_PARAMETERS = []
-    DataBase = open(DB, 'r').readlines()
-    for line in DataBase:
-        L = line.split(" = ")
-        if len(L) > 1:
-            CYCLE_PARAMETERS.append([L[0],L[1][:-1]])
-
-    if len(CYCLE_PARAMETERS) < 1: return population
-
-    #print(CYCLE_PARAMETERS) #TEMP
-    for C in range(len(CYCLE_PARAMETERS)):
-        for P in range(len(population[0].PARAMETERS)):
-            #print(P)
-            #print(C)
-            try:
-                if population[0].PARAMETERS[P].name in CYCLE_PARAMETERS[C][0]:
-                    CYCLE_PARAMETERS[C][0] = P
-            except:
-                print('>>>>>'+population[0].PARAMETERS[P].name)
-                
-
-    for P in range(len(CYCLE_PARAMETERS),-1):
-        if type(CYCLE_PARAMETERS[P][0]) != int:
-            CYCLE_PARAMETERS.pop(P)
-       
-
-
-    for IND in population:
-        IND.resetscores()
-        for CP in CYCLE_PARAMETERS:
-            IND.PARAMETERS[CP[0]].lock(float(CP[1]))
-            
-    return population
-
 
 
 def sendtoHallOfFame(MACHINE):

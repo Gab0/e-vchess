@@ -22,7 +22,7 @@ class Table(Frame):
         self.board = chess.Board()
         self.online = 0
         self.movelist=[]
-
+        
 
         self.arena = arena 
 
@@ -51,7 +51,10 @@ class Table(Frame):
 
 
         self.startThread = None
-
+        
+        if forceNoGUI:
+            self._w = "chessArena table #%i" % self.number
+            
         self.initialize=0
         
     def newmatch_thread(self, specificMatch=None):
@@ -91,7 +94,7 @@ class Table(Frame):
 
         try:
             if specificMatch:
-                CURRENTengineARGS = engineARGS + ["-TOP", "--specific", specificMatch[0]]
+                CURRENTengineARGS = specificMatch[0]
                 # print(' '.join(CURRENTengineARGS))
             else:
                 CURRENTengineARGS = engineARGS
@@ -99,7 +102,7 @@ class Table(Frame):
             self.MACHINE.append(Popen(CURRENTengineARGS, stdin=PIPE, stdout=PIPE))
 
             if specificMatch:
-                CURRENTengineARGS = engineARGS + ["-TOP", "--specific", specificMatch[1]]
+                CURRENTengineARGS = specificMatch[1]
             else:
                 CURRENTengineARGS = engineARGS
                 
@@ -666,8 +669,8 @@ class Table(Frame):
             
 
     def DUMPmovehistory(self, reason):
-        
-        Fname = 'log/log_%s_%i.txt' % (reason, self.arena.ROUND)
+        CurrentRound = self.arena.ROUND if self.arena else 0
+        Fname = 'log/log_%s_%i.txt' % (reason, CurrentRound)
         FLOG = open(Fname, 'w+')
         FLOG.write("%s\n" % reason)
         try:
