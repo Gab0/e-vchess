@@ -161,7 +161,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        
        legal_moves(&finalboardsArray[I], &nextlevelMovelist[i], PLAYER, 0);
        reorder_movelist(&nextlevelMovelist[i]);
-       dummyboard = 0;
+       //dummyboard = NULL;
+       DUMP(dummyboard);
        
        if (nextlevelMovelist[i].k) {
 	 //Alpha = -17000;

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+BASEDIR=$(dirname "$0")
+
+if [ "$1" == "machineviewer" ]; then
+python ${BASEDIR}/machineviewer.py
+fi
+if [ "$1" == "play" ]; then	
+python ${BASEDIR}/BoardLauncher.py
+fi
+if [ "$1" == "arena" ]; then
+python ${BASEDIR}/chessarena.py
+fi

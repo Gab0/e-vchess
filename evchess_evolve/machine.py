@@ -2,7 +2,7 @@
 
 from evchess_evolve.std_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
-from evchess_evolve.core import Fdir
+from evchess_evolve.core import machine_dir
 
 class machine():
 
@@ -58,7 +58,7 @@ class machine():
         if 'stat_elo' in split_line:
             self.ELO = int(split_line[2])
     def write(self):
-        Fo = open(Fdir+'/'+self.filename, "w+")
+        Fo = open(machine_dir+'/'+self.filename, "w+")
         for parameter in self.PARAMETERS+self.TPARAMETERS:
             Fo.write(parameter.write())
             Fo.write('\n')
@@ -91,7 +91,7 @@ class machine():
             parameter.randomize()
 
     def delete(self):
-        os.remove(Fdir+'/'+self.filename)
+        os.remove(machine_dir+'/'+self.filename)
 
     def resetscores(self):
         for P in self.TPARAMETERS:

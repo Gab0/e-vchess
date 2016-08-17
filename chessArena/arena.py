@@ -126,8 +126,9 @@ class Arena():
                 if not self.ROUND % (self.EvolveRatio * 3):
                     LEVEL += "C"
                 if not self.ROUND % (self.EvolveRatio * 20):
-                    #LEVEL += "T"
-                    pass
+                    LEVEL += "T"
+                if not self.ROUND % (self.EvolveRatio//3 * 13):
+                    LEVEL += "H" # better act alone.
                     
                 if LEVEL:
                     self.routine_pop_management(LEVEL)
@@ -198,7 +199,8 @@ class Arena():
         setmachines(population)
         
     def routine_pop_management(self, LEVEL):
-        if not len(LEVEL): return
+        if not len(LEVEL):
+            return
         population = loadmachines()
 
         originalPOPLEN = len(population)
@@ -213,8 +215,8 @@ class Arena():
 
         if "T" in LEVEL:
             sendtoHallOfFame( select_best_inds(population, 1)[0] )
-            self.Tournament = Tournament(1,1)
-            self.log('RUNNING TOURNAMENT!')
+            #self.Tournament = Tournament(1,1)
+            #self.log('RUNNING TOURNAMENT!')
             
         if "B" in LEVEL:
             MODscorelimit = 2
@@ -237,9 +239,15 @@ class Arena():
                                                  MODscorelimit)
                         
         if "C" in LEVEL:
-            population = EliminateEquals(population, X)
+            population = EliminateEquals(population, DELTAind)
             population = populate(population, originalPOPLEN - len(population), 1)
 
+        if "H" in LEVEL:
+            population = deltheworst_clonethebest(population,
+                                                  -DELTAind,
+                                                  MODscorelimit)
+            while len(population) < originalPOPLEN:
+                population += clone_from_template()
             
         #setmachines need to happen before management level C, which is advanced and loads
             #the population by it's own method.

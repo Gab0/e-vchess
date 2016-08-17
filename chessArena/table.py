@@ -425,9 +425,17 @@ class Table(Frame):
         self.flagged_toend=0
         self.Damaged = 0
         for machine in self.MACHINE:
-            #print('killing %s' % machine.pid)
-            call(['kill', '-9', str(machine.pid)])
-            machine.terminate()
+            # here is where the memory error probably occours;
+            # switching to a soft kill for the machine;
+            print("killing %s" % machine.pid)
+            try:
+                machine.stdin.write(bytearray('quit\n', 'utf-8'))
+                machine.stdin.flush()
+                #call(['kill', '-9', str(machine.pid)])
+            except OSError:
+                self.log("Cannot allocate memory!", 0)
+                
+            #machine.terminate()
         self.MACHINE = []
 
 

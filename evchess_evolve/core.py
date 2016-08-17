@@ -7,8 +7,8 @@ import copy
 
 from shutil import copyfile
 #machine directory.
-Fdir = "/home/gabs/Desktop/e-vchess/machines"
-machine_dir = "/home/gabs/Desktop/e-vchess/machines"
+
+machine_dir = "machines"
 
 from evchess_evolve.machine import machine
 
@@ -176,11 +176,11 @@ def dump_all_paramstat(individual):
 
 
 def read_param_dump(parameter):
-    if not os.path.exists(Fdir + "/paramstats.xml"):
+    if not os.path.exists(machine_dir + "/paramstats.xml"):
         return ["stats dump not found."]
 
     DUMP = ["reading " + parameter + ":  W D L G"]
-    tree = ET.parse(Fdir + "/paramstats.xml")
+    tree = ET.parse(machine_dir + "/paramstats.xml")
     root = tree.getoot()
 
     for child in root:
@@ -205,9 +205,9 @@ def setmachines(population):
     for i in range(len(population)):
         population[i].write()
 
-    if os.path.isfile(Fdir+'/machines.list'):
-        os.remove(Fdir+'/machines.list')
-    Fo = open(Fdir+'/machines.list', "w+")
+    if os.path.isfile(machine_dir +'/machines.list'):
+        os.remove(machine_dir+'/machines.list')
+    Fo = open(machine_dir+'/machines.list', "w+")
     for i in range(len(population)):
         Fo.write(population[i].filename+"\n")
 
@@ -257,7 +257,7 @@ def deltheworst_clonethebest(population, action, MODlimit):
                     print("ERROR on Delete the Worst/Clone the Best")
                     pass
                 """try:
-                    os.remove(Fdir+'/'+population[CURRENT_SCORE[0]].filename)
+                    os.remove(machine_dir+'/'+population[CURRENT_SCORE[0]].filename)
                 except FileNotFoundError:
                     print("can't find machine file, but it's ok.")"""
                 population[CURRENT_SCORE[0]] = 0
@@ -337,7 +337,7 @@ def crossover(population, indexA, indexB):
 def Mate(individuals, nchild):
     Children = []
     for N in range(nchild):
-        Child = machine(NewMacName())
+        Child = machine(NewMacName(Tail="#"))
         for P in range(len(Child.PARAMETERS)):
             Child.PARAMETERS[P] = copy.deepcopy(random.choice(individuals).PARAMETERS[P])
         Children.append(Child)
@@ -357,36 +357,39 @@ def replicate_best_inds(population, NUMBER):
 
 
 def clone_from_template():
-    Tpool = open('%s/top_machines/machines.list' % Fdir, 'r')
+    TemplatePool = open('%s/top_machines/machines.list' % machine_dir, 'r')
     POOL = []
     
-    for line in Tpool.readlines():
+    for line in TemplatePool.readlines():
         if '.mac' in line:
-            POOL.append(line[:-1])
+            POOL.append(line.replace('\n', ''))
 
     X = random.randrange(len(POOL))
 
-    model = open('%s/top_machines/%s' % (Fdir,POOL[X]), 'r')
+    model = open('%s/top_machines/%s' % (machine_dir, POOL[X]), 'r')
 
-    CHILD = machine(NewMacName())
+    CHILD = machine(NewMacName(Tail="&"))
     for line in model.readlines():
         CHILD.read(line)
     CHILD.onTOP = 0
                   
     #for N in range(NUMBER):
-    CHILD.mutate(10,6)    
+    CHILD.mutate(3, 3)    
 
     return CHILD
 
 
-def NewMacName():
+def NewMacName(Tail=""):
+    # used tail coding:
+    # &   stands for machine cloned from hall of fame template.
+    # #   stands for machine created by mating.
     letters = ""
     for k in range(3):
         x=random.randrange(65,91)
         letters += chr(x)
         
     numbers = random.randrange(0,6489)
-    return "%s%i.mac" % (letters, numbers)
+    return "%s%i%s.mac" % (letters, numbers, Tail)
 
 def IsEqual(model, against):
     for P in range(len(model.PARAMETERS)):

@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
     
     inp =(char *)malloc(128*sizeof(char));
 
-    for (i=0;i<2018;i++) infomoveTABLE[i] = (char*)malloc(16 * sizeof(char));
+    //for (i=0;i<2018;i++) infomoveTABLE[i] = (char*)malloc(16 * sizeof(char));
     
     //printf("brain.deep = %f", Brain.DEEP);
     //read inputs loop.
@@ -258,13 +258,13 @@ int main(int argc, char** argv) {
     }   
 #endif
        
-    if(strstr(inp, "result") !=NULL) {
-        if (strstr(inp, "1-0")!=NULL && machineplays == 0) applyresult(1);
+       if(strstr(inp, "result") !=NULL) {
+        if (strstr(inp, "1-0") !=NULL && machineplays == 0) applyresult(1);
         else if (strstr(inp, "0-1") !=NULL && machineplays == 1) applyresult(1); 
         else if (strstr(inp, "1/2-1/2") !=NULL) applyresult(0);
         else applyresult(-1);
         
-    }
+	}
     if(strstr(inp, "echo") !=NULL) {
         write(1, output, strlen(output));fflush(stdout);
     }

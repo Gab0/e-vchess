@@ -1,26 +1,20 @@
 #include "ev_chess.h"
 
-
-
-
-
-unsigned long long rndseed(){
+unsigned long long rndseed() {
     unsigned int lo,hi;
     __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
     return ((unsigned long long)hi << 32) | lo;
 }
 
 int loadmachine (int verbose, char *MachineDir) {
-  
-    
-    
+      
        FILE * fp;
        //FILE * flist;
        char * line = NULL;
        size_t len = 0;
        ssize_t read;
-       char *reading = (char *) malloc(128 * sizeof(char));
        
+       char *reading = (char *) malloc(128 * sizeof(char));
        char *filename = (char *) malloc(128 * sizeof(char));
        
        int V = 1;//verbose;
@@ -140,11 +134,8 @@ int loadmachine (int verbose, char *MachineDir) {
             Brain.MODmobility = readparam(line, V);                
            
 
-           
-           
            printf(".\n");
-           
-           
+
        }
 
        fclose(fp);
@@ -153,7 +144,7 @@ int loadmachine (int verbose, char *MachineDir) {
        
        
        machinepath = filename;
-       applyresult(5);
+       //applyresult(5);
        printf("machinepath>> %s\n", machinepath);
        
        loadedmachine = true;
@@ -172,31 +163,23 @@ int loadmachine (int verbose, char *MachineDir) {
 
 int applyresult (int result) {
     if (loadedmachine == false) return 0;
-    snprintf(output, 32,"machinepath>> %s\n", machinepath);
-    write(1,output,strlen(output));
+    snprintf(output, 64,"machinepath>> %s\n", machinepath);
+    write(1, output, strlen(output));
+    
+    //return 0;
     
     FILE *file = fopen(machinepath, "a");
     
-    if (!againstHUMAN) {
+
     if (result==1) fprintf(file, "\nW\n");
     else if (result==-1) fprintf(file,"\nL\n");
     else if (result==0) fprintf(file, "\nx\n");
     else fprintf(file, "\nD\n");
- 
+   
     
+    fprintf(file, "K = %i\n", countpieces());
+
     
-    fprintf(file, "K = %i\n",countpieces());
-    }
-    
-    else {
-    if (result==1) fprintf(file, "\nHW\n");
-    else if (result==-1) fprintf(file,"\nHL\n");
-    else if (result==0) fprintf(file, "\nHx\n");
-    else fprintf(file, "\nHD\n"); 
-        
-        
-        
-    }
     
     fclose(file);
     return 1;
@@ -207,28 +190,28 @@ int countpieces(void) {
     int j=0;
     int piece=0;
     
-    int Tvalue=0;
+    int totalvalue=0;
     
-    int Vpieces[6]={1,5,3,3,9,10};
+    int piecevalue[6] = { 1, 5, 3, 3, 9, 10 };
     
     
     
     for (i=0;i<8;i++) for (j=0;j<8;j++) {
         
-        piece = is_in(board.squares[i][j],pieces[machineplays],6);
+        piece = is_in(board.squares[i][j], pieces[machineplays], 6);
         
-        if (piece>-1) Tvalue=Tvalue+Vpieces[piece];
-                    
+        if (piece>-1)
+	  totalvalue += piecevalue[piece];
         
+        piece = is_in(board.squares[i][j], pieces[1-machineplays], 6);
         
-        piece = is_in(board.squares[i][j],pieces[1-machineplays],6);
-        
-        if (piece>-1) Tvalue=Tvalue-Vpieces[piece];
-                    
+        if (piece>-1)
+	  totalvalue -= piecevalue[piece];
+                
        
     }
     
-    return Tvalue;
+    return totalvalue;
 }
 
 float readparam(char *line, int verbose) {

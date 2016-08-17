@@ -9,29 +9,7 @@ from chessArena import settings
 settings.initialize()
 
 from chessArena.table import Table
-def loadscores():
-    try:
-        F = open(settings.TOPmachineDIR + '/scoreData')
-        Content = F.read()
-        ScoreData = loads(Content)
-        return ScoreData
-    except:
-        return {}
-        pass
 
-def savescores(DATA):
-    F = open(settings.TOPmachineDIR + '/scoreData', 'w')
-
-    F.write(dumps(DATA))
-    F.close()
-    
-def ModifyScore(DATA, MacName, Operator):
-    try:
-        DATA[MacName] += Operator
-    except:
-        DATA[MacName] = Operator
-
-    return DATA
 
 def LoadMachineList():
     MachineListLocation = settings.TOPmachineDIR + '/machines.list'

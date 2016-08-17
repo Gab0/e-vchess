@@ -9,8 +9,8 @@ import sys
 from time import sleep
 from shutil import *
 
-from os import remove
-from os import path
+from os import path, remove, chdir
+
 
 from threading import Thread
 from subprocess import call
@@ -468,7 +468,7 @@ class Application(Frame):
         MARKED = list(reversed(MARKED))
 
         for N in range(len(MARKED)):
-            remove(Fdir+'/'+self.machines[MARKED[N]].filename)
+            remove("%s/%s" % (machine_dir, self.machines[MARKED[N]].filename))
             self.machines.pop(MARKED[N])
 
 
@@ -492,7 +492,7 @@ class Application(Frame):
         self.blackboard.grid(column=5,row=0, sticky=NSEW,rowspan=10)
 
         
-        self.DIR = Fdir
+        self.DIR = machine_dir
         self.N= 0
         self.machines = loadmachines()
         setmachines(self.machines)
@@ -553,7 +553,7 @@ PHu0BMfCFl6AKB1UUvbAKlbAHbiAF8XsA0rwBxeIm5w2QyPmRPpvqrRsBIRADw2YDI4DIVxCAIMHIKoE
 fLbVPPf1FvkrglnEVWspVw3YFjtShXlEIMrDvcPmzbxIDN+JZkZajPS6HFQ/e4Cif8g5+E1KhEzvR4zkwY03QFi7qFWnwAQaAjdgYkhsgAm+SOnNRFQx+GqqD5CqgOsNiGQyO8jw69HMRAz1+I1mB8X1hCVKQBY4ACJowCK8ACpsAk5dwCaSgCTA5
 CI5Q2I6gCHUAx6wQNYvmTJCgCCuGBrunIl5VBnLQEVQPt3xvrgEBADs="""
 
-
+chdir(path.dirname(path.realpath(__file__)))
 
  
 root = Tk()

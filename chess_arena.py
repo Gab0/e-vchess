@@ -3,7 +3,7 @@
 import shlex
 from time import *
 import sys
-
+from os import path, chdir
 import threading
 import gc
 
@@ -17,5 +17,6 @@ from chessArena.arena import Arena
 if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
     global GUI
     GUI = 0
-
+    
+chdir(path.dirname(path.realpath(__file__)))
 arenaArray = Arena()
