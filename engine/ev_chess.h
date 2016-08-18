@@ -257,8 +257,8 @@ Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves)
 
 //functions from evolution.cpp;
 int loadmachine (int verbose, char *dir);
-int applyresult (int result);
-int countpieces (void);
+//int applyresult (int result);
+//int countpieces (void);
 float readparam(char *line, int verbose);
 void dump_history();
 void chesslog(char *location, const char content[]);

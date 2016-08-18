@@ -8,7 +8,7 @@ unsigned long long rndseed() {
 
 int loadmachine (int verbose, char *MachineDir) {
       
-       FILE * fp;
+       FILE *fp;
        //FILE * flist;
        char * line = NULL;
        size_t len = 0;
@@ -39,12 +39,10 @@ int loadmachine (int verbose, char *MachineDir) {
        fp = fopen(filename, "r");
 
        while(!feof(fp)) {ch = fgetc(fp); if(ch == '\n') Nmachines++;}
-       fclose(fp);
-
- 
        
-       fp = fopen(filename, "r");
-        srand ( rndseed() );
+       rewind(fp);
+       
+       srand ( rndseed() );
        Nchosenmachine = rand() % Nmachines;
 
        Vb printf("number of machines on list: %i    (%ith was chosen)\n",
@@ -144,7 +142,7 @@ int loadmachine (int verbose, char *MachineDir) {
        
        
        machinepath = filename;
-       //applyresult(5);
+
        printf("machinepath>> %s\n", machinepath);
        
        loadedmachine = true;
@@ -161,58 +159,6 @@ int loadmachine (int verbose, char *MachineDir) {
     
 }
 
-int applyresult (int result) {
-    if (loadedmachine == false) return 0;
-    snprintf(output, 64,"machinepath>> %s\n", machinepath);
-    write(1, output, strlen(output));
-    
-    //return 0;
-    
-    FILE *file = fopen(machinepath, "a");
-    
-
-    if (result==1) fprintf(file, "\nW\n");
-    else if (result==-1) fprintf(file,"\nL\n");
-    else if (result==0) fprintf(file, "\nx\n");
-    else fprintf(file, "\nD\n");
-   
-    
-    fprintf(file, "K = %i\n", countpieces());
-
-    
-    
-    fclose(file);
-    return 1;
-}    
-
-int countpieces(void) {
-    int i=0;
-    int j=0;
-    int piece=0;
-    
-    int totalvalue=0;
-    
-    int piecevalue[6] = { 1, 5, 3, 3, 9, 10 };
-    
-    
-    
-    for (i=0;i<8;i++) for (j=0;j<8;j++) {
-        
-        piece = is_in(board.squares[i][j], pieces[machineplays], 6);
-        
-        if (piece>-1)
-	  totalvalue += piecevalue[piece];
-        
-        piece = is_in(board.squares[i][j], pieces[1-machineplays], 6);
-        
-        if (piece>-1)
-	  totalvalue -= piecevalue[piece];
-                
-       
-    }
-    
-    return totalvalue;
-}
 
 float readparam(char *line, int verbose) {
     

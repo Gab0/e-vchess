@@ -76,7 +76,8 @@ class Table(Frame):
         if self.initialize:
             return
         
-        while len(self.MACHINE)>0: self.MACHINE[0].kill()
+        #while len(self.MACHINE) > 0:
+        #    self.MACHINE[0].kill()
         
         self.MACHINE = []
         self.MACcontent = []
@@ -434,6 +435,7 @@ class Table(Frame):
                 #call(['kill', '-9', str(machine.pid)])
             except OSError:
                 self.log("Cannot allocate memory!", 0)
+                machine.online = 0
                 
             #machine.terminate()
         self.MACHINE = []
@@ -615,9 +617,16 @@ class Table(Frame):
         
         if not self.ReadMachineTextContent("machines/"):
             print("ERROR reading machine text content.")
-            
+
+        """machineContentIndexes = [{"stat_elo": -1,
+                                 "stat_wins": -1,
+                                 "stat_draws": -1,
+                                 "stat_loss": -1} for k in [0,1]]"""
         for macIndex in range(len(self.MACcontent)):
             for lineIndex in range(len(self.MACcontent[macIndex])):
+                """for searchingKey in machineContentIndexes[macIndex].keys():
+                    if searchingKey in self.MACcontent[macIndex][lineIndex]:"""
+                        
                 if 'stat_elo' in self.MACcontent[macIndex][lineIndex].split(' = ')[0]:
                     ELO.append(int(self.MACcontent[macIndex][lineIndex].split(' = ')[1][:-1]))
                     index.append(lineIndex)
@@ -657,12 +666,16 @@ class Table(Frame):
                     % (ScoreString[winner],
                      ScoreString[1-winner],
                      deltaELO) )
+                for k in [0,1]:
+                    self.MACcontent[k].append('\nD\n')
             else:                       
                 print("Winner is %s. %s lost.    delta: %i"\
                       % (ScoreString[winner],
                          ScoreString[1-winner],
                          deltaELO) )
-            
+                
+                self.MACcontent[winner].append('\nW\n')
+                self.MACcontent[1-winner].append('\nL\n')
             try:
                 for macIndex in range(len(self.MACcontent)):
                     self.MACcontent[macIndex][index[macIndex]] = "stat_elo = %i\n"  % newELO[macIndex]

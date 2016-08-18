@@ -208,7 +208,8 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "show") !=NULL) show_board(board.squares);
     
-    if (strstr(inp, "quit") !=NULL) break;
+    if (strstr(inp, "quit") !=NULL) {//sleep(1);
+      break;}
     
     if (strstr(inp, "new") != NULL) setup_board(1);
     
@@ -233,16 +234,14 @@ int main(int argc, char** argv) {
         }
     }
     
-    if (strstr(inp, "testsend") != NULL) {
-        applyresult(1);
-    }
+    
     
     /*if (strstr(inp, "usermove") !=NULL) { 
         if (read_movelines(inp) > 0) {
             computer(1);
         }
     }*/
-#ifndef __CUDACC__
+
     if (strstr(inp, "list") !=NULL)  {
         legal_moves(&board, &moves,0,0);
         printf("list [%i]:\n", moves.k);
@@ -256,15 +255,9 @@ int main(int argc, char** argv) {
         for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
         printf("attacker? %c.\n", moves.movements[i].casualty);}
     }   
-#endif
-       
-       if(strstr(inp, "result") !=NULL) {
-        if (strstr(inp, "1-0") !=NULL && machineplays == 0) applyresult(1);
-        else if (strstr(inp, "0-1") !=NULL && machineplays == 1) applyresult(1); 
-        else if (strstr(inp, "1/2-1/2") !=NULL) applyresult(0);
-        else applyresult(-1);
-        
-	}
+
+  
+ 
     if(strstr(inp, "echo") !=NULL) {
         write(1, output, strlen(output));fflush(stdout);
     }
