@@ -29,7 +29,14 @@ class Application(Frame):
         self.VIEWDUMP.grid_forget()
         self.blackboard.grid(column=5,row=0, sticky=NSEW,rowspan=10)
 
-        MACfile = self.DIR+'/'+self.machines[self.N].filename
+        try:
+            MACfile = "%s/%s" % (self.DIR,
+                                 self.machines[self.N].filename)
+        except IndexError:
+            self.N=0
+            self.show_machine()
+            return
+        
         self.blackboard.delete('1.0',END)
         if os.path.isfile(MACfile):
             Fo = open(MACfile)
@@ -40,24 +47,27 @@ class Application(Frame):
         
         self.marker["text"] = self.N+1
 
+        SUBJECT = self.machines[self.N]
 
-        self.VIEW_wins["text"] = self.machines[self.N].TPARAMETERS[1].value
+        self.VIEW_wins["text"] = SUBJECT.TPARAMETERS[1].value
         
-        self.VIEW_loss["text"] = self.machines[self.N].TPARAMETERS[3].value
+        self.VIEW_loss["text"] = SUBJECT.TPARAMETERS[3].value
 
-        self.VIEW_games["text"] = self.machines[self.N].TPARAMETERS[0].value
+        self.VIEW_games["text"] = SUBJECT.TPARAMETERS[0].value
 
-        self.VIEW_draws["text"] = self.machines[self.N].TPARAMETERS[2].value
+        self.VIEW_draws["text"] = SUBJECT.TPARAMETERS[2].value
 
-        self.VIEW_elo["text"] = self.machines[self.N].ELO
+        self.VIEW_elo["text"] = SUBJECT.ELO
 
-        self.macname["text"] = self.machines[self.N].filename
+        self.macname["text"] = SUBJECT.filename
 
-        self.viewK["text"] = str(self.machines[self.N].TPARAMETERS[4].value)
+        self.viewK["text"] = str(SUBJECT.TPARAMETERS[4].value)
 
-        self.winrate["text"] = str(round(self.machines[self.N].TPARAMETERS[1].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
-        self.drawrate["text"] = str(round(self.machines[self.N].TPARAMETERS[2].value/(self.machines[self.N].TPARAMETERS[0].value+1)*100, 3)) + "%"
-
+        self.winrate["text"] = self.percentageValueAgainst(SUBJECT.TPARAMETERS[1].value,
+                                                           SUBJECT.TPARAMETERS[0].value)
+ 
+        self.drawrate["text"] = self.percentageValueAgainst(SUBJECT.TPARAMETERS[2].value,
+                                                            SUBJECT.TPARAMETERS[0].value)
         UNCONFORMITY = 0
         self.paramNAMES = []
         for VW in range(len(self.paramVIEWER)):
@@ -120,7 +130,7 @@ class Application(Frame):
                 
 
     def savemac(self):
-        setmachines(self.machines)
+        setmachines(self.machines, DIR=self.DIR)
         self.show_machine()
         print('machines saved.')
         
@@ -265,7 +275,8 @@ class Application(Frame):
 
         self.Logo.configure(data=LOGO)
         #self.Logo = self.Logo.zoom(2,2)
-        self.logoframe = Label(self, image=self.Logo)
+        self.logoframe = Button(self, image=self.Logo, borderwidth=0)
+        self.logoframe['command'] = self.changeToHallOfFameMode
         self.logoframe.grid(column=1,row=0,rowspan=4)
 
         self.menubar = Menu(root)
@@ -468,11 +479,29 @@ class Application(Frame):
         MARKED = list(reversed(MARKED))
 
         for N in range(len(MARKED)):
-            remove("%s/%s" % (machine_dir, self.machines[MARKED[N]].filename))
+            remove("%s/%s" % (self.DIR, self.machines[MARKED[N]].filename))
             self.machines.pop(MARKED[N])
+    
+    def percentageValueAgainst(self, v1, v2):
+        if not v2:
+            return "0%"
+        
+        V = v1/v2
+        V *= 100
 
+        return "%.2f%%" % V
+    
+    def changeToHallOfFameMode(self):
+        if self.DIR == settings.machineDIR:
+            self.DIR = settings.TOPmachineDIR
 
-                    
+            self.logoframe['bg'] = 'gold'
+        else:
+            self.DIR = settings.machineDIR
+            self.logoframe['bg'] = "#d9d9d9"
+            
+        print(self.DIR)
+        self.machines = loadmachines(DIR=self.DIR)     
 #INIT
     def __init__(self, master=None):
         Frame.__init__(self, master)
@@ -492,10 +521,10 @@ class Application(Frame):
         self.blackboard.grid(column=5,row=0, sticky=NSEW,rowspan=10)
 
         
-        self.DIR = machine_dir
+        self.DIR = settings.machineDIR
         self.N= 0
-        self.machines = loadmachines()
-        setmachines(self.machines)
+        self.machines = loadmachines(DIR=self.DIR)
+        setmachines(self.machines, DIR=self.DIR)
         self.createWidgets()
         self.create_param_viewer()
         if len(self.machines):

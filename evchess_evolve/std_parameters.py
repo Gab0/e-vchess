@@ -17,7 +17,7 @@ def STDPARAMETERS():
 
         parameter("param_seekmiddle", 0, 30, 3, LIM = 5),
 
-        parameter("param_presumeOPPaggro", 0, 50, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
+        #parameter("param_presumeOPPaggro", 0, 50, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
         parameter("param_pawnrankMOD", 0, 30, 0, LIM=37),
 
@@ -37,3 +37,9 @@ def STDPARAMETERS():
 ]
 
 
+"""
+turned off param_seekpieces to serve as an anchor/solid reference to other parameters.
+
+turned off param_presumeOPPaggro at a point where the engine was getting
+    overly agressive. AVG real ELO: 920.
+"""

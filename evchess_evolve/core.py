@@ -16,7 +16,7 @@ from evchess_evolve.machine import machine
 def populate(population,popsize, Randomize):
     NEWINDS = []
     for i in range(popsize):
-        NEWINDS.append(machine(str(random.randrange(0,6489))+".mac")) 
+        NEWINDS.append(machine(NewMacName())) 
     
 
 
@@ -28,11 +28,11 @@ def populate(population,popsize, Randomize):
         
     return population
        
-def loadmachines():
+def loadmachines(DIR=machine_dir):
         population = []
         k=0
 
-        machinelist = "%s/machines.list" % machine_dir
+        machinelist = "%s/machines.list" % DIR
         if not os.path.isfile(machinelist):
             return population
         Fo = open(machinelist,'r')
@@ -201,13 +201,13 @@ def read_param_dump(parameter):
 
 
 
-def setmachines(population):
+def setmachines(population, DIR=machine_dir):
     for i in range(len(population)):
         population[i].write()
 
-    if os.path.isfile(machine_dir +'/machines.list'):
-        os.remove(machine_dir+'/machines.list')
-    Fo = open(machine_dir+'/machines.list', "w+")
+    if os.path.isfile("%s/machines.list" % DIR):
+        os.remove("%s/machines.list" % DIR)
+    Fo = open("%s/machines.list" % DIR, "w+")
     for i in range(len(population)):
         Fo.write(population[i].filename+"\n")
 

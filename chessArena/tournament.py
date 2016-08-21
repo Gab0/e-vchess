@@ -93,6 +93,9 @@ class Tournament():
         return ROUNDS
 
     def DeleteLosers(self):
+        for machine in list(self.Scores.keys()):
+            print("%s: %s" % (machine, self.Scores[machine]))
+                  
         Deaths = len(self.Competitors)//4
         Deaths = 1 if not Deaths else Deaths
 
@@ -105,6 +108,7 @@ class Tournament():
                     Worst[1] = self.Scores[K]
                     
             remove("%s/%s" % (settings.TOPmachineDIR, Worst[0]) )
+            print("Deleting %s; %i points." % (Worst[0], Worst[1]))
 
             self.Scores.pop(Worst[0])
     
