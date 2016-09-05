@@ -53,6 +53,7 @@ bool toloadmachine = false;
 bool loadDEEP = false;
 bool loadxDEEP = false;
 
+bool thinkVerbose = false;
 
 int NODEcount;
 
@@ -149,6 +150,7 @@ int main(int argc, char** argv) {
 	  Brain.xDEEP = (float)atof(argv[i+1]);
 	  loadxDEEP = false;
 	}
+	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
 	
         }  
     
@@ -263,7 +265,7 @@ int main(int argc, char** argv) {
     }
     
     if (read_movelines(inp,0)) {
-       computer(0);
+       computer(thinkVerbose);
         
 
     }

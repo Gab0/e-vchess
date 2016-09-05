@@ -27,6 +27,8 @@
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
 
+#define VariableSignal >
+
 #define Vb if (verbose)
 
 #ifdef __CUDACC__
@@ -85,16 +87,16 @@ struct movelist {
 
 struct board;
    struct board {
-      char squares[8][8];
+     char squares[8][8];
       
-      int castle[2][3];
+     int castle[2][3];
       
       int passantJ;
       int whoplays;
 
      long score;
      
-     int Nmoved;
+     int MovementCount;
      int betaCut;
    }; 
    
@@ -168,6 +170,9 @@ extern bool againstHUMAN;
 
 extern bool toloadmachine;
 extern char *specificMachine;
+
+extern bool thinkVerbose;
+
 extern bool loadDEEP;
 
 IFnotGPU( extern bool allow_castling; )

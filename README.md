@@ -39,5 +39,5 @@ chess_arena.py requires <a href="https://github.com/niklasf/python-chess">python
 
  The engine code is filled with strange stuff such as 'Host', 'Device' macro keywords, and strange functions. They are related to alternative evaluation method I tried to implement with
 NVIDIA CUDA.<br>
- Turned out that CUDA can't handle traditional chess engine processing with those small cores. Waiting for CUDA 8 or going for neural networks someday.
+ Turned out that CUDA can't handle traditional chess engine processing with those small cores. Waiting for CUDA 8 and going for neural networks someday.
 

@@ -283,7 +283,7 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
     tg_board->passantJ=movement->passantJ[1];
 
     flip(tg_board->whoplays);
-    tg_board->Nmoved += 1;
+    tg_board->MovementCount += 1;
     
 }
 
@@ -341,7 +341,7 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     tg_board->passantJ=movement->passantJ[0];
     
     flip(tg_board->whoplays);
-    tg_board->Nmoved -= 1;
+    tg_board->MovementCount -= 1;
     
 }
 

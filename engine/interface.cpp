@@ -177,41 +177,42 @@ int parse_move (struct move *target, char *s, int P) {
     
 }   
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
-    struct move showmovebuff;
-
-    time_t elapsedT = time(NULL) - startT;
-    replicate_move(&showmovebuff, move);
-
-     cord2pos(showmovebuff.from);
-     cord2pos(showmovebuff.to);
-       
-     asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, 0/*elapsedT*/, P, 
-              showmovebuff.from[0], showmovebuff.from[1],
-              showmovebuff.to[0], showmovebuff.to[1]);
-     write(1, output, strlen(output));   
+  struct move showmovebuff;
+  
+  time_t elapsedT = time(NULL) - startT;
+  replicate_move(&showmovebuff, move);
+  
+  cord2pos(showmovebuff.from);
+  cord2pos(showmovebuff.to);
+    
+  asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, 0/*elapsedT*/, P, 
+	   showmovebuff.from[0], showmovebuff.from[1],
+	   showmovebuff.to[0], showmovebuff.to[1]);
+  write(1, output, strlen(output));   
 }
 
 void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P) {
   struct move primarybuff;
   struct move secondarybuff;
-
+  
   time_t elapsedT = time(NULL) - startT;
   
   replicate_move(&primarybuff, primary);
   replicate_move(&secondarybuff, secondary);
-
+  
   cord2pos(primarybuff.from);
-    cord2pos(primarybuff.to);
-      cord2pos(secondarybuff.from);
-        cord2pos(secondarybuff.to);
-
-
-	asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, primary->score, elapsedT, P,
-		 primarybuff.from[0], primarybuff.from[1],
-		 primarybuff.to[0], primarybuff.to[1],
-		 secondarybuff.from[0], secondarybuff.from[1],
-		 secondarybuff.to[0], secondarybuff.to[1]);
-	write(1, output, strlen(output));
+  cord2pos(primarybuff.to);
+  cord2pos(secondarybuff.from);
+  cord2pos(secondarybuff.to);
+  
+  
+  asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, primary->score, elapsedT, P,
+	   primarybuff.from[0], primarybuff.from[1],
+	   primarybuff.to[0], primarybuff.to[1],
+	   secondarybuff.from[0], secondarybuff.from[1],
+	   secondarybuff.to[0], secondarybuff.to[1]);
+  
+  write(1, output, strlen(output));
 
 }
 

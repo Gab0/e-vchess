@@ -7,16 +7,18 @@ from os import path, chdir
 import threading
 import gc
 
-
 import chessArena.settings
 chessArena.settings.initialize()
 from chessArena.arena import Arena
-# from chessArena.table import Table
 
 
-if (len(sys.argv) > 0) and ('--nogui' in sys.argv):
-    global GUI
-    GUI = 0
-    
+# TKinter interface causes memory leak issues.
+# for long runs, disabling the graphical interface is mandatory.
+Interface = not '--nogui' in sys.argv
+GO = '--go' in sys.argv or not Interface
+
+
 chdir(path.dirname(path.realpath(__file__)))
-arenaArray = Arena()
+
+
+arenaArray = Arena(GraphicInterface=Interface, GO=GO)
