@@ -105,31 +105,33 @@ int loadmachine (int verbose, char *MachineDir) {
             Brain.DEEP = readparam(line, V);
            
         if (strstr(line, "param_deviationcalc") != NULL)
-            Brain.deviationcalc = readparam(line, V);
+	  Brain.deviationcalc = readparam(line, V);
         if (strstr(line, "eval_randomness") != NULL)
-            Brain.randomness = readparam(line, V);
+	  Brain.randomness = readparam(line, V);
         if (strstr(line, "param_seekpieces") != NULL)
-            Brain.seekpieces = readparam(line, V);
+	  Brain.seekpieces = readparam(line, V);
         if (strstr(line, "param_seekmiddle") != NULL)
-            Brain.seekmiddle = readparam(line, V);
+	  Brain.seekmiddle = readparam(line, V);
         if (strstr(line, "param_seekatk") != NULL)
-            Brain.seekatk = readparam(line, V);
+	  Brain.seekatk = readparam(line, V);
         if (strstr(line, "param_evalmethod") != NULL)
-            Brain.evalmethod = readparam(line, V);
+	  Brain.evalmethod = readparam(line, V);
         if (strstr(line, "param_presumeOPPaggro") != NULL)
-            Brain.presumeOPPaggro = readparam(line, V);
+	  Brain.presumeOPPaggro = readparam(line, V);
         if (strstr(line, "param_pawnrankMOD") != NULL)
-            Brain.pawnrankMOD = readparam(line, V);
+	  Brain.pawnrankMOD = readparam(line, V);
         if (strstr(line, "param_parallelcheck") != NULL)
-            Brain.parallelcheck = readparam(line, V);
+	  Brain.parallelcheck = readparam(line, V);
         if (strstr(line, "param_balanceoffense") != NULL)
-            Brain.balanceoffense = readparam(line, V);
+	  Brain.balanceoffense = readparam(line, V);
         if (strstr(line, "param_cumulative") != NULL)
-            Brain.cumulative = readparam(line, V);          
+	  Brain.cumulative = readparam(line, V);          
         if (strstr(line, "param_MODbackup") != NULL)
-            Brain.MODbackup = readparam(line, V);                
+	  Brain.MODbackup = readparam(line, V);                
         if (strstr(line, "param_MODmobility") != NULL)
-            Brain.MODmobility = readparam(line, V);                
+	  Brain.MODmobility = readparam(line, V);
+	if (strstr(line, "param_moveFocus") != NULL)
+	  Brain.moveFocus = readparam(line, V);
            
 
            printf(".\n");
@@ -150,10 +152,6 @@ int loadmachine (int verbose, char *MachineDir) {
        if (againstHUMAN) 
 	 chesslog(MachineDir, machinepath);
        
-
-       if (!Brain.randomness)
-	 Brain.randomness = 10;
-      
        return 0;
    
     

@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
     Brain.MODbackup = 0;
     Brain.MODmobility = 0;
 
+    Brain.moveFocus = 0.2;
+
     int i=0;
     signal(SIGINT, SIG_IGN);    
     signal(SIGTERM, SIG_IGN); 
@@ -173,7 +175,8 @@ int main(int argc, char** argv) {
 
     
     char testfehn[128] = "fen r3kbr1/3bp2p/1pN3p1/1B1pQ3/PP2p3/7P/5qPR/RNK5 b - - 2 26";
-        
+
+    printf("DEEP=%f   xDEEP=%f\n", Brain.DEEP, Brain.xDEEP);
 
     for (i=Brain.DEEP;i>=0;i--) 
         printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
@@ -236,7 +239,7 @@ int main(int argc, char** argv) {
         }
     }
     
-    
+
     
     /*if (strstr(inp, "usermove") !=NULL) { 
         if (read_movelines(inp) > 0) {

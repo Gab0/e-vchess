@@ -91,9 +91,9 @@ struct board;
       
      int castle[2][3];
       
-      int passantJ;
-      int whoplays;
-
+     int passantJ;
+     int whoplays;
+     
      long score;
      
      int MovementCount;
@@ -103,25 +103,26 @@ struct board;
   
    
 struct param;
-   struct param {
-    int pvalues[6];
-    float randomness;
-    float seekmiddle;
-    float DEEP;
-    float xDEEP;
-    float seekpieces;
-    float deviationcalc;
-    float evalmethod;
-    float seekatk;
-    float TIMEweight[10];
-    float presumeOPPaggro;
-    float pawnrankMOD;
-    float parallelcheck;
-    float balanceoffense;
-    float cumulative;
-    float MODbackup;
-    float MODmobility;
-   };
+struct param {
+  int pvalues[6];
+  float randomness;
+  float seekmiddle;
+  float DEEP;
+  float xDEEP;
+  float seekpieces;
+  float deviationcalc;
+  float evalmethod;
+  float seekatk;
+  float TIMEweight[10];
+  float presumeOPPaggro;
+  float pawnrankMOD;
+  float parallelcheck;
+  float balanceoffense;
+  float cumulative;
+  float MODbackup;
+  float MODmobility;
+  float moveFocus;
+};
 
 extern struct move movehistory[512];
 extern char movehistoryboard[512][8][8];
@@ -228,7 +229,7 @@ Host Device void replicate_move(struct move *target, struct move *source);
 Host Device int power(int base, unsigned int exp);
 Host Device void reorder_movelist(struct movelist *movelist); 
 
-
+Host Device void movement_to_string(struct move *move, char *target);
 
 //functions from interface.cpp;##################################################
 int parse_move (struct move *target, char *s, int P);
@@ -255,7 +256,7 @@ Global void kerneliterate(struct board *workingboard,
 Global void Testkernel(int *Test);
 Device void Testdevice(int *Test);
 Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
-
+Device void satellite_evaluation (long *score, struct move *movement);
 
 
 

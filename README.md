@@ -18,21 +18,23 @@ After some thousands cycles in the arena_array, machines will have their ELO rat
    Otherwise, to evolve machines:<br>
 
  1) Use machineviewer.py to create a pool of 64 machines.<br>
- 2) Run chess_arena.py for 30k cycles or more, on a 32-tabled session, then look at the population on the Machineviewer.<br>
+ 2) Run chess_arena.py for 30k cycles or more, on a 32-tabled session.<br>
  3) Run xboard or other chess interface, loading the engine with --TOP arg.<br>
-	`$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 4 --xdeep 2'`<br>
- 4) Good luck. evchess is still weak on the board.. WIP.<br>
+	`$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 4 --xdeep 2'`<br>or<br>
+	`$./evc play`<br>
+ 4) Good luck. evchess is still weak on the board. [WIP].<br>
 
 ##Commands:
  The main shell script will call useful stuff:<br>
-    `$ cd path/to/repo`<br>
-    `$ ./evc play //Load xboard with the engine, and choose a machine from the hall of fame.`<br>
+
+    `$ ./evc play //Choose a machine from the hall of fame to load with xboard.`<br>
     `$ ./evc view //Population manager.`<br>
     `$ ./evc arena //Load some dozens of engines and let them play against each other so they can evolve.`
+    `$ ./evc tournament //Launch a tournament, where hall of fame machines will play against themselves.`
     
 ##Dependencies:
 
-chess_arena.py requires <a href="https://github.com/niklasf/python-chess">python-chess</a>.<br>
+<a href="https://github.com/niklasf/python-chess">python-chess</a><br>
 
 
 ##CUDA:

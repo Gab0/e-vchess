@@ -1,29 +1,31 @@
-def PurgeMachines(population):
+from os import listdir, remove
+
+def PurgeMachines(population, machine_dir):
     print('Purging machines. is this OK? (type OK')
     RLY = input()
     if not 'OK' in RLY: return population
-    for file in os.listdir(Fdir):
+    for file in listdir(machine_dir):
 
-        if file.endswith(".mac"): os.remove("%s/%s" % (Fdir,file))
-    os.remove(Fdir+'/machines.list')
+        if file.endswith(".mac"): remove("%s/%s" % (machine_dir,file))
+    remove("%s/machines.list" % machine_dir)
 
     population = populate([],1, 0)
     setmachines(population)
     return population
 
-def ReleaseOrphan():
-    Fo = open("%s/machines.list" % Fdir, 'r')
+def ReleaseOrphan(machine_dir):
+    Fo = open("%s/machines.list" % machine_dir, 'r')
     mLIST = Fo.readlines()
     Fo.close
 
     
-    for file in os.listdir(Fdir):
+    for file in listdir(machine_dir):
         if file.endswith('.mac'):
             FOUND = 0
             for guest in mLIST:
                 if file in guest: FOUND = 1
             if not FOUND:
-                os.remove("%s/%s" % (Fdir, file))
+                remove("%s/%s" % (machine_dir, file))
                 print('Deleted orphan: %s.' % file)
 
 

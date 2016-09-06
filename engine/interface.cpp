@@ -177,41 +177,40 @@ int parse_move (struct move *target, char *s, int P) {
     
 }   
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
-  struct move showmovebuff;
-  
+
+  char buffer[4];
   time_t elapsedT = time(NULL) - startT;
-  replicate_move(&showmovebuff, move);
-  
-  cord2pos(showmovebuff.from);
-  cord2pos(showmovebuff.to);
+
+  movement_to_string(move, buffer);
     
-  asprintf(&output, "%i %ld %ld %i %c%c%c%c\n", DEEP, move->score, 0/*elapsedT*/, P, 
-	   showmovebuff.from[0], showmovebuff.from[1],
-	   showmovebuff.to[0], showmovebuff.to[1]);
+  asprintf(&output, "%i %ld %ld %i %s\n", DEEP, move->score, elapsedT, P, 
+  	   buffer);
   write(1, output, strlen(output));   
 }
 
 void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P) {
   struct move primarybuff;
   struct move secondarybuff;
-  
+  int m=0;
   time_t elapsedT = time(NULL) - startT;
+
+  char bufferA[4];
+  char bufferB[4];
+
+  movement_to_string(primary, bufferA);
+  movement_to_string(secondary, bufferB);
   
-  replicate_move(&primarybuff, primary);
-  replicate_move(&secondarybuff, secondary);
+  asprintf(&output, "%i %ld %ld %i %s ", DEEP, primary->score, elapsedT, P, bufferA);
+
+  for(m=0;m<Brain.DEEP-1;m++)
+    asprintf(&output, "%s???? ", output);
+
+  asprintf(&output, "%s %s ", output, bufferB);
   
-  cord2pos(primarybuff.from);
-  cord2pos(primarybuff.to);
-  cord2pos(secondarybuff.from);
-  cord2pos(secondarybuff.to);
-  
-  
-  asprintf(&output, "%i %ld %ld %i %c%c%c%c %c%c%c%c\n", DEEP, primary->score, elapsedT, P,
-	   primarybuff.from[0], primarybuff.from[1],
-	   primarybuff.to[0], primarybuff.to[1],
-	   secondarybuff.from[0], secondarybuff.from[1],
-	   secondarybuff.to[0], secondarybuff.to[1]);
-  
+  for(m=0;m<Brain.DEEP-1;m++)
+    asprintf(&output, "%s???? ", output);
+
+  asprintf(&output, "%s\n", output);
   write(1, output, strlen(output));
 
 }

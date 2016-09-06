@@ -57,19 +57,20 @@ void setup_board (int setup) {
     }
 
 void show_board (char squares[8][8]) {
-  int i, j, X;
-    char BoardDraw[15];
+  int i=0, j=0, X=0;
+    char BoardDraw[18];
 
-    BoardDraw[X] =  '\n';
-    X++;
+    fprintf(stderr, "\n");
     for(i=0;i<8;i++){
       for(j=0;j<8;j++){
 	  
-	BoardDraw[X] = squares[i][j]; X++;
-	if (j!=7)BoardDraw[X] = ' '; X++;
+	BoardDraw[X] = squares[i][j];
+	X++;
+	if (j!=7) {BoardDraw[X] = ' ';
+	  X++;}
       }
 
-      fprintf(stderr, "%s", BoardDraw);
+      fprintf(stderr, "%s\n", BoardDraw);
       X=0;
       //BoardDraw[X] = '\n'; X++;
       //BoardDraw[X] = '\n'; X++;
@@ -92,7 +93,7 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
 
     //NullMove.
     //append_move(board, moves,9,6,6,6,PL);
-    
+
     
     int EP = 1-PL;
        

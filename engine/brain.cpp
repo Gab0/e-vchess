@@ -141,10 +141,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        Vb fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I].whoplays, I);
        if (finalboardsArray[I].MovementCount % 4) {
 	 //Lever -= (BRAIN.DEEP-finalboardsArray[I].MovementCount);
-       Vb printf("DISCREPANCY DETECTED ~~~~~~~~~~~~~~~~~~~%i~~~~~~~%i~~~~~\n", finalboardsArray[I].MovementCount, Lever);}
-       Vb show_board(finalboardsArray[I].squares);
+       Vb printf("DISCREPANCY DETECTED ~~~~~~~~~~~~~~~~~~~%i~~~~~~~%i~~~~~\n", finalboardsArray[I].MovementCount, Lever);
+       }
+       //Vb show_board(finalboardsArray[I].squares);
 
-
+ 
        int PLAYER = finalboardsArray[I].whoplays;
 
        if (finalboardsArray[I].score != moves->movements[I].score) fprintf(stderr, "DANGER wp%i    %i||%i\n", PLAYER, finalboardsArray[I].score, moves->movements[I].score);
@@ -163,9 +164,9 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        
        legal_moves(&finalboardsArray[I], &nextlevelMovelist[i], PLAYER, 0);
        reorder_movelist(&nextlevelMovelist[i]);
-       //dummyboard = NULL;
+
        DUMP(dummyboard);
-       
+
        if (nextlevelMovelist[i].k) {
 	 //Alpha = -17000;
        //Beta = 17000;
@@ -173,7 +174,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	 //Alpha = -17000;
 	 //Beta = 17000;
 	 move_pc(&finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
-
+ 
 	 dummyboard =
 	   thinkiterate(&finalboardsArray[I], DEEP-Lever, 0, Alpha, Beta, AllowCutoff);
 	 
@@ -199,14 +200,19 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	 movelistSCORE = moves->movements[I].score;
 	 s = 63;
        }
-	 
-       
+
+
+
+       if (movelistSCORE VariableSignal sessionSCORE) {
+	 satellite_evaluation(&movelistSCORE, &moves->movements[r]);
 	 if (movelistSCORE VariableSignal sessionSCORE) {
+		  
 	   r = I;
 	   sessionSCORE = movelistSCORE;
 	   
-	   Vb fprintf(stderr, "CHOSEN\n", r);
+	   
 	 }
+       }
       
 
        Vb fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I].MovementCount, finalboardsArray[I].whoplays);
@@ -214,10 +220,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        //cloneboard(dummyboard, &finalboardsArray[I]);
        
        //if (nextlevelMovelist[individualINDEX].score) > sessionSCORE) {sessionSCORE = nextlevelMovelist[individualINDEX].score; r = I;}
-       IFnotGPU( /*if (show_info)*/ eval_info_group_move(&moves->movements[I], &nextlevelMovelist[i].movements[s],
-							 Brain.DEEP + Brain.DEEP*Brain.xDEEP,
-							 //finalboardsArray[I].MovementCount,
-							 startT, PL); )
+       IFnotGPU( /*if (show_info)*/
+	 eval_info_group_move(&moves->movements[I], &nextlevelMovelist[i].movements[s],
+			      Brain.DEEP + Brain.DEEP * (R+1),
+			      //finalboardsArray[I].MovementCount,
+			      startT, PL); )
 	 
               
      }
@@ -275,9 +282,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     int PLAYER = _board->whoplays;
     
     legal_moves(_board, &moves, PLAYER, 0);
-
-    
-
+ 
     
     /*IFnotGPU(
     Vb printf("DEEP = %i; K=%i Address: %p\n", DEEP,moves.k ,(void *)_board); 
@@ -329,14 +334,14 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
    //long OAlpha=0, OBeta=0;
 	 
-   for(i=0;i<moves.k;i++) {
+     for(i=0;i<moves.k;i++) {
      //printf("new tree;\n");
-     
+       
        move_pc(_board, &moves.movements[i]);  
 
        Buffer = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
 	//printf("%i\n", Buffer->score);
-	moves.movements[i].score = Buffer->score;
+       moves.movements[i].score = Buffer->score;
 
 
 	
@@ -350,7 +355,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	//if (show_info)
 	//eval_info_move(&moves.movements[i], DEEP, 0, PLAYER);  
        
-	if (PLAYER==Machineplays) {
+       if (PLAYER==Machineplays) {
 	 if (moves.movements[i].score > BoardBuffer->score) cloneboard(Buffer, BoardBuffer);
 	 if (moves.movements[i].score > Alpha) {
 	   //printf("*.\n");
@@ -366,56 +371,56 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	     if (AllowCutoff)
 	       ABcutoff=1;
 	     //else if (Buffer->score - 10 > Alpha) ABcutoff=1;
-
-	  }
+	     
+	   }
 	 }
-	}
-
+       }
+       
 	
-	if (PLAYER!=Machineplays) {
+       if (PLAYER!=Machineplays) {
 	 if (moves.movements[i].score < BoardBuffer->score) cloneboard(Buffer, BoardBuffer);
          if (moves.movements[i].score < Beta) {
-	    //printf("**.\n");
+	   //printf("**.\n");
 	   //OBeta = Beta;    
            Beta = moves.movements[i].score;
-
+	   
 	   //cloneboard(Buffer, BoardBuffer);
   	   //if(Buffer->score != BoardBuffer->score) printf("FAIL b !\n");
-
+	   
 	   if (Beta<=Alpha) {
-	      if (AllowCutoff)
-		ABcutoff=1;
-	      //else if (Buffer->score + 10 < Beta) ABcutoff=1;
-	      
-	  }      
+	     if (AllowCutoff)
+	       ABcutoff=1;
+	     //else if (Buffer->score + 10 < Beta) ABcutoff=1;
+	     
+	   }      
          }
-        }
-	
-        DUMP(Buffer);
-	if (ABcutoff) {
-	  
-	  /* asprintf(&output, "*%i --  %i -> %i | %i -> %i  ||%i\n", PL,
+       }
+       
+       DUMP(Buffer);
+       if (ABcutoff) {
+	 
+	 /* asprintf(&output, "*%i --  %i -> %i | %i -> %i  ||%i\n", PL,
 		   OAlpha, Alpha, OBeta, Beta, moves.movements[i].score);
 		   write(1, output, strlen(output));*/
-	  //if(PL==Machineplays) fprintf(stderr, "*%i\n", PL);
-
-	  break;
-	}	
-	undo_move(_board, &moves.movements[i]);
-	
-
-
+	 //if(PL==Machineplays) fprintf(stderr, "*%i\n", PL);
+	 
+	 break;
+       }	
+       undo_move(_board, &moves.movements[i]);
+       
+       
+       
      }
 
-   //score = moves.movements[r].score;
+     //score = moves.movements[r].score;
 
-    DUMP(_board);
-
-    return BoardBuffer;
+     DUMP(_board);
+     
+     return BoardBuffer;
     
    }
      
-     else {
+   else {
 
      machine_score = evaluate(_board, &moves, Machineplays);
      enemy_score = evaluate(_board, &moves, 1-Machineplays);
@@ -565,8 +570,22 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
                    board->squares[i][j]!=Pieces[P][0]&&
                    !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
                if (board->squares[i][j]==Pieces[P][5])
-                   if (ifsquare_attacked (board->squares,i,j,P,0)) return 0;                   }
+                   if (ifsquare_attacked (board->squares,i,j,P,0)) return 0;
+       }
        
 	   return NullMove;       
                
+}
+
+
+Device void satellite_evaluation (long *score, struct move *movement) {
+
+  if (!Brain.moveFocus) return;
+
+  if (movement->lostcastle && !movement->iscastle)
+    *score -= 100 * Brain.moveFocus;
+
+  if (movement->iscastle) *score += 50 * Brain.moveFocus;
+
+
 }

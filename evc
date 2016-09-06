@@ -9,7 +9,7 @@ case  "$1" in
 
 "arena") python ${BASEDIR}/chess_arena.py --go;;
 
-"tournament") python ${BASEDIR}/launchT.py;;
+"tournament") python ${BASEDIR}/launch_tournament.py;;
 
 *) 
 echo ""
