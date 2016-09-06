@@ -27,10 +27,10 @@ After some thousands cycles in the arena_array, machines will have their ELO rat
 ##Commands:
  The main shell script will call useful stuff:<br>
 
-    `$ ./evc play //Choose a machine from the hall of fame to load with xboard.`
+    $ ./evc play //Choose a machine from the hall of fame to load with xboard.
     $ ./evc view //Population manager.
-    `$ ./evc arena //Load some dozens of engines and let them play against each other so they can evolve.`
-    `$ ./evc tournament //Launch a tournament, where hall of fame machines will play against themselves.`
+    $ ./evc arena //Load some dozens of engines and let them play against each other so they can evolve.
+    $ ./evc tournament //Launch a tournament, where hall of fame machines will play against themselves.
     
 ##Dependencies:
 
