@@ -4,51 +4,51 @@ from evchess_evolve.std_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
 from evchess_evolve.core import machine_dir
 
+
 class machine():
 
     def __init__(self, fname):
         self.filename = fname
         self.wasmodified = 0
 
-
         self.PARAMETERS = STDPARAMETERS()
 
         self.TPARAMETERS = [
-        parameter("stat_games", 1, 0, 0),
-        parameter("stat_wins", 1, 0, 0),
-        parameter("stat_draws", 1, 0, 0),
-        parameter("stat_loss", 1, 0, 0),
-        parameter("stat_K", 1, 0, 0),
+            parameter("stat_games", 1, 0, 0),
+            parameter("stat_wins", 1, 0, 0),
+            parameter("stat_draws", 1, 0, 0),
+            parameter("stat_loss", 1, 0, 0),
+            parameter("stat_K", 1, 0, 0),
         ]
-        
+
         self.ELO = 1000
         self.onTOP = 0
-        
+
         self.stat_games = 0
         self.stat_wins = 0
         self.stat_draws = 0
         self.stat_loss = 0
         self.K = 0
-        
+
         self.dumped_games = 0
         self.dumped_wins = 0
         self.dumped_draws = 0
         self.dumped_loss = 0
-        self.dumped_K = 0   
+        self.dumped_K = 0
 
     def read(self, split_line):
         for parameter in self.TPARAMETERS + self.PARAMETERS:
             if len(split_line) < 2:
                 if split_line[0] == 'W':
-                    self.TPARAMETERS[1].value +=1
-                    self.TPARAMETERS[0].value +=1
+                    self.TPARAMETERS[1].value += 1
+                    self.TPARAMETERS[0].value += 1
                 elif split_line[0] == 'L':
-                    self.TPARAMETERS[3].value +=1
-                    self.TPARAMETERS[0].value +=1
+                    self.TPARAMETERS[3].value += 1
+                    self.TPARAMETERS[0].value += 1
                 elif split_line[0] == 'D':
-                    self.TPARAMETERS[2].value +=1
-                    self.TPARAMETERS[0].value +=1
-                    
+                    self.TPARAMETERS[2].value += 1
+                    self.TPARAMETERS[0].value += 1
+
             if parameter.name == split_line[0]:
                 parameter.read(split_line)
 
@@ -57,24 +57,24 @@ class machine():
 
         if 'stat_elo' in split_line:
             self.ELO = int(split_line[2])
+
     def write(self):
-        Fo = open(machine_dir+'/'+self.filename, "w+")
-        for parameter in self.PARAMETERS+self.TPARAMETERS:
+        Fo = open(machine_dir + '/' + self.filename, "w+")
+        for parameter in self.PARAMETERS + self.TPARAMETERS:
             Fo.write(parameter.write())
             Fo.write('\n')
 
         if self.onTOP:
             Fo.write('TOP\n')
 
-        Fo.write('stat_elo = %i\n' %self.ELO)
+        Fo.write('stat_elo = %i\n' % self.ELO)
 
         Fo.close()
-
 
     def mutate(self, MutateProbabilityDamper, Aggro):
         print("mutating %s [ MPD: %i, ELO: %i ] " % (self.filename,
                                                      MutateProbabilityDamper,
-                                                     self.ELO) )
+                                                     self.ELO))
         for parameter in self.PARAMETERS:
             parameter.mutate(MutateProbabilityDamper, Aggro)
 
@@ -91,7 +91,7 @@ class machine():
             parameter.randomize()
 
     def delete(self):
-        os.remove(machine_dir+'/'+self.filename)
+        os.remove(machine_dir + '/' + self.filename)
 
     def resetscores(self):
         for P in self.TPARAMETERS:

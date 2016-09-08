@@ -1,16 +1,18 @@
 #!/usr/bin/python
 import random
 
+
 class parameter():
-    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM = None, bLIM = None, INCR = 1, locked=0, stdvalue=0):
-        
+
+    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0):
+
         self.name = name
         self.marks_dumpable = dumpable
-        
+
         self.chanceMutate = chanceMutate
 
         self.stdvalue = stdvalue
-     
+
         self.value = value
         self.dumpedvalue = 0
 
@@ -19,9 +21,8 @@ class parameter():
         self.bLIM = bLIM
         self.INCR = INCR
 
-        self.locked=locked
-        
-        
+        self.locked = locked
+
     def read(self, split_line):
         if self.locked:
             return
@@ -30,7 +31,6 @@ class parameter():
                 if split_line[0] == "|":
                     self.locked = 1
                     print("locked.")
-                
 
                 if self.marks_dumpable:
                     self.value = int(split_line[2])
@@ -43,21 +43,19 @@ class parameter():
                         for z in range(2, len(split_line)):
                             self.value.append(int(split_line[z]))
 
-                            
                     if type(self.value[0]) == float:
                         self.value = []
                         for z in range(2, len(split_line)):
                             self.value.append(float(split_line[z]))
 
                 else:
-                    self.value = round(float(split_line[2]),3)
+                    self.value = round(float(split_line[2]), 3)
 
         except ValueError:
             print('fail to read %s.' % self.name)
 
-        
     def write(self):
-        
+
         STR = self.name + " = "
 
         if not type(self.value) == list:
@@ -67,26 +65,26 @@ class parameter():
             for i in range(len(self.value)):
                 STR += str(self.value[i]) + " "
 
-
         if self.marks_dumpable:
             STR += " " + str(self.dumpedvalue)
 
         STR += "\n"
-        if self.locked: STR = "|"+STR
+        if self.locked:
+            STR = "|" + STR
         return STR
-
-
 
     def putonlimits(self):
 
         TYPE = type(self.value)
-        
+
         def RUN(self, value):
             if self.LIM:
-                if value > self.LIM: value = random.uniform(self.stdvalue, self.LIM)
+                if value > self.LIM:
+                    value = random.uniform(self.stdvalue, self.LIM)
                 value -= value % self.INCR
             if self.bLIM:
-                if value < self.bLIM: value = random.uniform(self.bLIM, self.stdvalue)
+                if value < self.bLIM:
+                    value = random.uniform(self.bLIM, self.stdvalue)
                 value -= value % self.INCR
             if self.alwaysPOSITIVE:
                 value = abs(value)
@@ -96,17 +94,16 @@ class parameter():
 
             elif type(value) == int:
                 value = int(round(value))
-                
+
             return value
-        
+
         if TYPE == list:
             for X in range(len(self.value)):
                 self.value[X] = RUN(self, self.value[X])
-                
+
         else:
             self.value = RUN(self, self.value)
 
-    
     def mutate(self, MutateProbabilityDamper, Aggro):
         if (self.marks_dumpable) or (self.locked):
             return
@@ -120,56 +117,59 @@ class parameter():
             for V in range(len(self.value)):
 
                 self.value[V] += self.mutateDecideIfProceed\
-                                 (self.chanceMutate, MutateProbabilityDamper)\
-                                 * AggroModifier * self.INCR 
-               
+                    (self.chanceMutate, MutateProbabilityDamper)\
+                    * AggroModifier * self.INCR
+
         else:
 
             self.value += self.mutateDecideIfProceed\
-                           (self.chanceMutate, MutateProbabilityDamper)\
-                           * AggroModifier * self.INCR
-            
+                (self.chanceMutate, MutateProbabilityDamper)\
+                * AggroModifier * self.INCR
+
         self.putonlimits()
 
-
     def mutateDecideIfProceed(self, chance, MutateProbabilityDamper):
-        
+
         result = random.randrange(100) + MutateProbabilityDamper
         if result > chance:
             return 0
 
-        GRAPHIC = [ '-', '+' ]
-        VALUE = [ -1, 1 ]
+        GRAPHIC = ['-', '+']
+        VALUE = [-1, 1]
 
         x = 1 if self.value >= 0 else 0
 
         if MutateProbabilityDamper < 0:
             x = 1 - x
-      
+
         print("mutated %c" % GRAPHIC[x])
         return VALUE[x]
 
-    
     def dump_parameter_stat(self, individual):
         parameter = self.name
 
-        DUMP_games = individual.PARAMETERS[0].value - individual.PARAMETERS[0].dumpedvalue
-        DUMP_wins = individual.PARAMETERS[1].value - individual.PARAMETERS[1].dumpedvalue
-        DUMP_draws = individual.PARAMETERS[2].value - individual.PARAMETERS[2].dumpedvalue
-        DUMP_loss = individual.PARAMETERS[3].value - individual.PARAMETERS[3].dumpedvalue
-        DUMP_K = individual.PARAMETERS[4].value - individual.PARAMETERS[4].dumpedvalue
+        DUMP_games = individual.PARAMETERS[
+            0].value - individual.PARAMETERS[0].dumpedvalue
+        DUMP_wins = individual.PARAMETERS[
+            1].value - individual.PARAMETERS[1].dumpedvalue
+        DUMP_draws = individual.PARAMETERS[
+            2].value - individual.PARAMETERS[2].dumpedvalue
+        DUMP_loss = individual.PARAMETERS[
+            3].value - individual.PARAMETERS[3].dumpedvalue
+        DUMP_K = individual.PARAMETERS[4].value - \
+            individual.PARAMETERS[4].dumpedvalue
 
         value = self.value
 
         if type(self.value) == list:
             BUF = ""
             for ind in value:
-                BUF += str(ind)+"x"
+                BUF += str(ind) + "x"
             value = BUF[:-1]
         value = 'x' + str(value)
-        
+
         if not os.path.exists(Fdir + "/paramstats.xml"):
-            
+
             root = ET.Element('root')
             tree = ET.ElementTree(root)
 
@@ -185,21 +185,25 @@ class parameter():
             for child in root:
                 #print("match? '" +child.tag + "'.")
                 if child.tag == parameter:
-                    #print('match!')
+                    # print('match!')
                     ISNEWPARAM = False
-                    
+
                     #print("searching for '" + value + "'.")
                     for PRchild in child:
                         #print("match? '" +PRchild.tag + "'.")
                         if PRchild.tag == value:
-                            #print('match!')
+                            # print('match!')
                             ISNEWPARAMVAL = False
-                            PRchild[0].text = str(int(PRchild[0].text) + DUMP_wins)
-                            PRchild[1].text = str(int(PRchild[1].text) + DUMP_draws)
-                            PRchild[2].text = str(int(PRchild[2].text) + DUMP_loss)
-                            PRchild[3].text = str(int(PRchild[3].text) + DUMP_games)
-                            PRchild[4].text = str(int(PRchild[4].text) + DUMP_K)
-
+                            PRchild[0].text = str(
+                                int(PRchild[0].text) + DUMP_wins)
+                            PRchild[1].text = str(
+                                int(PRchild[1].text) + DUMP_draws)
+                            PRchild[2].text = str(
+                                int(PRchild[2].text) + DUMP_loss)
+                            PRchild[3].text = str(
+                                int(PRchild[3].text) + DUMP_games)
+                            PRchild[4].text = str(
+                                int(PRchild[4].text) + DUMP_K)
 
         if ISNEWPARAM == True:
             PARAM = ET.SubElement(root, parameter)
@@ -208,7 +212,7 @@ class parameter():
             PARAM = root.find(parameter)
 
         if ISNEWPARAMVAL == True:
-            
+
             NEWPARAMVAL = ET.SubElement(PARAM, value)
 
             ET.SubElement(NEWPARAMVAL, "wins").text = str(DUMP_wins)
@@ -217,28 +221,31 @@ class parameter():
             ET.SubElement(NEWPARAMVAL, "games").text = str(DUMP_games)
             ET.SubElement(NEWPARAMVAL, "K").text = str(DUMP_K)
 
-
-        #ET.dump(root)
+        # ET.dump(root)
         tree.write(Fdir + "/paramstats.xml")
 
     def randomize(self):
         if self.locked:
             print('locked')
             return
-        if not self.LIM: MAX = 2*self.stdvalue
-        else: MAX = self.LIM
-        
-        if not self.bLIM: MIN = MAX - 2*self.stdvalue
-        else: MIN = self.bLIM
+        if not self.LIM:
+            MAX = 2 * self.stdvalue
+        else:
+            MAX = self.LIM
 
-        Grading = round((MAX-MIN)/self.INCR)
+        if not self.bLIM:
+            MIN = MAX - 2 * self.stdvalue
+        else:
+            MIN = self.bLIM
+
+        Grading = round((MAX - MIN) / self.INCR)
         if Grading == 0:
             self.value = 0
             return
 
         VAL = random.randrange(Grading)
 
-        self.value = VAL*self.INCR + MIN
+        self.value = VAL * self.INCR + MIN
 
         self.putonlimits()
 
@@ -246,7 +253,8 @@ class parameter():
         self.value = value
         self.putonlimits()
         self.locked = 1
-        
+
     def unlock(self, rnd):
         self.locked = 0
-        if rnd: self.randomize()
+        if rnd:
+            self.randomize()
