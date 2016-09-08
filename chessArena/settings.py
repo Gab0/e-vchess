@@ -13,6 +13,7 @@ def initialize():
 
     global enginebin
 
+    global arena_showmemuse
     COLOR = {0: 'WHITE', 1: 'BLACK'}
 
     # path to e-vchess executable.
@@ -35,3 +36,5 @@ def initialize():
     TABLECOUNT = 32
     # number of tables to be shown on each row of machines.
     TABLEonROW = 8
+    # allow chessarena to plot memory usage on graphic.
+    arena_showmemuse = 0

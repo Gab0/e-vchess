@@ -150,7 +150,8 @@ class Arena():
                 ))
 
             if not self.ROUND % 100:
-                self.show_memory_usage()
+                if arena_showmemuse:
+                    self.show_memory_usage()    
 
             # each N rounds, do maintenance management,
             # in order to get best evolving performance.

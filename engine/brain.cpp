@@ -251,13 +251,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				  long Alpha, long Beta, int AllowCutoff) {
 
-    int i=0, r=0;
+  int i=0, r=0, PersistentBufferOnline=0;
     
     int enemy_score=0, machine_score=0;
 
     struct board *_board = makeparallelboard(feed);
 
-    struct board *Buffer;
+    struct board *DisposableBuffer;
 
 
     int ABcutoff = 0;
@@ -282,15 +282,17 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
      //If in checkmate/stalemate situation;
      if (!moves.k) {
              
-         if (ifsquare_attacked(_board->squares, findking(_board->squares, 'Y', PLAYER), 
-                 findking(_board->squares, 'X', PLAYER), PLAYER, 0)) {
-            score = 13000 - 50*(BRAIN.DEEP-DEEP); 
-            if (PLAYER == Machineplays) score = -score;
-
-         }
-	 else score = 0; 
-	 
-     _board->score = score; 
+       if (ifsquare_attacked(_board->squares,
+			     findking(_board->squares, 'Y', PLAYER), 
+			     findking(_board->squares, 'X', PLAYER),
+			     PLAYER, 0)) {
+	 score = 13000 - 50*(BRAIN.DEEP-DEEP); 
+	 if (PLAYER == Machineplays) score = -score;
+       }
+       
+       else score = 0; 
+       
+       _board->score = score; 
        return _board;
          
      }
@@ -299,39 +301,41 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
     //IFnotGPU( Vb show_board(_board->squares); )
    if (DEEP>0) {
-     struct board *BoardBuffer = makeparallelboard(feed);
+     struct board *PersistentBuffer;
+
      reorder_movelist(&moves); 
     
-       //NULL MOVE: guaranteed as long as if PL is not in check,
-       //and its not K+P endgame.
+     //NULL MOVE: guaranteed as long as if PL is not in check,
+     //and its not K+P endgame.
      if(DEEP > BRAIN.DEEP - 2) 
        if(canNullMove(DEEP, _board, moves.k, PLAYER)) {
 	 flip(_board->whoplays);
-	 Buffer = thinkiterate(_board, DEEP-1, verbose,
+	 DisposableBuffer = thinkiterate(_board, DEEP-1, verbose,
 			       Alpha, Beta, AllowCutoff);
 	 flip(_board->whoplays);
-	 if (PLAYER==Machineplays && Buffer->score > Alpha) Alpha = Buffer->score;
-	 if (PLAYER!=Machineplays && Buffer->score < Beta ) Beta  = Buffer->score;
-	 //DUMP(Buffer);
-	 //	 cloneboard(Buffer, BoardBuffer);
+	 if (PLAYER==Machineplays && DisposableBuffer->score > Alpha) Alpha = DisposableBuffer->score;
+	 if (PLAYER!=Machineplays && DisposableBuffer->score < Beta ) Beta  = DisposableBuffer->score;
+	 
+	 DUMP(DisposableBuffer);
 
+	 
        }
-     if (PLAYER==Machineplays) BoardBuffer->score = -17000;
-     	 else BoardBuffer->score = 17000;	   
+     
+     if (PLAYER==Machineplays)
+       score = -17000;
+     else
+       score = 17000;	   
 
    // Movelist iteration.
 
-
-   //long OAlpha=0, OBeta=0;
-	 
+    
      for(i=0;i<moves.k;i++) {
-     //printf("new tree;\n");
        
        move_pc(_board, &moves.movements[i]);  
 
-       Buffer = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
-	//printf("%i\n", Buffer->score);
-       moves.movements[i].score = Buffer->score;
+       DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
+	
+       moves.movements[i].score = DisposableBuffer->score;
 
 
 	
@@ -346,29 +350,37 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	//eval_info_move(&moves.movements[i], DEEP, 0, PLAYER);  
        
        if (PLAYER==Machineplays) {
-	 if (moves.movements[i].score > BoardBuffer->score) cloneboard(Buffer, BoardBuffer);
+	 if (moves.movements[i].score > score) {
+	   if (PersistentBufferOnline)
+	     DUMP(PersistentBuffer);
+	   PersistentBuffer=DisposableBuffer;
+	   score = moves.movements[i].score;
+	   DisposableBuffer=NULL;
+	   PersistentBufferOnline=1;
+	 }
+	 
 	 if (moves.movements[i].score > Alpha) {
 	   //printf("*.\n");
 	   //OAlpha = Alpha;
 	   Alpha = moves.movements[i].score;
-	   //printf("gg\n");
-	   //printf("%i\n", Buffer->score);
-	   //cloneboard(Buffer, BoardBuffer);
-	   //if(Buffer->score != BoardBuffer->score) printf("FAIL a !\n");
-	   //printf("%i\n", Buffer->score);
 	   
            if (Beta<=Alpha) {
 	     if (AllowCutoff)
 	       ABcutoff=1;
-	     //else if (Buffer->score - 10 > Alpha) ABcutoff=1;
-	     
 	   }
 	 }
        }
        
 	
        if (PLAYER!=Machineplays) {
-	 if (moves.movements[i].score < BoardBuffer->score) cloneboard(Buffer, BoardBuffer);
+	 if (moves.movements[i].score < score) {
+	   if (PersistentBufferOnline)
+	     DUMP(PersistentBuffer);
+	   PersistentBuffer = DisposableBuffer;
+	   score = moves.movements[i].score;
+	   DisposableBuffer=NULL;
+	   PersistentBufferOnline=1;
+	 }
          if (moves.movements[i].score < Beta) {
 	   //printf("**.\n");
 	   //OBeta = Beta;    
@@ -386,27 +398,28 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
          }
        }
        
-       DUMP(Buffer);
+       
        if (ABcutoff) {
 	 
 	 /* asprintf(&output, "*%i --  %i -> %i | %i -> %i  ||%i\n", PL,
 		   OAlpha, Alpha, OBeta, Beta, moves.movements[i].score);
 		   write(1, output, strlen(output));*/
 	 //if(PL==Machineplays) fprintf(stderr, "*%i\n", PL);
-	 
+	 DUMP(DisposableBuffer);  
+
 	 break;
        }	
        undo_move(_board, &moves.movements[i]);
        
-       
+       DUMP(DisposableBuffer);  
        
      }
 
      //score = moves.movements[r].score;
 
      DUMP(_board);
-     
-     return BoardBuffer;
+     //PersistentBuffer->score=score
+     return PersistentBuffer;
     
    }
      
@@ -574,3 +587,4 @@ Device void satellite_evaluation (long *score, struct move *movement) {
 
 
 }
+
