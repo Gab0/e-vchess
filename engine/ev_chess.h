@@ -27,7 +27,7 @@
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
 
-#define VariableSignal >
+#define VariableSignal <
 
 #define Vb if (verbose)
 
@@ -98,6 +98,7 @@ struct board;
      
      int MovementCount;
      int betaCut;
+     struct move movements[256];
    }; 
    
   
@@ -239,7 +240,7 @@ int fehn2board (char str[]);
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P);
 void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P);
 void stdoutWrite(const char * text);
-
+void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
 
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);

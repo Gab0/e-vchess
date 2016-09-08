@@ -5,12 +5,14 @@ from json import loads, dumps
 from os import remove, path, listdir
 from threading import Thread
 from random import shuffle, choice
+from time import time
+
 from chessArena import settings
 settings.initialize()
 
 from chessArena.table import Table
 
-
+xDeepValue = 1
 def LoadMachineList():
     MachineListLocation = settings.TOPmachineDIR + '/machines.list'
     MachineList = open(MachineListLocation, 'r').readlines()
@@ -131,7 +133,7 @@ class Tournament():
 
         # print([ len(self.TournamentRounds[z]) for z in range(len(self.TournamentRounds)) ] )
 
-        xDeepValue = 0
+        last_time = time()
         MoveInfo = {0: "move not played.", 1: "move played."}
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
                            for k in range(len(self.TournamentRounds[0]))]
@@ -148,6 +150,7 @@ class Tournament():
             END = 0
 
             while True:
+                startingtime = time()
                 for G in range(len(ROUND)):
 
                     try:
@@ -216,7 +219,9 @@ class Tournament():
                     break
 
                 if not I % 10:
-                    self.showStatus(I, SCORE, ACTIVE, DRAWS, ROUND)
+                    elapsed = time() - last_time
+                    last_time = time()
+                    self.showStatus(I, SCORE, ACTIVE, DRAWS, ROUND, elapsed)
                 sleep(0.5 + xDeepValue * 5)
                 I += 1
 
@@ -248,14 +253,16 @@ class Tournament():
 
         print("Tournament Ends.")
 
-    def showStatus(self, RoundIndex, SCORE, ACTIVE, DRAWS, ROUND):
+    def showStatus(self, RoundIndex, SCORE, ACTIVE, DRAWS, ROUND, elapsed):
         if self.stdscr:
             self.stdscr.clear()
         ActiveSymbol = {True: 'o', False: 'x'}
-        print("\nPlay %i of Round %i/%i." % (RoundIndex,
-                                             self.TournamentRounds.index(
-                                                 ROUND) + 1,
-                                             len(self.TournamentRounds)))
+        print("\nPlay %i of Round %i/%i.  t: %is" %\
+              (RoundIndex,
+               self.TournamentRounds.index(ROUND) + 1,
+               len(self.TournamentRounds),
+               elapsed))
+        
         I = 0
         for iTABLE in self.TABLEBOARD:
             try:

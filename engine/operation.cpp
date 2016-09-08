@@ -278,6 +278,9 @@ Host Device struct board *makeparallelboard (struct board *model) {
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
     
+    for (i=0; i<model->MovementCount; i++)
+      replicate_move(&_board->movements[i], &model->movements[i]);
+    
     return _board;
 }
 
@@ -296,6 +299,10 @@ Host Device void cloneboard (struct board *model, struct board *target) {
   
   for(i=0;i<2;i++) for(j=0;j<3;j++) target->castle[i][j] = model->castle[i][j];
 
+  for (i=0;i<model->MovementCount;i++)
+    replicate_move(&target->movements[i], &model->movements[i]);
+
+  
 }
 
 Host Device void selectBestMoves (struct move *array, int size, int target[], int quant) {

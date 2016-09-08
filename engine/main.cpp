@@ -14,7 +14,7 @@ Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
 
 bool computer_turn = false;
 
-char *output = (char *)malloc(256 * sizeof(char));
+char *output = (char *)malloc(364 * sizeof(char));
 
 int machineplays = 1;
 Device int GPUmachineplays = 1;
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
     #endif
 
     
-    char testfehn[128] = "fen r3kbr1/3bp2p/1pN3p1/1B1pQ3/PP2p3/7P/5qPR/RNK5 b - - 2 26";
+    char testfehn[128] = "fen r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
 
     printf("DEEP=%f   xDEEP=%f\n", Brain.DEEP, Brain.xDEEP);
 
@@ -290,7 +290,7 @@ void computer(int verbose) {
 
     
     if (think(&move, P , Brain.DEEP, verbose) < 0) {
-        printf("puta merda.\n");return;}
+        printf("Checkmate.\n");return;}
     //sleep(1);
     move_pc(&board, &move);
     

@@ -27,7 +27,7 @@ def STDPARAMETERS():
 
         parameter("param_MODbackup", 0, 50, 0, LIM=3, bLIM=-0.2, INCR=0.2),
 
-        parameter("param_MODmobility", 0, 50, 0, LIM=3, bLIM=-0.2,INCR=0.2)
+        parameter("param_MODmobility", 0, 50, 0, LIM=3, bLIM=-0.2,INCR=0.2),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
         

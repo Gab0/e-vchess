@@ -189,8 +189,7 @@ void eval_info_move(struct move *move, int DEEP, time_t startT, int P) {
 }
 
 void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P) {
-  struct move primarybuff;
-  struct move secondarybuff;
+
   int m=0;
   time_t elapsedT = time(NULL) - startT;
 
@@ -200,7 +199,7 @@ void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP
   movement_to_string(primary, bufferA);
   movement_to_string(secondary, bufferB);
   
-  asprintf(&output, "%i %ld %ld %i %s ", DEEP, primary->score, elapsedT, P, bufferA);
+  asprintf(&output, "%i %ld %ld %i %s ", DEEP, secondary->score, elapsedT, P, bufferA);
 
   for(m=0;m<Brain.DEEP-1;m++)
     asprintf(&output, "%s???? ", output);
@@ -213,6 +212,26 @@ void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP
   asprintf(&output, "%s\n", output);
   write(1, output, strlen(output));
 
+}
+
+
+void show_moveline(struct board *finalboard, int bottom_span, time_t startT) {
+  char buffer[4];
+  int I=0;
+  int DEEP = finalboard->MovementCount-bottom_span;
+  time_t elapsedT = time(NULL) - startT;
+  
+  //show_board(finalboard->squares);
+  asprintf(&output, "%i %ld %ld", DEEP, finalboard->score, elapsedT);
+  
+  for (I=bottom_span; I < finalboard->MovementCount; I++) {
+    movement_to_string(&finalboard->movements[I], buffer);
+
+      asprintf(&output, "%s %s", output, buffer);
+
+  }
+    asprintf(&output, "%s\n", output);
+    write(1, output, strlen(output));
 }
 
 

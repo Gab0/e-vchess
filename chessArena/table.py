@@ -1,16 +1,16 @@
 from tkinter import *
 
 from threading import Thread
-from subprocess import Popen, PIPE, call
+
 import chess
 
 from time import sleep
-from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read, system
 
 import gc
 from random import randrange
 from weakref import ref
+
+from chessArena.enginewrap import Engine
 from chessArena.settings import *
 
 
@@ -78,12 +78,6 @@ class Table(Frame):
             except RuntimeError:
                 print('Error starting match.')
 
-        '''elif not self.initialize:
-            self.endgame()
-            if self.startThread:
-                #self.startThread.join()
-                self.startThread = None'''
-
     def newmatch(self, specificMatch=None):
         if self.initialize:
             return
@@ -113,7 +107,7 @@ class Table(Frame):
                 CURRENTengineARGS = engineARGS
 
             self.MACHINE.append(
-                Popen(CURRENTengineARGS, stdin=PIPE, stdout=PIPE))
+                Engine(CURRENTengineARGS))
 
             if specificMatch:
                 CURRENTengineARGS = specificMatch[1]
@@ -121,8 +115,9 @@ class Table(Frame):
                 CURRENTengineARGS = engineARGS
 
             self.MACHINE.append(
-                Popen(CURRENTengineARGS, stdin=PIPE, stdout=PIPE))
+                Engine(CURRENTengineARGS))
         except Exception as e:
+            raise
             self.log('exception', '#1')
             print("Initializing failed.")
             print(e.strerror)
@@ -135,12 +130,6 @@ class Table(Frame):
             self.Maximize["background"] = "gold"
         try:
             self.MACnames = ['zero', 'zero']
-
-            # get current p.stdout flags
-            flags = fcntl(self.MACHINE[0].stdout, F_GETFL)
-            fcntl(self.MACHINE[0].stdout, F_SETFL, flags | O_NONBLOCK)
-            # fcntl(self.Bmachine.stdout, F_SETFL, flags | O_NONBLOCK) >>>>>?
-            fcntl(self.MACHINE[1].stdout, F_SETFL, flags | O_NONBLOCK)
 
             self.board.reset()
         except:
@@ -166,8 +155,8 @@ class Table(Frame):
             # self.MACHINE[1].stdout.flush()
 
             for i in [0, 1]:
-                for line in self.MACHINE[i].stdout.readlines():
-                    L = line.decode('utf-8')
+                for line in self.MACHINE[i].receive():
+                    L = line
                     # print(L)
                     if "MACname > " in L:
                         self.MACnames[i] = L[10:-1]
@@ -175,19 +164,12 @@ class Table(Frame):
                     if "opening machine:" in L:
                         self.MACnames[i] = L.split('/')[-1][:-1]
 
-            #sleep(0.3)
+            self.MACHINE[1].send("new")
 
-            self.MACHINE[1].stdin.write(bytearray('new\n', 'utf-8'))
-            self.MACHINE[1].stdin.flush()
+            self.MACHINE[0].send("new")
+            self.MACHINE[0].send("white")
+            self.MACHINE[0].send("go")
 
-            self.MACHINE[0].stdin.write(bytearray('new\n', 'utf-8'))
-            self.MACHINE[0].stdin.flush()
-            #sleep(0.6)
-            self.MACHINE[0].stdin.write(bytearray('white\n', 'utf-8'))
-            self.MACHINE[0].stdin.flush()
-            #sleep(0.6)
-            self.MACHINE[0].stdin.write(bytearray('go\n', 'utf-8'))
-            self.MACHINE[0].stdin.flush()
 
         except BrokenPipeError:
             print("broken pipe @ " + str(self.number) + " while starting.")
@@ -223,7 +205,6 @@ class Table(Frame):
         self.turn = 0
         self.initialize = 0
 
-        #self.startThread.join()
         self.startThread=0
 
     def ReadMachineTextContent(self, MachineLocation):
@@ -272,8 +253,7 @@ class Table(Frame):
         self.movelist = []
 
         try:
-            self.LastFlush = self.MACHINE[self.turn].stdout.readlines()
-            self.MACHINE[self.turn].stdout.flush()
+            self.LastFlush = self.MACHINE[self.turn].receive()
 
         except BrokenPipeError:
             print("broken pipe @ " + str(self.number) + " while gaming.")
@@ -286,27 +266,10 @@ class Table(Frame):
             return
         MOVE = 0
 
-        self.movereadbuff = []
-
         # for line in self.MACHINE[self.turn].stdout.readlines():
-        for line in self.LastFlush:
-            # print(line.decode('utf-8'))
-            line = line.decode('utf-8', 'ignore')[:-1]
-            if "move" not in line:
-                continue
 
-            L = line.split(" ")
-
-            if ("move" in L[0]) and (len(L) > 1):
-                    #print(">>>> %s"%L[1])
-                MOVE = L[1]
-                break
-            elif ("move" in L[1]):
-                MOVE = L[-1]
-                break
-            else:
-                self.movereadbuff.append(line)
-
+        MOVE =  self.MACHINE[self.turn].readMove(data = self.LastFlush)
+ 
         if MOVE:
             for move in self.board.legal_moves:
                 self.movelist.append(str(move))
@@ -357,12 +320,11 @@ class Table(Frame):
                     return
 
                 self.turn = 1 - self.turn
-                self.MACHINE[self.turn].stdin.write(
-                    bytearray(MOVE + '\n', 'utf-8'))
+
                 self.rounds_played += 1
 
                 try:
-                    self.MACHINE[self.turn].stdin.flush()
+                    self.MACHINE[self.turn].send(MOVE)
                 except BrokenPipeError:
                     print("broken pipe @ " + str(self.number) +
                           " while receiving move.")
@@ -383,13 +345,11 @@ class Table(Frame):
                 # self.log(str(self.board),0)
                 #self.log('engine internal board >>>>',0)
 
-                self.MACHINE[self.turn].stdin.write(
-                    bytearray('dump\n', 'utf-8'))
-                self.MACHINE[self.turn].stdin.flush()
+                self.MACHINE[self.turn].send("dump")
                 sleep(1)
                 try:
                     Hdump = self.MACHINE[
-                        self.turn].stdout.read().decode('utf-8')
+                        self.turn].receive(method="word")
 
                     if self.arena:
                         FLOG = open('log/log_illegal%i.txt' %
@@ -415,11 +375,9 @@ class Table(Frame):
             if self.consec_failure % 25 == 0:
                 try:
                     #self.log("requested FEN > ","%s" % str(self.board.fen()))
-                    self.MACHINE[self.turn].stdin.write(
-                        bytearray('echo\n', 'utf-8'))
-                    self.MACHINE[self.turn].stdin.flush()
+                    self.MACHINE[self.turn].send("echo")
                     self.MACHINE[
-                        1 - self.turn].stdin.write(bytearray('sorry\n', 'utf-8'))
+                        1 - self.turn].send("sorry")
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',
                              COLOR[self.turn])
@@ -459,8 +417,8 @@ class Table(Frame):
                 #machine.stdin.write(bytearray('quit\n', 'utf-8'))
                 #machine.stdin.flush()
                 #machine.join()
+                machine.destroy()
 
-                call(['kill', '-9', str(machine.pid)])
             except OSError:
                 self.log("Cannot allocate memory!", 0)
                 #machine.join()
@@ -522,8 +480,8 @@ class Table(Frame):
             #self.log('draw', '1/2')
 
         for MAC in self.MACHINE:
-            MAC.stdin.write(bytearray('result ' + result + '\n', 'utf-8'))
-            MAC.stdin.flush()
+            MAC.send("result %s" % result)
+
         self.online = 0
 
         self.endgame()
@@ -720,10 +678,10 @@ class Table(Frame):
         FLOG = open(Fname, 'w+')
         FLOG.write("%s\n" % reason)
         try:
-            self.MACHINE[self.turn].stdin.write(bytearray('dump\n', 'utf-8'))
-            self.MACHINE[self.turn].stdin.flush()
+            self.MACHINE[self.turn].send("dump")
+
             sleep(1)
-            Hdump = self.MACHINE[self.turn].stdout.read().decode('utf-8')
+            Hdump = self.MACHINE[self.turn].receive(method="word")
 
             FLOG.write('')
             FLOG.write(Hdump)

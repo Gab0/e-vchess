@@ -44,10 +44,11 @@ class DuelTable():
         loading machines from Hall of Fame.
 
           Choose your opponent:
+
                       """)
 
-        LegalMachines = ['random'] + LoadMachineList()
-
+        LegalMachines = ["random"] + LoadMachineList()
+        print("zero")
         for M in range(len(LegalMachines)):
             view = '%i - %s' % (M, LegalMachines[M])
             try:
@@ -56,41 +57,47 @@ class DuelTable():
                 pass
             print(view)
         print("")
-
+        LOADED=0
         userchoice = self.CollectInput(
             [ x for x in range(len(LegalMachines)) ] )
 
         if not userchoice:
             userchoice = randrange(1,len(LegalMachines))
 
-        print('Loading %s. glhf' % LegalMachines[userchoice])
-        Callargs =[ settings.enginebin, "--deep", '4', '--xdeep', '1',
-                    '--specific', LegalMachines[userchoice] ] 
+        
+        Callargs =[ settings.enginebin, "--deep", '4', '--xdeep', '3' ]
+
+        if userchoice != "zero":
+            LOADED=1
+            print('Loading %s. glhf' % LegalMachines[userchoice])
+            Callargs += [ '--specific', LegalMachines[userchoice] ] 
         engineCALL = " ".join(Callargs)
 
         Command = ['xboard', '-fcp', engineCALL]
 
         X = call(Command)
+        if LOADED:
+            print("Did this machine win the game? [y/n]")
 
-        print("Did this machine win the game? [y/n]")
+            FeedBack = self.CollectInput( ['y', 'n'] )
 
-        FeedBack = self.CollectInput( ['y', 'n'] )
-
-        if FeedBack == 'y':
-            ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], 1)
-            print("logically.")
-        else:
-            ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], -1)
-            print("a bad day for the computer age.")
+            if FeedBack == 'y':
+                ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], 1)
+                print("logically.")
+            else:
+                ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], -1)
+                print("a bad day for the computer age.")
 
 
-        savescores(ScoreData)
+            savescores(ScoreData)
 
         
     def CollectInput(self, ValidValues):
         userchoice = None
         while userchoice == None:
             userchoice = input(">>>")
+            if userchoice == "zero":
+                break
             try:
                 userchoice = int(userchoice)
             except ValueError:

@@ -54,6 +54,7 @@ void setup_board (int setup) {
     
     board.passantJ=-1;
     //erase_moves(&board, 1);
+    board.MovementCount=0;
     }
 
 void show_board (char squares[8][8]) {
@@ -284,7 +285,10 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
     tg_board->passantJ=movement->passantJ[1];
 
     flip(tg_board->whoplays);
-    tg_board->MovementCount += 1;
+    
+
+    replicate_move(&tg_board->movements[tg_board->MovementCount], movement);
+    tg_board->MovementCount++;
     
 }
 
@@ -342,7 +346,8 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     tg_board->passantJ=movement->passantJ[0];
     
     flip(tg_board->whoplays);
-    tg_board->MovementCount -= 1;
+    tg_board->MovementCount--;
+
     
 }
 
