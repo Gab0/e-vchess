@@ -7,6 +7,7 @@ from tkinter import *
 
 from threading import Thread
 from subprocess import *
+import psutil
 
 from chessArena.settings import *
 from chessArena.table import Table
@@ -17,7 +18,7 @@ from evchess_evolve.core import populate, loadmachines, mutatemachines,\
     setmachines, deltheworst_clonethebest, select_best_inds, Mate,\
     replicate_best_inds, clone_from_template, EliminateEquals
 
-
+from makegraphic import show_mem_graphic
 #from evchess_evolve.management import *
 
 # DEBUG, MEMORY SCAN MODULES;
@@ -361,51 +362,17 @@ class Arena():
         print("using %.3f GB of ram." % (memuse / 1000000))
         self.plotOnGraph(memuse, 'ro')
 
-        #kkk = asizeof.Asizer()
-        #memuse = kkk.asizeof(self)/1000000
-        #print("asizeof: using %.3f GB of ram." % memuse)
-        # print("")
-        # muppy.print_summary()
-        # print("")
-        # print(objgraph.get_leaking_objects())
-        #heap_objects = muppy.get_objects()
-        # print(len(heap_objects))
+        TableMemUsage=0
+        for TABLE in self.TABLEBOARD:
+            for MAC in TABLE.MACHINE:
+                size=0
+                pid = MAC.pid()
+                proc = psutil.Process(pid)
+                TableMemUsage=proc.memory_info()[0]
 
-        #HO = muppy.sort(muppy.get_objects())
 
-        size = asizeof.asizeof(self.TABLEBOARD)
-        #plotOnGraph(size/1000, 'bo')
-        size /= 1000000
+        self.plotOnGraph(TableMemUsage, 'bo')
 
-        print("tableboard counted size is %.2f MB||general size: %.2f MB" % (size,
-                                                                             asizeof.asizeof(self.TABLEBOARD) / 1000000))
-        '''snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('traceback')
-        totalKB = 0
-        for stat in top_stats:
-            totalKB += (stat.size / 1024)
-
-        print("All resource number: %i        size: %i" % (len(top_stats), totalKB))
-        
-        for stat in top_stats:
-            if len(stat.traceback.format()) > 20:
-                print("------------- %s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
-                for line in stat.traceback.format():
-                    print(line)'''
-
-        '''self.memory_tracker = tracker.SummaryTracker()
-        self.memory_tracker.print_diff()'''
-
-        '''arenasize = sys.getsizeof(self.TABLEBOARD[0].board)/1000
-        print("table's board size is %.3f MB" % (arenasize))
-        FGraph.write("%i|%i|go\n" % (self.ROUND, arenasize))
-        FGraph.close()'''
-
-        '''ALL = gc.get_objects()
-        print(len(ALL))
-        for O in ALL[:10]:
-            print(O)
-        gc.collect()'''
 
     def plotOnGraph(self, value, color):
         graphic_file = open(self.graphpath, 'a')

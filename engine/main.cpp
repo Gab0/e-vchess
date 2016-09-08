@@ -113,13 +113,8 @@ int main(int argc, char** argv) {
     signal(SIGTERM, SIG_IGN); 
     signal(SIGCHLD, SIG_IGN);
     
-    printf("id name e-v dchess engine v0.7\n");
-    printf("id author afrogabs\n");
-    printf("uci ok\n");
-    
-    
-    
-    
+    printf("name e-v dchess engine v0.8\n");
+    printf("author afrogabs\n");
     
     char *inp;
 
@@ -176,11 +171,9 @@ int main(int argc, char** argv) {
     
     char testfehn[128] = "fen r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
 
-    printf("DEEP=%f   xDEEP=%f\n", Brain.DEEP, Brain.xDEEP);
+    printf("DEEP=%f   xDEEP=%f\n\n", Brain.DEEP, Brain.xDEEP);
 
-    for (i=Brain.DEEP;i>=0;i--) 
-        printf("timeWEIGHT for DEEP=%i   %f\n",i,scoremod(i,Brain.evalmethod));
-    
+ 
     
     inp =(char *)malloc(128*sizeof(char));
 
@@ -200,7 +193,7 @@ int main(int argc, char** argv) {
     for (i=0;i<128;i++) inp[i]='0';
     printf("\n");
       */  
-        
+    board.MovementCount=0;
     if (strstr(inp, "isready") != NULL) {printf("readyok\n"); fflush(stdout);}
    
     if (strstr(inp, "quit") != NULL) return 0;

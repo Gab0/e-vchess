@@ -37,4 +37,4 @@ def initialize():
     # number of tables to be shown on each row of machines.
     TABLEonROW = 8
     # allow chessarena to plot memory usage on graphic.
-    arena_showmemuse = 0
+    arena_showmemuse = 1

@@ -13,6 +13,10 @@ class Engine():
         flags = fcntl(self.engine.stdout, F_GETFL)
         fcntl(self.engine.stdout, F_SETFL, flags | O_NONBLOCK)
 
+        self.recordComm = 1
+
+        self.recordedData=""
+
     def send(self, data):
         self.engine.stdin.write(bytearray("%s\n" % data, "utf-8"))
         self.engine.stdin.flush()
@@ -22,10 +26,14 @@ class Engine():
         if method == "lines":
             data = self.engine.stdout.readlines()
             data = [x.decode('utf-8', 'ignore') for x in data]
+            if self.recordComm:
+                for c in data:
+                    self.recordedData +=c
         else:
             data = self.engine.stdout.read().decode('utf-8', 'ignore')
+            if self.recordComm:
+                self.recordedData +=data
 
-        self.engine.stdout.flush()
         return data
 
     def readMove(self, data=None):
@@ -36,14 +44,30 @@ class Engine():
             if not "move" in line:
                 continue
             line = line.replace('\n', '').split(" ")
-            P = line.index("move")
+            try:
+                P = line.index("move")
+            except ValueError:
+                return None
             return line[P + 1]
 
         return None
 
-    def destroy(self):
-        call(['kill', '-9', str(self.engine.pid)])
+    def pid(self):
+        return self.engine.pid
 
+    def dumpRecordedData(self):
+        if self.recordedData:
+            File = open("log/%i.dump" % self.pid(),'w')
+            File.write(self.recordedData)
+            File.close()
+        
+    def destroy(self):
+        try:
+            call(['kill', '-9', str(self.engine.pid)])
+        except AttributeError:
+            pass
+
+        
     def __del__(self):
         self.destroy()
         self.engine = None

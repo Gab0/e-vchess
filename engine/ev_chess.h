@@ -98,7 +98,7 @@ struct board;
      
      int MovementCount;
      int betaCut;
-     struct move movements[256];
+     struct move movements[364];
    }; 
    
   
@@ -257,7 +257,7 @@ Global void kerneliterate(struct board *workingboard,
 Global void Testkernel(int *Test);
 Device void Testdevice(int *Test);
 Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
-Device void satellite_evaluation (long *score, struct move *movement);
+Device int satellite_evaluation (struct move *movement);
 
 
 
@@ -266,7 +266,7 @@ Device void satellite_evaluation (long *score, struct move *movement);
 int loadmachine (int verbose, char *dir);
 //int applyresult (int result);
 //int countpieces (void);
-float readparam(char *line, int verbose);
+void readparam(char *line, int verbose, const char *keyword, float *Parameter);
 void dump_history();
 void chesslog(char *location, const char content[]);
 #define	EV_CHESS_H

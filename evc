@@ -13,6 +13,8 @@ case  "$1" in
 
 "make") cd ${BASEDIR}/engine && sh make.sh;;
 
+"memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
+
 *) 
 echo ""
 echo " Invalid Option."

@@ -101,7 +101,7 @@ int loadmachine (int verbose, char *MachineDir) {
            }
            
            
-        if(loadDEEP) if (strstr(line, "param_DEEP") != NULL)   
+	   /*   if(loadDEEP) if (strstr(line, "param_DEEP") != NULL)   
             Brain.DEEP = readparam(line, V);
            
         if (strstr(line, "param_deviationcalc") != NULL)
@@ -132,9 +132,21 @@ int loadmachine (int verbose, char *MachineDir) {
 	  Brain.MODmobility = readparam(line, V);
 	if (strstr(line, "param_moveFocus") != NULL)
 	  Brain.moveFocus = readparam(line, V);
-           
-
-           printf(".\n");
+	   */
+	   readparam(line, V, "eval_randomness", &Brain.randomness);
+	   readparam(line, V, "param_seekpieces", &Brain.seekpieces);
+	   readparam(line, V, "param_seekmiddle", &Brain.seekmiddle);
+	   readparam(line, V, "param_seekatk", &Brain.seekatk);
+	   readparam(line, V, "param_evalmethod", &Brain.evalmethod);
+	   readparam(line, V, "param_presumeOPPaggro", &Brain.presumeOPPaggro);
+	   readparam(line, V, "param_pawnrankMOD", &Brain.pawnrankMOD);
+	   readparam(line, V, "param_parallelcheck", &Brain.parallelcheck);
+	   readparam(line, V, "param_balanceoffense", &Brain.balanceoffense);
+	   readparam(line, V, "param_cumulative", &Brain.cumulative);
+	   readparam(line, V, "param_MODbackup", &Brain.MODbackup);
+	   readparam(line, V, "param_MODmobility", &Brain.MODmobility);
+	   readparam(line, V, "param_moveFocus", &Brain.moveFocus);
+           //printf(".\n");
 
        }
 
@@ -158,9 +170,9 @@ int loadmachine (int verbose, char *MachineDir) {
 }
 
 
-float readparam(char *line, int verbose) {
+void readparam(char *line, int verbose, const char *keyword, float *Parameter) {
     
-    //if (strstr(line, keyword) != NULL) {
+  if (strstr(line, keyword) == NULL) return;
     char *reading = (char *) malloc(64);
     
                
@@ -170,13 +182,9 @@ float readparam(char *line, int verbose) {
                float parameter = (float)(atof(reading));
                Vb printf("is %f\n",parameter);
     
-   
-    
-    
-    
     reading = NULL;
-    return parameter;
-
+    *Parameter = parameter;
+    
 
 }
 

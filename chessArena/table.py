@@ -374,11 +374,11 @@ class Table(Frame):
                 try:
                     #self.log("requested FEN > ","%s" % str(self.board.fen()))
                     self.MACHINE[self.turn].send("echo")
-                    self.MACHINE[
-                        1 - self.turn].send("sorry")
+
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',
                              COLOR[self.turn])
+                    self.MACHINE[self.turn].dumpRecordedData()
                     self.DUMPmovehistory("inactivity")
                     if self.arena:
                         self.arena.setcounter_inactivity += 1
