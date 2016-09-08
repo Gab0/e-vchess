@@ -11,7 +11,8 @@ settings.initialize()
 
 from chessArena.tournament import LoadMachineList
 
-#print(VerboseMove)
+# print(VerboseMove)
+
 
 def loadscores():
     try:
@@ -22,12 +23,14 @@ def loadscores():
     except:
         return {}
         pass
-    
+
+
 def savescores(DATA):
     F = open(settings.TOPmachineDIR + '/scoreData', 'w')
 
     F.write(dumps(DATA))
     F.close()
+
 
 def ModifyScore(DATA, MacName, Operator):
     try:
@@ -37,7 +40,9 @@ def ModifyScore(DATA, MacName, Operator):
 
     return DATA
 
+
 class DuelTable():
+
     def __init__(self):
         ScoreData = loadscores()
         print("""
@@ -57,20 +62,19 @@ class DuelTable():
                 pass
             print(view)
         print("")
-        LOADED=0
+        LOADED = 0
         userchoice = self.CollectInput(
-            [ x for x in range(len(LegalMachines)) ] )
+            [x for x in range(len(LegalMachines))])
 
         if not userchoice:
-            userchoice = randrange(1,len(LegalMachines))
+            userchoice = randrange(1, len(LegalMachines))
 
-        
-        Callargs =[ settings.enginebin, "--deep", '4', '--xdeep', '3' ]
+        Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '3']
 
         if userchoice != "zero":
-            LOADED=1
+            LOADED = 1
             print('Loading %s. glhf' % LegalMachines[userchoice])
-            Callargs += [ '--specific', LegalMachines[userchoice] ] 
+            Callargs += ['--specific', LegalMachines[userchoice]]
         engineCALL = " ".join(Callargs)
 
         Command = ['xboard', '-fcp', engineCALL]
@@ -79,19 +83,19 @@ class DuelTable():
         if LOADED:
             print("Did this machine win the game? [y/n]")
 
-            FeedBack = self.CollectInput( ['y', 'n'] )
+            FeedBack = self.CollectInput(['y', 'n'])
 
             if FeedBack == 'y':
-                ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], 1)
+                ScoreData = ModifyScore(
+                    ScoreData, LegalMachines[userchoice], 1)
                 print("logically.")
             else:
-                ScoreData = ModifyScore(ScoreData, LegalMachines[userchoice], -1)
+                ScoreData = ModifyScore(
+                    ScoreData, LegalMachines[userchoice], -1)
                 print("a bad day for the computer age.")
-
 
             savescores(ScoreData)
 
-        
     def CollectInput(self, ValidValues):
         userchoice = None
         while userchoice == None:
@@ -102,13 +106,13 @@ class DuelTable():
                 userchoice = int(userchoice)
             except ValueError:
                 userchoice = userchoice.lower()
-            
+
             try:
                 assert(userchoice in ValidValues)
             except:
                 userchoice = None
                 print("Invalid input. Try again.")
-            
+
         return userchoice
 
 

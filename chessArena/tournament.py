@@ -13,6 +13,8 @@ settings.initialize()
 from chessArena.table import Table
 
 xDeepValue = 1
+
+
 def LoadMachineList():
     MachineListLocation = settings.TOPmachineDIR + '/machines.list'
     MachineList = open(MachineListLocation, 'r').readlines()
@@ -34,9 +36,9 @@ class Tournament():
         else:
             self.mainscr = None
             self.stdscr = None
-            
+
         self.verboseBoards = False
-        
+
         self.Competitors = LoadMachineList()
 
         self.Scores = {}
@@ -100,7 +102,6 @@ class Tournament():
         for machine in list(self.Scores.keys()):
             print("%s: %s" % (machine, self.Scores[machine]))
 
-        
         self.Deaths = 1 if not self.Deaths else self.Deaths
 
         for k in range(self.Deaths):
@@ -145,7 +146,7 @@ class Tournament():
             ACTIVE = [True for i in range(len(ROUND))]
             SCORE = [[0, 0] for i in range(len(ROUND))]
             DRAWS = [0 for i in range(len(ROUND))]
-            
+
             I = 0
             END = 0
 
@@ -232,9 +233,9 @@ class Tournament():
             # for T in self.TABLEBOARD:
             #    T.endgame()
             print("Round Ends. %s" % SCORE)
-            
+
             # to end tournament prematurely if one machine is really crap.
-            
+
             if CURRENT > (len(self.TournamentRounds) / 4):
                 if not self.checkFateContinue(
                         len(self.TournamentRounds) - CURRENT):
@@ -248,7 +249,7 @@ class Tournament():
         # delete losers of tournament.
         if self.ToDeleteLosers:
             #T = Thread(target=self.DeleteLosers)
-            #T.start()
+            # T.start()
             self.DeleteLosers()
 
         print("Tournament Ends.")
@@ -257,12 +258,12 @@ class Tournament():
         if self.stdscr:
             self.stdscr.clear()
         ActiveSymbol = {True: 'o', False: 'x'}
-        print("\nPlay %i of Round %i/%i.  t: %is" %\
+        print("\nPlay %i of Round %i/%i.  t: %is" %
               (RoundIndex,
                self.TournamentRounds.index(ROUND) + 1,
                len(self.TournamentRounds),
                elapsed))
-        
+
         I = 0
         for iTABLE in self.TABLEBOARD:
             try:
@@ -277,7 +278,7 @@ class Tournament():
                     ActiveSymbol[ACTIVE[I]])
 
                 TableBoard = str(iTABLE.board)
-                
+
                 if self.stdscr:
                     self.stdscr.addstr(I * 10, 0, TableInfo)
                     self.stdscr.addstr(I * 10 + 1, 0, TableBoard)
@@ -313,8 +314,8 @@ class Tournament():
         WORST = 0
         POORBEST = 1000
         LASTPOORBEST = 0
-        
-        for DEATH in range(self.Deaths+1):
+
+        for DEATH in range(self.Deaths + 1):
             LASTPOORBEST = POORBEST
             POORBEST = 1000
             for MACHINE in self.Scores:
@@ -326,12 +327,13 @@ class Tournament():
             WORST = POORBEST
 
         # print("LPB: %i; PB: %i" % (LASTPOORBEST, POORBEST))
-        
+
         if LASTPOORBEST + PossiblePoints > POORBEST:
             return True
         else:
             return False
-                    
+
+
 def checknumberofPROCS():
     pids = [pid for pid in listdir('/proc') if pid.isdigit()]
     ENGINE_COUNT = 0

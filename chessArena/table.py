@@ -69,8 +69,7 @@ class Table(Frame):
             try:
                 if self.startThread:
                     self.startThread.join()
-                
-                    
+
                 self.startThread = Thread(target=self.newmatch, kwargs={
                                           'specificMatch': specificMatch})
 
@@ -87,7 +86,7 @@ class Table(Frame):
 
         self.MACHINE = []
         self.MACcontent = []
-        
+
         self.rounds_played = 0
 
         self.initialize = 1
@@ -170,7 +169,6 @@ class Table(Frame):
             self.MACHINE[0].send("white")
             self.MACHINE[0].send("go")
 
-
         except BrokenPipeError:
             print("broken pipe @ " + str(self.number) + " while starting.")
             #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
@@ -195,7 +193,7 @@ class Table(Frame):
         if self.GUI:
             self.Maximize["background"] = "grey"
             self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
-            if self.visible:        
+            if self.visible:
                 self.visor.delete('1.0', END)
                 self.visor.insert('1.0', self.board)
             self.switch["command"]
@@ -205,7 +203,7 @@ class Table(Frame):
         self.turn = 0
         self.initialize = 0
 
-        self.startThread=0
+        self.startThread = 0
 
     def ReadMachineTextContent(self, MachineLocation):
         try:
@@ -268,8 +266,8 @@ class Table(Frame):
 
         # for line in self.MACHINE[self.turn].stdout.readlines():
 
-        MOVE =  self.MACHINE[self.turn].readMove(data = self.LastFlush)
- 
+        MOVE = self.MACHINE[self.turn].readMove(data=self.LastFlush)
+
         if MOVE:
             for move in self.board.legal_moves:
                 self.movelist.append(str(move))
@@ -415,22 +413,21 @@ class Table(Frame):
             #print("killing %s" % machine.pid)
             try:
                 #machine.stdin.write(bytearray('quit\n', 'utf-8'))
-                #machine.stdin.flush()
-                #machine.join()
+                # machine.stdin.flush()
+                # machine.join()
                 machine.destroy()
 
             except OSError:
                 self.log("Cannot allocate memory!", 0)
-                #machine.join()
-                #machine.endgame()
+                # machine.join()
+                # machine.endgame()
                 #machine.online = 0
 
             # machine.terminate()
         self.MACHINE = []
 
-        
         self.board = chess.Board()
-        
+
         self.online = 0
         self.initialize = 0
         if self.GUI:
@@ -685,7 +682,6 @@ class Table(Frame):
 
             FLOG.write('')
             FLOG.write(Hdump)
-
 
         except:
             if self.Damaged:

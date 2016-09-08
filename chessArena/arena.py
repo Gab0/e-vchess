@@ -30,6 +30,7 @@ import sys
 import tracemalloc
 import gc
 
+
 class Arena():
 
     def __init__(self, GraphicInterface=True, GO=False):
@@ -38,7 +39,7 @@ class Arena():
         self.looplimit = 0
         self.GraphicInterface = GraphicInterface
         self.TIME = time()
-        k,j = 0,0
+        k, j = 0, 0
 
         if self.GraphicInterface:
             try:
@@ -48,24 +49,23 @@ class Arena():
                 GO = True
 
         if self.GraphicInterface:
-                          
-            
+
             self.menubar = Menu(self.root)
 
             self.Ccycle = self.menubar.add_command(
                 label='cycle thru', command=self.startcycle)
 
-            self.menubar.add_command(label="Kill 'em All", command=self.killemall)
+            self.menubar.add_command(
+                label="Kill 'em All", command=self.killemall)
             self.menubar.add_command(
                 label='show/hide ALL',
                 command=self.showhideall)
-            
+
             self.root.config(menu=self.menubar)
         else:
-            self.root=None
-            
-        self.TABLEBOARD = []
+            self.root = None
 
+        self.TABLEBOARD = []
 
         for i in range(TABLECOUNT):
             if self.GraphicInterface:
@@ -78,7 +78,6 @@ class Arena():
             if k == TABLEonROW:
                 k = 0
                 j += 1
-
 
         self.showhide_ = 0
 
@@ -93,7 +92,6 @@ class Arena():
         self.setcounter_checkmate = 0
         self.setcounter_forcedwin = 0
         self.setcounter_inactivity = 0
-
 
         self.graphpath = "mempertime"
 
@@ -118,11 +116,11 @@ class Arena():
         self.ROUND = 0
         self.Cycle = True
 
-        RoutineColor= {"A": [20000, 'gx'],
-                       "B": [40000, 'rx'],
-                       "C": [60000, 'bx'],
-                       "T": [80000, 'yx'],
-                       "H": [100000, 'mx']}
+        RoutineColor = {"A": [20000, 'gx'],
+                        "B": [40000, 'rx'],
+                        "C": [60000, 'bx'],
+                        "T": [80000, 'yx'],
+                        "H": [100000, 'mx']}
         if self.GraphicInterface:
             self.menubar.entryconfigure(1, label='stop cycle')
             self.menubar.entryconfigure(1, command=self.killcycle)
@@ -153,8 +151,7 @@ class Arena():
 
             if not self.ROUND % 100:
                 self.show_memory_usage()
-                
-            
+
             # each N rounds, do maintenance management,
             # in order to get best evolving performance.
             # also prints running info to log.
@@ -175,8 +172,8 @@ class Arena():
                 if LEVEL:
                     for LETTER in LEVEL:
                         self.plotOnGraph(RoutineColor[LETTER][0],
-                                    RoutineColor[LETTER][1])
-                        
+                                         RoutineColor[LETTER][1])
+
                     self.routine_pop_management(LEVEL)
 
             self.move_read_reliability = 0
@@ -233,7 +230,7 @@ class Arena():
         for table in self.TABLEBOARD:
             if table.online == 1:
                 table.endgame()
-                
+
     def killunused(self):
         for T in range(len(self.TABLEBOARD)):
             if T > self.looplimit:
@@ -360,15 +357,15 @@ class Arena():
 
     def show_memory_usage(self):
         memuse = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        print("using %.3f GB of ram." % (memuse/1000000))
+        print("using %.3f GB of ram." % (memuse / 1000000))
         self.plotOnGraph(memuse, 'ro')
 
         #kkk = asizeof.Asizer()
         #memuse = kkk.asizeof(self)/1000000
         #print("asizeof: using %.3f GB of ram." % memuse)
-        #print("")
-        #muppy.print_summary()
-        #print("")
+        # print("")
+        # muppy.print_summary()
+        # print("")
         # print(objgraph.get_leaking_objects())
         #heap_objects = muppy.get_objects()
         # print(len(heap_objects))
@@ -378,9 +375,9 @@ class Arena():
         size = asizeof.asizeof(self.TABLEBOARD)
         #plotOnGraph(size/1000, 'bo')
         size /= 1000000
-        
+
         print("tableboard counted size is %.2f MB||general size: %.2f MB" % (size,
-                                                                             asizeof.asizeof(self.TABLEBOARD)/1000000))
+                                                                             asizeof.asizeof(self.TABLEBOARD) / 1000000))
         '''snapshot = tracemalloc.take_snapshot()
         top_stats = snapshot.statistics('traceback')
         totalKB = 0
@@ -394,21 +391,20 @@ class Arena():
                 print("------------- %s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
                 for line in stat.traceback.format():
                     print(line)'''
-        
+
         '''self.memory_tracker = tracker.SummaryTracker()
         self.memory_tracker.print_diff()'''
-                
+
         '''arenasize = sys.getsizeof(self.TABLEBOARD[0].board)/1000
         print("table's board size is %.3f MB" % (arenasize))
         FGraph.write("%i|%i|go\n" % (self.ROUND, arenasize))
         FGraph.close()'''
-        
+
         '''ALL = gc.get_objects()
         print(len(ALL))
         for O in ALL[:10]:
             print(O)
         gc.collect()'''
-        
 
     def plotOnGraph(self, value, color):
         graphic_file = open(self.graphpath, 'a')
@@ -417,5 +413,3 @@ class Arena():
                                            color))
 
         graphic_file.close()
-                           
-        
