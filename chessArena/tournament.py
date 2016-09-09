@@ -167,6 +167,7 @@ class Tournament():
         while True:
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
+            # self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)]
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
                     if not SCORE[GAME][MACHINE]:
@@ -183,7 +184,6 @@ class Tournament():
                           
 
     def RunTournamentRound(self, ROUND, ThisRoundNumber, ExpectedRoundNumber):
-        MoveInfo = {0: "move not played.", 1: "move played."}
         ACTIVE = [True for i in ROUND]
         SCORE = [[0, 0] for i in ROUND]
         DRAWS = [0 for i in ROUND]
@@ -250,7 +250,7 @@ class Tournament():
                     x = x if x else 0
                     if x:
                         STATUS[G] = "+"
-                    #print('playing %i %s' % ( G,MoveInfo[x] ) )
+                    
             print(' '.join(STATUS))
             if not I % 10:
                 elapsed = time() - last_time
@@ -285,6 +285,8 @@ class Tournament():
 
         I = 0
         for iTABLE in self.TABLEBOARD:
+            if I > len(SCORE):
+                continue
             try:
                 TableInfo = "{%i} %s %ix%i %s {%i} (%i)   %s" % (
                     self.Scores[iTABLE.MACnames[0]],

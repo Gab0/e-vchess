@@ -34,8 +34,8 @@ def ReleaseOrphan(machine_dir):
 
 def bareDeleteMachine(machine_dir, machine_name):
     try:
-        remove("%s/%s", mahcine_dir, machinename)
-    except:
+        remove("%s/%s", machine_dir, machine_name)
+    except FileNotFoundError:
         return 0
     MachineListLocation = "%s/machines.list" % machine_dir
     MachineList = open(MachineListLocation, 'r').readlines()
