@@ -8,9 +8,11 @@ import chess.pgn
 
 from random import choice, random
 from time import sleep
-from subprocess import Popen, PIPE
-from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read, system
+
+
+
+
+from chessArena.enginewrap import Engine
 from chessArena import settings
 settings.initialize()
 
@@ -83,21 +85,18 @@ class trainingDataFeeder():
         print(fen)
         print(expected_movement)
 
-        self.subject.stdin.write(bytearray('position %s\n' % fen, 'utf-8'))
-        self.subject.stdin.flush()
-        self.subject.stdin.write(
-            bytearray('%s\n' % Color[WinnerColor[R]], 'utf-8'))
-        self.subject.stdin.flush()
-        self.subject.stdin.write(bytearray('go\n', 'utf-8'))
-        self.subject.stdin.flush()
+        self.subject.send("position %s" % fen)
+        self.subject.send("%s" % Color[WinnerColor[R]])
+        self.subject.send("go")
+
 
         k = 0
         while True:
             sleep(1)
             k += 1
             print(k)
-            self.subject.stdout.flush()
-            response = self.subject.stdout.readlines()
+            
+            response = self.subject.receive()
             for line in response:
                 line = line.decode('utf-8')
                 print(line)
@@ -116,8 +115,9 @@ class trainingDataFeeder():
         self.TotalTests += 1
 
     def startEngine(self):
-        self.subject = Popen(settings.engineARGS, stdin=PIPE, stdout=PIPE)
-        flags = fcntl(self.subject.stdout, F_GETFL)
-        fcntl(self.subject.stdout, F_SETFL, flags | O_NONBLOCK)
+        self.subject = Engine(settings.engineARGS)
+        
+        
+        
 
 X = trainingDataFeeder('database_2015.pgn')

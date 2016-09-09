@@ -98,7 +98,7 @@ struct board;
      
      int MovementCount;
      int betaCut;
-     struct move movements[364];
+     struct move movements[64];
    }; 
    
   
@@ -161,6 +161,7 @@ extern int  infomoveINDEX;
 
 extern char *output;
 
+extern bool Show_Info;
 extern bool show_info;
 
 extern int machineplays;

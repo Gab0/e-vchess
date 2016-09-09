@@ -363,8 +363,9 @@ def NewMacName(Tail=""):
         x = random.randrange(65, 91)
         letters += chr(x)
 
-    numbers = random.randrange(0, 6489)
-    return "%s%i%s.mac" % (letters, numbers, Tail)
+    numbers = random.randrange(0, 9999)
+    numbers = str(numbers).zfill(4)
+    return "%s%s%s.mac" % (letters, numbers, Tail)
 
 
 def IsEqual(model, against):

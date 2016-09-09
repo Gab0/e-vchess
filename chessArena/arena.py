@@ -166,7 +166,7 @@ class Arena():
                     LEVEL += "B"
                 if not self.ROUND % (self.EvolveRatio * 3):
                     LEVEL += "C"
-                if not self.ROUND % (self.EvolveRatio * 20):
+                if not self.ROUND % (self.EvolveRatio * 10):
                     LEVEL += "T"
                 if not self.ROUND % (self.EvolveRatio // 3 * 13):
                     LEVEL += "H"  # better act alone.

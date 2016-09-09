@@ -8,7 +8,8 @@ unsigned long long rndseed() {
 
 int loadmachine (int verbose, char *MachineDir) {
       
-       FILE *fp;
+       FILE *MachineListFile;
+       FILE *MachineFile;
        //FILE * flist;
        char * line = NULL;
        size_t len = 0;
@@ -36,11 +37,16 @@ int loadmachine (int verbose, char *MachineDir) {
        printf("loaded machine list:  %s\n", filename);
        
 
-       fp = fopen(filename, "r");
-
-       while(!feof(fp)) {ch = fgetc(fp); if(ch == '\n') Nmachines++;}
+       MachineListFile = fopen(filename, "r");
+       if (!MachineListFile) {
+	 printf("Failed to reach [machines.list].\n");
+	 return 1;
+       }
+       while(!feof(MachineListFile)) {
+	 ch = fgetc(MachineListFile);
+	 if(ch == '\n') Nmachines++;}
        
-       rewind(fp);
+       rewind(MachineListFile);
        
        srand ( rndseed() );
        Nchosenmachine = rand() % Nmachines;
@@ -50,9 +56,9 @@ int loadmachine (int verbose, char *MachineDir) {
        
        
        
-       for (i=0;i<=Nchosenmachine;i++) read = getline(&line, &len, fp);
+       for (i=0;i<=Nchosenmachine;i++) read = getline(&line, &len, MachineListFile);
        
-       fclose(fp);
+       fclose(MachineListFile);
        
        printf("MACname > %s\n", line);
        strtok(line, "\n");
@@ -72,13 +78,13 @@ int loadmachine (int verbose, char *MachineDir) {
        printf("opening machine: %s\n", filename);
 
        // printf("MACname > %s\n",line);
-       fp = fopen(filename, "r");
-       if (fp == NULL) {
+       MachineFile = fopen(filename, "r");
+       if (MachineFile == NULL) {
 	 printf("ERROR: failed to load machine [null file].\n");
 	 return 0;
 	 //exit(EXIT_FAILURE);
 	 }
-       while ((read = getline(&line, &len, fp)) != -1) {
+       while ((read = getline(&line, &len, MachineFile)) != -1) {
            i=0;
            
            Vb printf("Retrieved line of length %zu :\n", read);
@@ -99,40 +105,7 @@ int loadmachine (int verbose, char *MachineDir) {
 
                       
            }
-           
-           
-	   /*   if(loadDEEP) if (strstr(line, "param_DEEP") != NULL)   
-            Brain.DEEP = readparam(line, V);
-           
-        if (strstr(line, "param_deviationcalc") != NULL)
-	  Brain.deviationcalc = readparam(line, V);
-        if (strstr(line, "eval_randomness") != NULL)
-	  Brain.randomness = readparam(line, V);
-        if (strstr(line, "param_seekpieces") != NULL)
-	  Brain.seekpieces = readparam(line, V);
-        if (strstr(line, "param_seekmiddle") != NULL)
-	  Brain.seekmiddle = readparam(line, V);
-        if (strstr(line, "param_seekatk") != NULL)
-	  Brain.seekatk = readparam(line, V);
-        if (strstr(line, "param_evalmethod") != NULL)
-	  Brain.evalmethod = readparam(line, V);
-        if (strstr(line, "param_presumeOPPaggro") != NULL)
-	  Brain.presumeOPPaggro = readparam(line, V);
-        if (strstr(line, "param_pawnrankMOD") != NULL)
-	  Brain.pawnrankMOD = readparam(line, V);
-        if (strstr(line, "param_parallelcheck") != NULL)
-	  Brain.parallelcheck = readparam(line, V);
-        if (strstr(line, "param_balanceoffense") != NULL)
-	  Brain.balanceoffense = readparam(line, V);
-        if (strstr(line, "param_cumulative") != NULL)
-	  Brain.cumulative = readparam(line, V);          
-        if (strstr(line, "param_MODbackup") != NULL)
-	  Brain.MODbackup = readparam(line, V);                
-        if (strstr(line, "param_MODmobility") != NULL)
-	  Brain.MODmobility = readparam(line, V);
-	if (strstr(line, "param_moveFocus") != NULL)
-	  Brain.moveFocus = readparam(line, V);
-	   */
+	   printf("\n");
 	   readparam(line, V, "eval_randomness", &Brain.randomness);
 	   readparam(line, V, "param_seekpieces", &Brain.seekpieces);
 	   readparam(line, V, "param_seekmiddle", &Brain.seekmiddle);
@@ -146,11 +119,10 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_MODbackup", &Brain.MODbackup);
 	   readparam(line, V, "param_MODmobility", &Brain.MODmobility);
 	   readparam(line, V, "param_moveFocus", &Brain.moveFocus);
-           //printf(".\n");
-
+	   printf("\n");
        }
 
-       fclose(fp);
+       fclose(MachineFile);
        if (line)
            free(line);
        
@@ -180,7 +152,7 @@ void readparam(char *line, int verbose, const char *keyword, float *Parameter) {
                reading = strtok(NULL, " ");
                reading = strtok(NULL, " ");
                float parameter = (float)(atof(reading));
-               Vb printf("is %f\n",parameter);
+               Vb printf("%s is %f\n",keyword,parameter);
     
     reading = NULL;
     *Parameter = parameter;

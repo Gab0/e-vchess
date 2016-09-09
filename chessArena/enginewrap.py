@@ -8,12 +8,16 @@ from os import O_NONBLOCK, read, system
 class Engine():
 
     def __init__(self, Arguments):
-        self.engine = Popen(Arguments, stdin=PIPE, stdout=PIPE)
+        try:
+            self.engine = Popen(Arguments, stdin=PIPE, stdout=PIPE)
+        except FileNotFoundError:
+            print("Engine not Found.")
+            return
 
         flags = fcntl(self.engine.stdout, F_GETFL)
         fcntl(self.engine.stdout, F_SETFL, flags | O_NONBLOCK)
 
-        self.recordComm = 1
+        self.recordComm = 0
 
         self.recordedData=""
 

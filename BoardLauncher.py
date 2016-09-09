@@ -69,7 +69,7 @@ class DuelTable():
         if not userchoice:
             userchoice = randrange(1, len(LegalMachines))
 
-        Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '3']
+        Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '3', '--showinfo']
 
         if userchoice != "zero":
             LOADED = 1

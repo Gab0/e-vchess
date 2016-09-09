@@ -76,7 +76,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     move_pc(_board, &moves->movements[i]);    
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
       
-    if (BufferBoard==NULL){printf ("NULL BufferBoard!\n");exit(0);}
+    if (BufferBoard==NULL){
+      printf ("NULL BufferBoard!\n");
+      exit(0);
+    }
     moves->movements[i].score = BufferBoard->score;
     //cloneboard(BufferBoard, &finalboardsArray[i]);
     finalboardsArray[i] = BufferBoard;
@@ -85,7 +88,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     //fprintf(stderr, "FNM: %i\n", BufferBoard->MovementCount);
     //IFnotGPU( /*if (show_info)*/ eval_info_move(&moves->movements[i], BufferBoard->MovementCount, startT, PLAYER); )
     //DUMP(BufferBoard);
-    show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
+    if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
     if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
       
       
@@ -111,7 +114,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
 
   if (BRAIN.xDEEP) {
-    int MaximumT = 4;
+    int MaximumT = 12;
 
     int T = moves->k;
     if (T > MaximumT) T = MaximumT;
@@ -145,7 +148,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	I = secondTOP[i];
 	OtherPlayer = 0;
 	Vb fprintf(stderr, "----------------------------------------------------------\n");
-	Vb fprintf(stderr, "Nm: %i || original R: %i || current R: %i\n", finalboardsArray[I]->MovementCount, I, ChosenMovementIndex);
+	Vb fprintf(stderr,
+		   "Nm: %i || original R: %i || current R: %i\n",
+		   finalboardsArray[I]->MovementCount, I,
+		   ChosenMovementIndex);
 	Vb fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I]->whoplays, I);
 
 	//Vb show_board(finalboardsArray[I].squares);
@@ -210,7 +216,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
 	Vb fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I]->MovementCount, finalboardsArray[I]->whoplays);
 
-	show_moveline(finalboardsArray[I], CurrentMovementIndex, startT);
+	if (Show_Info) show_moveline(finalboardsArray[I], CurrentMovementIndex, startT);
 	 
               
       }

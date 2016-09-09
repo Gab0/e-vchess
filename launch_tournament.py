@@ -9,7 +9,7 @@ chdir(path.dirname(path.realpath(__file__)))
 if len(sys.argv) == 1:
 
     #x = curses.wrapper(Tournament, 1, 1)
-    TOURNAMENT = Tournament(None, 1, 1)
+    TOURNAMENT = Tournament(None, "killemall", 1)
 
 else:
     while True:
@@ -18,4 +18,4 @@ else:
         if len(MACHINES) < 5:
             break
 
-        TOURNAMENT = Tournament(None, 1, 1)
+        TOURNAMENT = Tournament(None, "killemall", 1)
