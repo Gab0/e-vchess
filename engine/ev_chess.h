@@ -110,6 +110,7 @@ struct param {
   float seekmiddle;
   float DEEP;
   float xDEEP;
+  float yDEEP;
   float seekpieces;
   float deviationcalc;
   float evalmethod;

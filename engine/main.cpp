@@ -83,12 +83,22 @@ int main(int argc, char** argv) {
     Brain.randomness = 50;
     //seekmiddle augments the score for pieces in the center of the board.
     Brain.seekmiddle = 0;
+    
     //DEEP is the number of future moves to be evaluated.
     //must be an even number, in order to always end in a engine move.
     Brain.DEEP = 4;
+
+    
     //xDEEP is the number of evaluations on top of the original one will be made,
-    //'artificially' increasing total ply deepnes by xDEEP * DEEP;
+    //'artificially' increasing total ply deepness by xDEEP * DEEP;
     Brain.xDEEP = 0;
+
+
+    //yDEEP is the number of movements from the first section of evaluating
+    //to be considered for the second, yDEEP top movements.
+    Brain.yDEEP = 8;
+
+    
     //seekpieces augments the score for attacked enemy pieces.
     Brain.seekpieces = 1;
     
@@ -138,15 +148,15 @@ int main(int argc, char** argv) {
         
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
-        if (strstr(argv[i], "--deep") != NULL) {
-            Brain.DEEP = (float)atof(argv[i+1]);
-            loadDEEP = false;
-        }
+        if (strstr(argv[i], "--deep") != NULL) 
+	  Brain.DEEP = (float)atof(argv[i+1]);
+
 	if (strstr(argv[i], "--xdeep") != NULL)
-	  {
 	  Brain.xDEEP = (float)atof(argv[i+1]);
-	  loadxDEEP = false;
-	}
+
+	if (strstr(argv[i], "--ydeep") != NULL)
+	  Brain.yDEEP = (float) atof(argv[i+1]);
+	
 	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
 	
         }  

@@ -168,7 +168,7 @@ class Tournament():
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
             for GAME in range(len(ROUND)):
-                for MACHINE in range(len(GAME)):
+                for MACHINE in range(len(ROUND[GAME])):
                     if not SCORE[GAME][MACHINE]:
                         if SCORE[GAME][1-MACHINE] == 2:
                             deadmac = ROUND[GAME][MACHINE]
@@ -190,8 +190,9 @@ class Tournament():
 
         I = 0
 
+        last_time = time()
         while True:
-            last_time = time()
+            STATUS = [ "-" for i in ACTIVE ]
             for G in range(len(ROUND)):
                 try:
                     self.TABLEBOARD[G]
@@ -245,9 +246,12 @@ class Tournament():
                 else:
 
                     x = self.TABLEBOARD[G].readmove()
+                    
                     x = x if x else 0
-                    # print('playing %i %s' % ( G,MoveInfo[x] ) )
-
+                    if x:
+                        STATUS[G] = "+"
+                    #print('playing %i %s' % ( G,MoveInfo[x] ) )
+            print(' '.join(STATUS))
             if not I % 10:
                 elapsed = time() - last_time
                 last_time = time()
@@ -259,7 +263,7 @@ class Tournament():
                                 DRAWS,
                                 ROUND,
                                 elapsed)
-            sleep(0.5 + xDeepValue * 5)
+            sleep(0.5 + xDeepValue*1)
             I += 1
 
             if not True in ACTIVE:

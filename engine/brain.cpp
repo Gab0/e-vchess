@@ -114,7 +114,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
 
   if (BRAIN.xDEEP) {
-    int MaximumT = 12;
+    int MaximumT = (int) BRAIN.yDEEP;
 
     int T = moves->k;
     if (T > MaximumT) T = MaximumT;
