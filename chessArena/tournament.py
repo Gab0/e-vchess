@@ -167,7 +167,7 @@ class Tournament():
         while True:
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
-            # self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)]
+            self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)]
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
                     if not SCORE[GAME][MACHINE]:
@@ -285,8 +285,6 @@ class Tournament():
 
         I = 0
         for iTABLE in self.TABLEBOARD:
-            if I > len(SCORE):
-                continue
             try:
                 TableInfo = "{%i} %s %ix%i %s {%i} (%i)   %s" % (
                     self.Scores[iTABLE.MACnames[0]],

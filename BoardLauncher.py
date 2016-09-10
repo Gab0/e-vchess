@@ -81,9 +81,13 @@ class DuelTable():
 
         X = call(Command)
         if LOADED:
-            print("Did this machine win the game? [y/n]")
-
-            FeedBack = self.CollectInput(['y', 'n'])
+            try:
+                print("Did this machine win the game? [y/n]")
+                FeedBack = self.CollectInput(['y', 'n'])
+                
+            except KeyboardInterrupt:
+                print("\n")
+                exit()
 
             if FeedBack == 'y':
                 ScoreData = ModifyScore(
