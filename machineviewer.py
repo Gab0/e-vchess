@@ -401,7 +401,7 @@ class Application(Frame):
 
     def TOpopulate(self, NUM):
         self.machines = populate(self.machines, NUM, 1)
-        print('created 16 standard postmutated individuals.')
+        print("created %i standard postmutated individuals." % NUM)
 
     def TOroutineprocedures(self):
         self.TOdumpstats()

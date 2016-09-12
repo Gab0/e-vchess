@@ -4,7 +4,8 @@ import random
 
 class parameter():
 
-    def __init__(self, name, dumpable, chanceMutate, value, aP=0, LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0):
+    def __init__(self, name, dumpable, chanceMutate, value, aP=0,
+                 LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0):
 
         self.name = name
         self.marks_dumpable = dumpable
@@ -50,6 +51,8 @@ class parameter():
 
                 else:
                     self.value = round(float(split_line[2]), 3)
+                    #print(split_line)
+
 
         except ValueError:
             print('fail to read %s.' % self.name)

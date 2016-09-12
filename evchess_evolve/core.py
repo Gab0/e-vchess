@@ -13,10 +13,10 @@ machine_dir = "machines"
 from evchess_evolve.machine import machine
 
 
-def populate(population, popsize, Randomize):
+def populate(population, popsize, Randomize, ID=None):
     NEWINDS = []
     for i in range(popsize):
-        NEWINDS.append(machine(NewMacName()))
+        NEWINDS.append(machine(NewMacName(ID=ID)))
 
     for I in NEWINDS:
         if Randomize:
@@ -29,7 +29,7 @@ def populate(population, popsize, Randomize):
 def loadmachines(DIR=machine_dir):
     population = []
     k = 0
-
+    
     machinelist = "%s/machines.list" % DIR
     if not os.path.isfile(machinelist):
         return population
@@ -42,7 +42,7 @@ def loadmachines(DIR=machine_dir):
             file = file[:-1]
 
         if file.endswith(".mac"):
-            Fo = open(machine_dir + '/' + file, "r+")
+            Fo = open(DIR + '/' + file, "r+")
             population.append(machine(file))
 
             for line in Fo.readlines():
@@ -193,7 +193,7 @@ def setmachines(population, DIR=machine_dir):
     Fo.close
 
 
-def deltheworst_clonethebest(population, action, MODlimit):
+def deltheworst_clonethebest(population, action, MODlimit, ID=None):
     POP_SCORETABLE = []
     MEDIUMSCORE = 0
     VALIDPOP = 0
@@ -244,7 +244,7 @@ def deltheworst_clonethebest(population, action, MODlimit):
                 if (POP_SCORETABLE[k] > MEDIUMSCORE * 1.1):
                     print('subject cloned. ' + population[k].filename)
                     NEWINDS.append(population[k])
-                    NEWINDS[-1].filename = NewMacName()
+                    NEWINDS[-1].filename = NewMacName(ID=ID)
 
             mutatemachines(6, NEWINDS)
             for I in NEWINDS:
@@ -308,10 +308,10 @@ def crossover(population, indexA, indexB):
     return population
 
 
-def Mate(individuals, nchild):
+def Mate(individuals, nchild, ID=None):
     Children = []
     for N in range(nchild):
-        Child = machine(NewMacName(Tail="#"))
+        Child = machine(NewMacName(ID=ID, Tail="#"))
         for P in range(len(Child.PARAMETERS)):
             Child.PARAMETERS[P] = copy.deepcopy(
                 random.choice(individuals).PARAMETERS[P])
@@ -320,18 +320,18 @@ def Mate(individuals, nchild):
     return Children
 
 
-def replicate_best_inds(population, NUMBER):
+def replicate_best_inds(population, NUMBER, ID=None):
     TOP = select_best_inds(population, NUMBER)
 
     for IND in TOP:
         for N in range(NUMBER):
-            IND.filename = NewMacName()
+            IND.filename = NewMacName(ID=ID)
             population.append(copy.deepcopy(IND))
 
     return population
 
 
-def clone_from_template():
+def clone_from_template(ID=None):
     TemplatePool = open('%s/top_machines/machines.list' % machine_dir, 'r')
     POOL = []
 
@@ -343,7 +343,7 @@ def clone_from_template():
 
     model = open('%s/top_machines/%s' % (machine_dir, POOL[X]), 'r')
 
-    CHILD = machine(NewMacName(Tail="&"))
+    CHILD = machine(NewMacName(ID=ID, Tail="&"))
     for line in model.readlines():
         CHILD.read(line)
     CHILD.onTOP = 0
@@ -354,7 +354,7 @@ def clone_from_template():
     return CHILD
 
 
-def NewMacName(Tail=""):
+def NewMacName(Tail="", ID=None):
     # used tail coding:
     # &   stands for machine cloned from hall of fame template.
     # #   stands for machine created by mating.
@@ -365,7 +365,9 @@ def NewMacName(Tail=""):
 
     numbers = random.randrange(0, 9999)
     numbers = str(numbers).zfill(4)
-    return "%s%s%s.mac" % (letters, numbers, Tail)
+    if ID:
+        ID += "_"
+    return "%s%s%s%s.mac" % (ID, letters, numbers, Tail)
 
 
 def IsEqual(model, against):

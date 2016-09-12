@@ -51,11 +51,14 @@ class Tournament():
 
         self.Deaths = len(self.Competitors) // 4
 
+        L = len(self.Competitors)//2
+        self.MaxTableboardSize = L if L < 9 else 9
         self.EngineCommand = [settings.enginebin,
                               '-MD', settings.TOPmachineDIR,
                               '--deep', '4',
                               '--xdeep', str(xDeepValue),
                               '--specific']
+        
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
                           for k in range(len(self.Competitors)//2)]
         if RUN:
@@ -95,12 +98,13 @@ class Tournament():
             # print("space len %i " % len(space))
             return space
 
+
         for T in range(len(self.Competitors)):
             for K in range(T + 1, len(self.Competitors)):
                 allGames.append([self.Competitors[T], self.Competitors[K]])
 
         RoundIndex = 0
-        while len(ROUNDS[-1]) < len(self.Competitors) // 2:
+        while len(ROUNDS[-1]) < self.MaxTableboardSize:
             x = choice(allGames)
             if not searchPlayersInBracket(x, ROUNDS[RoundIndex]):
                 ROUNDS[RoundIndex].append(x)
@@ -164,10 +168,10 @@ class Tournament():
     def KillEmAllTournament(self):
         RemovedMachineCount = 0
         I=0
-        while True:
+        while len(self.Competitors) > 6:
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
-            self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)]
+            #self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)-1]
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
                     if not SCORE[GAME][MACHINE]:
@@ -177,9 +181,8 @@ class Tournament():
                             bareDeleteMachine(settings.TOPmachineDIR, deadmac)
                             RemovedMachineCount+=1
                             print("%s dies." % deadmac)
-                            if RemovedMachineCount > self.Deaths:
-                                break
             I+=1
+            
         print("Ending bloodbath. removed count: %i" % RemovedMachineCount)
                           
 
@@ -187,7 +190,7 @@ class Tournament():
         ACTIVE = [True for i in ROUND]
         SCORE = [[0, 0] for i in ROUND]
         DRAWS = [0 for i in ROUND]
-
+        GAMELENGHT = [0 for i in ROUND]
         I = 0
 
         last_time = time()
@@ -203,10 +206,13 @@ class Tournament():
                     raise
 
                 if self.TABLEBOARD[G].initialize:
-                    pass
+                    continue
                 elif not ACTIVE[G]:
-                    pass
-                elif not self.TABLEBOARD[G].online:
+                    continue
+                elif GAMELENGHT[G] > 96:
+                    self.TABLEBOARD[G].online = 0
+                    self.TABLEBOARD[G].result = 0.5
+                if not self.TABLEBOARD[G].online:
                     R = self.TABLEBOARD[G].result
                     if R != None:
                         nameTAG = "[%s x %s]" % (self.TABLEBOARD[G].MACnames[0],
@@ -229,6 +235,7 @@ class Tournament():
 
                     if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
                        and not DRAWS[G] > 1:
+                        GAMELENGHT[G]=0
                         print("Starting Game at Table %i [%s x %s]" % (G,
                                                                        ROUND[G][
                                                                            0],
@@ -250,6 +257,7 @@ class Tournament():
                     x = x if x else 0
                     if x:
                         STATUS[G] = "+"
+                        GAMELENGHT[G]+=1
                     
             print(' '.join(STATUS))
             if not I % 10:
@@ -285,6 +293,8 @@ class Tournament():
 
         I = 0
         for iTABLE in self.TABLEBOARD:
+            if I>len(SCORE)-1:
+                continue
             try:
                 TableInfo = "{%i} %s %ix%i %s {%i} (%i)   %s" % (
                     self.Scores[iTABLE.MACnames[0]],

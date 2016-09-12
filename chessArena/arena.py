@@ -1,6 +1,6 @@
-from random import randrange
+from random import randrange, choice
 from time import time, strftime, sleep
-
+import string
 from sys import exit as Exit
 
 from tkinter import *
@@ -94,8 +94,12 @@ class Arena():
         self.setcounter_forcedwin = 0
         self.setcounter_inactivity = 0
 
+        self.ID = ''.join(
+            choice(
+                string.ascii_uppercase) for _ in range(3))
+        
         self.graphpath = "mempertime"
-
+        self.InitTime = time()
         if GO:
             self.setlooplimit(TABLECOUNT - 1)
             self.startcycle()
@@ -105,6 +109,7 @@ class Arena():
             self.root.wm_title(self.Title)
             self.root.resizable(False, False)
             self.root.mainloop()
+            
 
     def startcycle(self):
 
@@ -273,32 +278,35 @@ class Arena():
 
             population = deltheworst_clonethebest(population,
                                                   -2 * DELTAind,
-                                                  MODscorelimit)
+                                                  MODscorelimit,
+                                                  ID=self.ID)
 
-            population = populate(population, DELTAind, 1)
+            population += populate([], DELTAind, True, ID=self.ID)
 
             population = replicate_best_inds(population,
-                                             DELTAind // 2)
+                                             DELTAind // 2,ID=self.ID)
 
             population += Mate(select_best_inds(population,
-                                                DELTAind // 2), DELTAind)
+                                                DELTAind // 2), DELTAind,ID=self.ID)
 
             population = deltheworst_clonethebest(population,
                                                   originalPOPLEN -
                                                   len(population),
-                                                  MODscorelimit)
+                                                  MODscorelimit,
+                                                  ID=self.ID)
 
         if "C" in LEVEL:
             population = EliminateEquals(population, DELTAind)
-            population = populate(
-                population, originalPOPLEN - len(population), 1)
+            NUM = originalPOPLEN - len(population)
+            population += populate([], NUM, True, ID=self.ID)
 
         if "H" in LEVEL:
             population = deltheworst_clonethebest(population,
                                                   -DELTAind,
-                                                  MODscorelimit)
+                                                  MODscorelimit,
+                                                  ID=self.ID)
             while len(population) < originalPOPLEN:
-                population += clone_from_template()
+                population += clone_from_template(ID=self.ID)
 
         # setmachines need to happen before management level C, which is advanced and loads
             # the population by it's own method.
@@ -322,7 +330,7 @@ class Arena():
         AverageElo //= len(population)
 
         self.log('')
-        self.log('>>>>ROUTINE MANAGEMENT %s' % LEVEL)
+        self.log('>> %s >>ROUTINE MANAGEMENT %s' % (self.ID,LEVEL))
         self.log("ROUND = %i. checkmate-> %i; forced wins-> %i; draws-> %i; illegal moves-> %i"
                  % (self.ROUND, self.setcounter_checkmate, self.setcounter_forcedwin, self.setcounter_draws, self.setcounter_illegalmove))
         self.log("initial population size-> %i; final population size-> %i"
@@ -335,6 +343,7 @@ class Arena():
         self.log('')
         print('routine management %s done. Average ELO: %i' %
               (LEVEL, AverageElo))
+        self.log("Running Time is %i" % (time() - self.InitTime))
 
     def showhideall(self):
         for T in self.TABLEBOARD:

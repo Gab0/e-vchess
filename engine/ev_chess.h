@@ -105,12 +105,13 @@ struct board;
    
 struct param;
 struct param {
+  int DEEP;
+  int xDEEP;
+  int yDEEP;
   int pvalues[6];
+  
   float randomness;
   float seekmiddle;
-  float DEEP;
-  float xDEEP;
-  float yDEEP;
   float seekpieces;
   float deviationcalc;
   float evalmethod;

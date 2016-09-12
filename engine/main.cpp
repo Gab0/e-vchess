@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
     signal(SIGCHLD, SIG_IGN);
     
     printf("name e-v dchess engine v0.8\n");
-    printf("author afrogabs\n");
+    printf("author afrogabs\n\n");
     
     char *inp;
 
@@ -149,13 +149,13 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
         if (strstr(argv[i], "--deep") != NULL) 
-	  Brain.DEEP = (float)atof(argv[i+1]);
+	  Brain.DEEP = (int)atoi(argv[i+1]);
 
 	if (strstr(argv[i], "--xdeep") != NULL)
-	  Brain.xDEEP = (float)atof(argv[i+1]);
+	  Brain.xDEEP = (int)atoi(argv[i+1]);
 
 	if (strstr(argv[i], "--ydeep") != NULL)
-	  Brain.yDEEP = (float) atof(argv[i+1]);
+	  Brain.yDEEP = (int) atoi(argv[i+1]);
 	
 	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
 	
@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
     
     char testfehn[128] = "fen r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
 
-    printf("DEEP=%f   xDEEP=%f\n\n", Brain.DEEP, Brain.xDEEP);
+    printf("DEEP=%i   xDEEP=%i   yDEEP=%i\n\n", Brain.DEEP, Brain.xDEEP, BRAIN.yDEEP);
 
  
     

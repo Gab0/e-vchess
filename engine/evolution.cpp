@@ -84,7 +84,8 @@ int loadmachine (int verbose, char *MachineDir) {
 	 return 0;
 	 //exit(EXIT_FAILURE);
 	 }
-       while ((read = getline(&line, &len, MachineFile)) != -1) {
+	 printf("\n");
+	 while ((read = getline(&line, &len, MachineFile)) != -1) {
            i=0;
            
            Vb printf("Retrieved line of length %zu :\n", read);
@@ -105,7 +106,7 @@ int loadmachine (int verbose, char *MachineDir) {
 
                       
            }
-	   printf("\n");
+
 	   readparam(line, V, "eval_randomness", &Brain.randomness);
 	   readparam(line, V, "param_seekpieces", &Brain.seekpieces);
 	   readparam(line, V, "param_seekmiddle", &Brain.seekmiddle);
@@ -119,9 +120,9 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_MODbackup", &Brain.MODbackup);
 	   readparam(line, V, "param_MODmobility", &Brain.MODmobility);
 	   readparam(line, V, "param_moveFocus", &Brain.moveFocus);
-	   printf("\n");
-       }
 
+       }
+	 printf("\n");
        fclose(MachineFile);
        if (line)
            free(line);

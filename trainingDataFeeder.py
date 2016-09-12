@@ -26,13 +26,14 @@ class trainingDataFeeder():
         self.TotalTests = 0
         self.PassedTests = 0
 
-        self.startEngine()
-
+        self.subject = Engine(settings.engineARGS+['--showinfo'])
+        sleep(4)
+        self.subject.receive()
         for k in range(19):
             self.launchTest()
 
         print(self.PassedTests)
-
+        self.subject.destroy()
     def loadPGNData(self, PGNfile):
         PGN = open(PGNfile, 'r').read()
         PGN.replace('^M', '')
@@ -82,8 +83,8 @@ class trainingDataFeeder():
                 if WinnerColor[R] in fen:
                     break
             node = next_node
-        print(fen)
-        print(expected_movement)
+        #print(fen)
+        expected_movement = str(expected_movement)
 
         self.subject.send("position %s" % fen)
         self.subject.send("%s" % Color[WinnerColor[R]])
@@ -94,30 +95,31 @@ class trainingDataFeeder():
         while True:
             sleep(1)
             k += 1
-            print(k)
+            #print(k)
             
             response = self.subject.receive()
             for line in response:
-                line = line.decode('utf-8')
-                print(line)
-                if 'move' in line:
-                    # print(line)
-                    print("*********************")
-                    self.TotalTests += 1
-                    if str(expected_movement) in line:
-                        self.PassedTests += 1
+                print(line.replace('\n', ''))
+                pass
+            move = self.subject.readMove(data=response)
+            if move:
+                if move == expected_movement:
+                    print("good! %s!" % expected_movement)
+                    self.PassedTests += 1
 
-                    return
+                else:
+                    print("bad! got %s while expecting %s." % (move, expected_movement))
 
+                print("\n*********************\n")
+                self.TotalTests += 1
+                return
+            
+            if k  > 25:
+                print("Timeout.")
+                break
         # self.subject.stdout.flush()
         #Response = self.subject.stdout.readlines()
 
         self.TotalTests += 1
-
-    def startEngine(self):
-        self.subject = Engine(settings.engineARGS)
-        
-        
-        
 
 X = trainingDataFeeder('database_2015.pgn')

@@ -51,6 +51,7 @@ class Engine():
             try:
                 P = line.index("move")
             except ValueError:
+
                 return None
             return line[P + 1]
 
@@ -71,7 +72,3 @@ class Engine():
         except AttributeError:
             pass
 
-        
-    def __del__(self):
-        self.destroy()
-        self.engine = None
