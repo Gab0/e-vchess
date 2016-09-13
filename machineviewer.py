@@ -82,7 +82,7 @@ class Application(Frame):
             UNCONFORMITY = len(self.HealthPallete) - 1
         self.marker["bg"] = self.HealthPallete[UNCONFORMITY]
 
-    def scrollmachinesU(self):
+    def scrollmachinesUP(self):
 
         self.N += 1
         if self.N >= len(self.machines):
@@ -90,7 +90,7 @@ class Application(Frame):
 
         self.show_machine()
 
-    def scrollmachinesD(self):
+    def scrollmachinesDOWN(self):
         self.N -= 1
         if self.N < 0:
             self.N = len(self.machines) - 1
@@ -174,7 +174,7 @@ class Application(Frame):
         self.Larrow["fg"] = "red"
         self.Larrow["height"] = 6
         self.Larrow["width"] = 9
-        self.Larrow["command"] = self.scrollmachinesD
+        self.Larrow["command"] = self.scrollmachinesDOWN
         self.Larrow.grid(column=0, row=0, rowspan=8)
 
         self.Rarrow = Button(self)
@@ -182,7 +182,7 @@ class Application(Frame):
         self.Rarrow["fg"] = "red"
         self.Rarrow["height"] = 6
         self.Rarrow["width"] = 9
-        self.Rarrow["command"] = self.scrollmachinesU
+        self.Rarrow["command"] = self.scrollmachinesUP
         self.Rarrow.grid(column=2, row=0, rowspan=8)
 
         self.marker = Button(self)
@@ -240,7 +240,7 @@ class Application(Frame):
 
         self.macname = Button(self)
         #self.macname["text"] = self.machines[self.N].filename
-        self.macname["width"] = 9
+        self.macname["width"] = 13
         self.macname["height"] = 2
         self.macname["command"] = self.savemactext
         self.macname.grid(column=1, row=9, sticky=NSEW, padx=3, pady=4)
@@ -255,8 +255,7 @@ class Application(Frame):
         self.save["command"] = self.savemac
         self.save.grid(column=5, row=11, sticky=NSEW, padx=3, pady=4)
 
-        self.HealthPallete = ['#000000',
-                              '#191919',
+        self.HealthPallete = ['#191919',
                               '#323232',
                               '#4c4c4c',
                               '#666666',
@@ -301,8 +300,10 @@ class Application(Frame):
         self.popmenu.add_separator()
         self.popmenu.add_command(label="DUMP Stats", command=self.TOdumpstats)
         self.popmenu.add_separator()
-        self.popmenu.add_command(
-            label="Populate 16", command=lambda: self.TOpopulate(16))
+        self.popmenu.add_command(label="Populate 16", 
+                                 command=lambda: self.TOpopulate(16))
+        self.popmenu.add_command(label="Populate 64",
+                                 command=lambda: self.TOpopulate(64))
         self.popmenu.add_command(label="Populate 128",
                                  command=lambda: self.TOpopulate(128))
         self.popmenu.add_command(label="Populate 256",
@@ -500,7 +501,7 @@ class Application(Frame):
             self.DIR = settings.machineDIR
             self.logoframe['bg'] = "#d9d9d9"
 
-        print(self.DIR)
+        print("switching machine directory to %s" % self.DIR)
         self.machines = loadmachines(DIR=self.DIR)
 # INIT
 
@@ -528,7 +529,7 @@ class Application(Frame):
         self.create_param_viewer()
         if len(self.machines):
             self.show_machine()
-            self.savemac()
+            #self.savemac()
 
         self.W = 1
 

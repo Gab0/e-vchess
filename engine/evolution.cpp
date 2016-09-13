@@ -69,7 +69,7 @@ int loadmachine (int verbose, char *MachineDir) {
 
        else {
 	 sprintf(filename, "%s/%s", MachineDir, specificMachine);
- 	 printf("ok but plans changed as we loaded user-defined machine!  %s\n", filename);
+ 	 printf("Loading user defined machine.\n");
 	 }
        
 

@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     signal(SIGTERM, SIG_IGN); 
     signal(SIGCHLD, SIG_IGN);
     
-    printf("name e-v dchess engine v0.8\n");
+    printf("e-vchess engine v0.8\n");
     printf("author afrogabs\n\n");
     
     char *inp;

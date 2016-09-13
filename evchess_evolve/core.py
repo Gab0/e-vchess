@@ -371,11 +371,11 @@ def NewMacName(Tail="", ID=None):
 
 
 def IsEqual(model, against):
+    EQUAL = True
     for P in range(len(model.PARAMETERS)):
         if not model.PARAMETERS[P].value == against.PARAMETERS[P].value:
-            return 0
-
-    return 1
+            EQUAL = False
+    return EQUAL
 
 
 def EliminateEquals(population, Range):
@@ -390,6 +390,17 @@ def EliminateEquals(population, Range):
 
     return list(filter((0).__ne__, population))
 
+def EvaluateSimilarityTwoMachines(mac1, mac2):
+    TotalScore = 0
+    for I in range(len(mac1.PARAMETERS)):
+        if mac1.PARAMETERS[I].value > 10:
+            continue
+
+        a = mac1.PARAMETERS[I].value
+        b = mac2.PARAMETERS[I].value
+        TotalScore += abs(a-b)
+
+    return TotalScore
 
 def Triangulate_value(values):
     if len(values) == 0:

@@ -57,10 +57,11 @@ class Tournament():
                               '-MD', settings.TOPmachineDIR,
                               '--deep', '4',
                               '--xdeep', str(xDeepValue),
+                              '--ydeep', '6',
                               '--specific']
         
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
-                          for k in range(len(self.Competitors)//2)]
+                          for k in range(self.MaxTableboardSize)]
         if RUN:
             T = None
             if RUN == "tournament":
@@ -244,7 +245,7 @@ class Tournament():
                         engineCommand = [ copy(self.EngineCommand) for k in range(2) ]
                         engineCommand[0] += [ROUND[G][0]]
                         engineCommand[1] += [ROUND[G][1]]
-
+                        self.TABLEBOARD[G].endgame()
                         self.TABLEBOARD[G].newmatch(
                             specificMatch=engineCommand)
 
@@ -275,8 +276,11 @@ class Tournament():
             I += 1
 
             if not True in ACTIVE:
+                for T in self.TABLEBOARD:
+                    for M in T.MACHINE:
+                        M.destroy()
                 return SCORE
-
+            
 
 
 

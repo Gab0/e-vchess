@@ -1,4 +1,4 @@
-from random import randrange, choice
+from random import randrange, choice, random
 from time import time, strftime, sleep
 import string
 from sys import exit as Exit
@@ -16,7 +16,8 @@ from chessArena.tournament import Tournament
 from evchess_evolve.advanced import *
 from evchess_evolve.core import populate, loadmachines, mutatemachines,\
     setmachines, deltheworst_clonethebest, select_best_inds, Mate,\
-    replicate_best_inds, clone_from_template, EliminateEquals
+    replicate_best_inds, clone_from_template, EliminateEquals,\
+    EvaluateSimilarityTwoMachines
 
 from makegraphic import show_mem_graphic
 #from evchess_evolve.management import *
@@ -126,7 +127,8 @@ class Arena():
                         "B": [40000, 'rx'],
                         "C": [60000, 'bx'],
                         "T": [80000, 'yx'],
-                        "H": [100000, 'mx']}
+                        "H": [100000, 'mx'],
+                        "V": [120000, 'gx']}
         if self.GraphicInterface:
             self.menubar.entryconfigure(1, label='stop cycle')
             self.menubar.entryconfigure(1, command=self.killcycle)
@@ -176,6 +178,8 @@ class Arena():
                 if not self.ROUND % (self.EvolveRatio // 3 * 13):
                     LEVEL += "H"  # better act alone.
 
+                if not self.ROUND % (self.EvolveRatio * 7):
+                    LEVEL += "V"
                 if LEVEL:
                     for LETTER in LEVEL:
                         self.plotOnGraph(RoutineColor[LETTER][0],
@@ -283,11 +287,11 @@ class Arena():
 
             population += populate([], DELTAind, True, ID=self.ID)
 
-            population = replicate_best_inds(population,
-                                             DELTAind // 2,ID=self.ID)
+            #population = replicate_best_inds(population,
+            #                                 DELTAind // 2,ID=self.ID)
 
             population += Mate(select_best_inds(population,
-                                                DELTAind // 2), DELTAind,ID=self.ID)
+                                                DELTAind), DELTAind,ID=self.ID)
 
             population = deltheworst_clonethebest(population,
                                                   originalPOPLEN -
@@ -310,7 +314,12 @@ class Arena():
 
         # setmachines need to happen before management level C, which is advanced and loads
             # the population by it's own method.
-        setmachines(population)
+
+        if "A" in LEVEL:
+            if randrange(10) > 8:
+                for k in range(1):
+                    population = mutatemachines(1, population)
+
         if "E" in LEVEL:
             ADVmanagement()
 
@@ -319,11 +328,28 @@ class Arena():
                       + self.setcounter_checkmate
                       + self.setcounter_draws + 1)
 
-        if "A" in LEVEL:
-            if randrange(10) > 8:
-                for k in range(1):
-                    population = mutatemachines(1, population)
+  
 
+        if "V" in LEVEL:
+            for k in range(len(population)-1):
+                for v in range(k+1, len(population)):
+                    if not population[k]:
+                        break
+                    Similarity = EvaluateSimilarityTwoMachines(
+                            population[k], population[v]) 
+                    if Similarity < random()-1:
+                        bareDeleteMachine(population[k].filename)
+                        print("Excluding %s by similarity to %s." % (
+                            population[k].filename, population[v].filename))
+                        population[k] = None
+                    elif Similarity < 1:
+                        print("Mutating %s by similarity." % population[k].filename)
+                        population[k].mutate(3,5)
+
+
+            population = [ x for x in population if x ]
+
+        setmachines(population)
         AverageElo = 0
         for I in population:
             AverageElo += I.ELO
