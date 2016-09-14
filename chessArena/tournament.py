@@ -7,26 +7,16 @@ from threading import Thread
 from random import shuffle, choice
 from time import time
 from copy import copy
+
 from evchess_evolve.management import bareDeleteMachine
+from evchess_evolve.core import loadmachines
+
 from chessArena import settings
 settings.initialize()
 
 from chessArena.table import Table
 
 xDeepValue = 2
-
-
-def LoadMachineList():
-    MachineListLocation = settings.TOPmachineDIR + '/machines.list'
-    MachineList = open(MachineListLocation, 'r').readlines()
-
-    LegalMachines = []
-    for line in MachineList:
-        if '.mac' in line:
-            LegalMachines.append(line[:-1])
-
-    return LegalMachines
-
 
 class Tournament():
 
@@ -40,26 +30,26 @@ class Tournament():
 
         self.verboseBoards = False
 
-        self.Competitors = LoadMachineList()
-
+        self.Competitors = loadmachines(DIR=settings.TOPmachineDIR)
+        self.Competitors = [ machine.filename for machine in self.Competitors ]
         self.Scores = {}
-
+        
 
         self.ToDeleteLosers = DELETE
         for PLAYER in self.Competitors:
             self.Scores[PLAYER] = 0
 
         self.Deaths = len(self.Competitors) // 4
-
         L = len(self.Competitors)//2
-        self.MaxTableboardSize = L if L < 9 else 9
+        self.MaxTableboardSize = L if L < 7 else 7
+        
         self.EngineCommand = [settings.enginebin,
                               '-MD', settings.TOPmachineDIR,
                               '--deep', '4',
                               '--xdeep', str(xDeepValue),
                               '--ydeep', '6',
                               '--specific']
-        
+
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
                           for k in range(self.MaxTableboardSize)]
         if RUN:
@@ -105,13 +95,16 @@ class Tournament():
                 allGames.append([self.Competitors[T], self.Competitors[K]])
 
         RoundIndex = 0
-        while len(ROUNDS[-1]) < self.MaxTableboardSize:
+        U = 0
+ 
+        while len(ROUNDS[-1]) < self.MaxTableboardSize and U < 5:
             x = choice(allGames)
             if not searchPlayersInBracket(x, ROUNDS[RoundIndex]):
                 ROUNDS[RoundIndex].append(x)
                 RoundIndex += 1
                 if RoundIndex == len(ROUNDS):
                     RoundIndex = 0
+                    U += 1
 
         shuffle(ROUNDS)
         return ROUNDS
@@ -146,7 +139,9 @@ class Tournament():
             GOING = 1
             END = 0
 
-            SCORE = self.RunTournamentRound(ROUND, CURRENT, len(TournamentRounds))
+            SCORE = self.RunTournamentRound(ROUND,
+                    CURRENT, len(TournamentRounds))
+
             print("Round Ends. %s" % SCORE)
             for GAME in range(len(ROUND)):
                 for MAC in range(len(ROUND[GAME])):
@@ -169,7 +164,7 @@ class Tournament():
     def KillEmAllTournament(self):
         RemovedMachineCount = 0
         I=0
-        while len(self.Competitors) > 6:
+        while len(self.Competitors) > 3:
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
             #self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)-1]
@@ -183,9 +178,7 @@ class Tournament():
                             RemovedMachineCount+=1
                             print("%s dies." % deadmac)
             I+=1
-            
         print("Ending bloodbath. removed count: %i" % RemovedMachineCount)
-                          
 
     def RunTournamentRound(self, ROUND, ThisRoundNumber, ExpectedRoundNumber):
         ACTIVE = [True for i in ROUND]
@@ -300,7 +293,7 @@ class Tournament():
             if I>len(SCORE)-1:
                 continue
             try:
-                TableInfo = "{%i} %s %ix%i %s {%i} (%i)   %s" % (
+                TableInfo = "{%i} %s %fx%f %s {%i} (%i)   %s" % (
                     self.Scores[iTABLE.MACnames[0]],
                     iTABLE.MACnames[0],
                     SCORE[I][0],

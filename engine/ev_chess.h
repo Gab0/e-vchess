@@ -148,7 +148,7 @@ IFGPU(extern __device__ struct param GBrain;)
 extern bool loadedmachine;
 
 extern bool selectTOPmachines;
-
+extern const float BoardMiddleScoreWeight[8];
 
 
 extern char *infoMOVE;
@@ -180,6 +180,7 @@ extern bool thinkVerbose;
 
 extern bool loadDEEP;
 
+extern int searchNODEcount;
 IFnotGPU( extern bool allow_castling; )
 IFGPU( extern __device__ bool allow_castling; )
 //functions from main.cpp;#######################################################

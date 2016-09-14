@@ -222,7 +222,7 @@ void show_moveline(struct board *finalboard, int bottom_span, time_t startT) {
   time_t elapsedT = time(NULL) - startT;
   
   //show_board(finalboard->squares);
-  asprintf(&output, "%i %ld %ld", DEEP, finalboard->score, elapsedT);
+  asprintf(&output, "%i %ld %ld %i", DEEP, finalboard->score, elapsedT, searchNODEcount);
   
   for (I=bottom_span; I < finalboard->MovementCount; I++) {
     movement_to_string(&finalboard->movements[I], buffer);

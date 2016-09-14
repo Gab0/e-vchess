@@ -337,7 +337,7 @@ class Arena():
                         break
                     Similarity = EvaluateSimilarityTwoMachines(
                             population[k], population[v]) 
-                    if Similarity < random()-1:
+                    if False:
                         bareDeleteMachine(population[k].filename)
                         print("Excluding %s by similarity to %s." % (
                             population[k].filename, population[v].filename))

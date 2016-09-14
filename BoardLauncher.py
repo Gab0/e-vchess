@@ -9,7 +9,7 @@ from json import dumps, loads
 from chessArena import settings
 settings.initialize()
 
-from chessArena.tournament import LoadMachineList
+from evchess_evolve.core import loadmachines
 
 # print(VerboseMove)
 
@@ -52,7 +52,10 @@ class DuelTable():
 
                       """)
 
-        LegalMachines = ["random"] + LoadMachineList()
+        LegalMachines = ["random"] +\
+                        [mac.filename for mac in loadmachines(
+                            DIR=settings.TOPmachineDIR)]
+                        
         print("zero")
         for M in range(len(LegalMachines)):
             view = '%i - %s' % (M, LegalMachines[M])
@@ -68,7 +71,9 @@ class DuelTable():
 
         if not userchoice:
             userchoice = randrange(1, len(LegalMachines))
-
+        else:
+            pass
+            #choices = userchoice.split(" ")
         Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '3', '--showinfo']
 
         if userchoice != "zero":

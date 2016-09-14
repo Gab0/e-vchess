@@ -11,7 +11,7 @@ char pieces[2][6] = {{'P','R','N','B','Q','K'},
                      {'p','r','n','b','q','k'}};
 Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
                                {'p','r','n','b','q','k'}};
-
+const float BoardMiddleScoreWeight[8] = {0, 0.33, 0.66, 1, 1, 0.66, 0.33, 0};
 bool computer_turn = false;
 
 char *output = (char *)malloc(364 * sizeof(char));
@@ -55,7 +55,7 @@ bool loadxDEEP = false;
 
 bool thinkVerbose = false;
 
-int NODEcount;
+int searchNODEcount;
 
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
