@@ -4,17 +4,15 @@ from evchess_evolve.parameter import parameter
 def STDPARAMETERS():
     return [
 
-        #parameter("param_DEEP", 0, 30, 2, bLIM=4, INCR=2, LIM=10),
-
         parameter("eval_randomness", 0, 30, 20, INCR=10, bLIM=1, LIM=270),
 
-        #parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
+        parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
 
         #parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2),
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        #parameter("param_seekatk", 0, 20, 0.4, bLIM=-0.2, INCR=0.2, LIM=0.8),
+        parameter("param_seekatk", 0, 20, 0.4, bLIM=-0.2, INCR=0.2, LIM=0.8),
 
         parameter("param_seekmiddle", 0, 23, 0, LIM=5),
 
@@ -22,11 +20,11 @@ def STDPARAMETERS():
 
         parameter("param_pawnrankMOD", 0, 20, 0, LIM=37),
 
-        #parameter("param_parallelcheck", 0, 30, 0, LIM=2, bLIM=0, INCR=0.3),
+        parameter("param_parallelcheck", 0, 30, 0, LIM=2, bLIM=0, INCR=0.3),
 
-        #parameter("param_balanceoffense", 0, 30, 0, LIM=5, bLIM=-0.2, INCR=0.2),
+        parameter("param_balanceoffense", 0, 30, 0, LIM=5, bLIM=-0.2, INCR=0.2),
 
-        #parameter("param_MODbackup", 0, 40, 0, LIM=3, bLIM=-0.2, INCR=0.2),
+        parameter("param_MODbackup", 0, 40, 0, LIM=3, bLIM=-0.2, INCR=0.2),
 
         parameter("param_MODmobility", 0, 40, 0, LIM=3, bLIM=-0.2, INCR=0.2),
 

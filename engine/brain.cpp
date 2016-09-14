@@ -444,8 +444,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
      
   else {
 
-    machine_score = evaluate(_board, &moves, Machineplays);
-    enemy_score = evaluate(_board, &moves, 1-Machineplays);
+    machine_score = evaluate(_board, &moves, Machineplays, PLAYER);
+    enemy_score = evaluate(_board, &moves, 1-Machineplays, PLAYER);
     //show_board(_board->squares);
      
     _board->score = machine_score - enemy_score * (1 + BRAIN.presumeOPPaggro);
@@ -461,7 +461,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
 }
 
-Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
+Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker) {
   //int Index = blockIdx.x;
   //printf("E %i\n", Index);
   
@@ -469,14 +469,14 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
   int i=0, j=0;
     
-  int L=0,Z=0,K=0;
+  int PieceIndex=0,Z=0,K=0;
     
 
   int chaos = 1;   
 
   if (BRAIN.randomness) chaos = rand() % (int)(BRAIN.randomness);
 
-  attackers_defenders(evalboard->squares, *moves, PL);
+  attackers_defenders(evalboard->squares, *moves, P);
 
     
   //int deadpiece = 0;
@@ -486,12 +486,12 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
     
   forsquares {
     if (evalboard->squares[i][j] == 'x') continue;
-    L = getindex(evalboard->squares[i][j], Pieces[PL], 6);
-    if (L < 0) continue;
+    PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
+    if (PieceIndex < 0) continue;
     K = BRAIN.pvalues[L];
         
-    if (L==0) {
-      if (PL) K += i * BRAIN.pawnrankMOD;
+    if (PieceIndex==0) {
+      if (P) K += i * BRAIN.pawnrankMOD;
       else K += (7-i) * BRAIN.pawnrankMOD;
     }
             
@@ -504,35 +504,35 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int PL) {
 
   }
         
-  /*
-  if (PL == Machineplays)   
+  
+  if (P == Attacker)   
     for (Z=0;Z<moves->kad;Z++) {
-    L = getindex(moves->defenders[Z][0],Pieces[1-PL],6); 
+    PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
         
     parallelatks = ifsquare_attacked
       (evalboard->squares,moves->defenders[Z][1],
-       moves->defenders[Z][2], 1-PL,0);
+       moves->defenders[Z][2], 1-P, 0);
                 
-    if (L==5 && BRAIN.parallelcheck) {
+    if (PieceIndex == 5 && BRAIN.parallelcheck) {
       if (parallelatks>1) 
 	score += parallelatks * BRAIN.parallelcheck;}
     else {
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
-	 moves->defenders[Z][2], PL, 0);
+	 moves->defenders[Z][2], P, 0);
         
       score = score - paralleldefenders * BRAIN.MODbackup;
          
          
     }       
                                
-    score += BRAIN.pvalues[L] * BRAIN.seekatk;
+    score += BRAIN.pvalues[PieceIndex] * BRAIN.seekatk;
          
-    L = getindex(moves->attackers[Z][0],Pieces[PL],6);
-    score -= BRAIN.pvalues[L] * BRAIN.balanceoffense;
+    PieceIndex = getindex(moves->attackers[Z][0],Pieces[P],6);
+    score -= BRAIN.pvalues[PieceIndex]/2 * BRAIN.balanceoffense;
          
          
-  }*/
+  }
 
   
   score += chaos;       

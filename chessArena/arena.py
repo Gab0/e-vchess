@@ -273,7 +273,15 @@ class Arena():
         DELTAind = originalPOPLEN // 8
 
         if "T" in LEVEL:
-            sendtoHallOfFame(select_best_inds(population, 1)[0])
+            halloffame = loadmachines(DIR=TOPmachineDIR)
+            halloffame = [mac.filename for mac in halloffame]
+
+            currentbestinds= select_best_inds(population, 6)
+
+            for mac in range(len(currentbestinds)):
+                if currentbestinds[mac].filename not in halloffame:
+                    sendtoHallOfFame(currentbestinds[mac])
+                    break
             #self.Tournament = Tournament(1,1)
             #self.log('RUNNING TOURNAMENT!')
 

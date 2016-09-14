@@ -275,20 +275,20 @@ def create_hybrid(population):
 
 
 def select_best_inds(population, NUMBER):
-    TOP = []
-    for i in range(NUMBER):
-        TOP.append(0)
+    TOP = [None for x in range(NUMBER)]
 
     SCORE = 0
-    LASTSCORE = 66666
     for i in range(NUMBER):
         SCORE = 0
         for individual in population:
             SCR = individual.ELO
-            if (SCR > SCORE) and (SCR < LASTSCORE):
+            if SCR > SCORE:
+                if i and SCR > TOP[i-1].ELO:
+                    continue
+                if i and individual.filename == TOP[i-1].filename:
+                    continue
                 TOP[i] = individual
                 SCORE = SCR
-                LASTSCORE = SCR
 
     TOP = [x for x in TOP if x]
 
