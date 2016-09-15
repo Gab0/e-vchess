@@ -285,7 +285,7 @@ def select_best_inds(population, NUMBER):
             if SCR > SCORE:
                 if i and SCR > TOP[i-1].ELO:
                     continue
-                if i and individual.filename == TOP[i-1].filename:
+                if i and individual.filename in [x.filename for x in TOP[:i]]:
                     continue
                 TOP[i] = individual
                 SCORE = SCR

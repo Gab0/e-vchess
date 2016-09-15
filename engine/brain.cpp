@@ -488,7 +488,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     if (evalboard->squares[i][j] == 'x') continue;
     PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
     if (PieceIndex < 0) continue;
-    K = BRAIN.pvalues[L];
+    K = BRAIN.pvalues[PieceIndex];
         
     if (PieceIndex==0) {
       if (P) K += i * BRAIN.pawnrankMOD;

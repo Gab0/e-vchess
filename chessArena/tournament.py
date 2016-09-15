@@ -170,13 +170,12 @@ class Tournament():
             #self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)-1]
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
-                    if not SCORE[GAME][MACHINE]:
-                        if SCORE[GAME][1-MACHINE] == 2:
-                            deadmac = ROUND[GAME][MACHINE]
-                            self.Competitors.pop(self.Competitors.index(deadmac))
-                            bareDeleteMachine(settings.TOPmachineDIR, deadmac)
-                            RemovedMachineCount+=1
-                            print("%s dies." % deadmac)
+                    if SCORE[GAME][1-MACHINE] - SCORE[GAME][MACHINE] >= 2:
+                        deadmac = ROUND[GAME][MACHINE]
+                        self.Competitors.pop(self.Competitors.index(deadmac))
+                        bareDeleteMachine(settings.TOPmachineDIR, deadmac)
+                        RemovedMachineCount+=1
+                        print("%s dies." % deadmac)
             I+=1
         print("Ending bloodbath. removed count: %i" % RemovedMachineCount)
 
@@ -228,7 +227,7 @@ class Tournament():
                         # print(SCORE)
 
                     if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
-                       and not DRAWS[G] > 1:
+                       and not DRAWS[G] > 2:
                         GAMELENGHT[G]=0
                         print("Starting Game at Table %i [%s x %s]" % (G,
                                                                        ROUND[G][
@@ -293,7 +292,7 @@ class Tournament():
             if I>len(SCORE)-1:
                 continue
             try:
-                TableInfo = "{%i} %s %fx%f %s {%i} (%i)   %s" % (
+                TableInfo = "{%i} %s %.1f x %.1f %s {%i} (%i)   %s" % (
                     self.Scores[iTABLE.MACnames[0]],
                     iTABLE.MACnames[0],
                     SCORE[I][0],
