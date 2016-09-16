@@ -145,7 +145,7 @@ class parameter():
         if MutateProbabilityDamper < 0:
             x = 1 - x
 
-        print("mutated %c" % GRAPHIC[x])
+        #print("mutated %c" % GRAPHIC[x])
         return VALUE[x]
 
     def dump_parameter_stat(self, individual):

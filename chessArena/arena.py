@@ -94,7 +94,10 @@ class Arena():
         self.setcounter_checkmate = 0
         self.setcounter_forcedwin = 0
         self.setcounter_inactivity = 0
-
+        
+        self.setcounter_createdmachines = 0
+        self.setcounter_deletedmachines = 0
+        self.setcounter_sentToHallOfFame = 0
         self.ID = ''.join(
             choice(
                 string.ascii_uppercase) for _ in range(3))
@@ -270,7 +273,7 @@ class Arena():
         #    CHILD = create_hybrid(population)
         #    if CHILD: population.append(CHILD)
 
-        DELTAind = originalPOPLEN // 8
+        DELTAind = originalPOPLEN // 16
 
         if "T" in LEVEL:
             halloffame = loadmachines(DIR=TOPmachineDIR)
@@ -281,6 +284,7 @@ class Arena():
             for mac in range(len(currentbestinds)):
                 if currentbestinds[mac].filename not in halloffame:
                     sendtoHallOfFame(currentbestinds[mac])
+                    self.setcounter_sentToHallOfFame += 1
                     break
             #self.Tournament = Tournament(1,1)
             #self.log('RUNNING TOURNAMENT!')
@@ -292,34 +296,41 @@ class Arena():
                                                   -2 * DELTAind,
                                                   MODscorelimit,
                                                   ID=self.ID)
+            self.setcounter_deletedmachines += 2 * DELTAind
 
             population += populate([], DELTAind, True, ID=self.ID)
-
-            #population = replicate_best_inds(population,
-            #                                 DELTAind // 2,ID=self.ID)
+            self.setcounter_createdmachines += DELTAind
 
             population += Mate(select_best_inds(population,
                                                 DELTAind), DELTAind,ID=self.ID)
+            self.setcounter_createdmachines += DELTAind
 
+
+            numToEquilibrium = originalPOPLEN - len(population)
+            if numToEquilibrium > 0:
+                self.setcounter_createdmachines += numToEquilibrium
+            else:
+                self.setcounter_deletedmachines -= numToEquilibrium
             population = deltheworst_clonethebest(population,
-                                                  originalPOPLEN -
-                                                  len(population),
+                                                numToEquilibrium,
                                                   MODscorelimit,
                                                   ID=self.ID)
-
+            
         if "C" in LEVEL:
             population = EliminateEquals(population, DELTAind)
             NUM = originalPOPLEN - len(population)
             population += populate([], NUM, True, ID=self.ID)
-
+            self.setcounter_deletedmachines += DELTAind
+            self.setcounter_createdmachines += NUM
         if "H" in LEVEL:
             population = deltheworst_clonethebest(population,
                                                   -DELTAind,
                                                   MODscorelimit,
                                                   ID=self.ID)
+            self.setcounter_deletedmachines += DELTAind
             while len(population) < originalPOPLEN:
                 population += clone_from_template(ID=self.ID)
-
+                self.setcounter_createdmachines +=1
         # setmachines need to happen before management level C, which is advanced and loads
             # the population by it's own method.
 
@@ -347,6 +358,7 @@ class Arena():
                             population[k], population[v]) 
                     if False:
                         bareDeleteMachine(population[k].filename)
+                        self.setcounter_deletedmachines +=1
                         print("Excluding %s by similarity to %s." % (
                             population[k].filename, population[v].filename))
                         population[k] = None
@@ -378,6 +390,10 @@ class Arena():
         print('routine management %s done. Average ELO: %i' %
               (LEVEL, AverageElo))
         self.log("Running Time is %i" % (time() - self.InitTime))
+        self.log("Deleted machines: %i; Created machines: %i; Sent to HOF: %i"%\
+                (self.setcounter_deletedmachines,
+                    self.setcounter_createdmachines,
+                    self.setcounter_sentToHallOfFame))
 
     def showhideall(self):
         for T in self.TABLEBOARD:

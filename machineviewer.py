@@ -288,6 +288,9 @@ class Application(Frame):
             label="Clear Scores", command=self.clearscores)
         self.clearmenu.add_command(
             label="Clear Attr Dump", command=self.TOcleardump)
+        self.clearmenu.add_command(
+            label="Rebuild Machine List", command= lambda: rebuildMachineList(self.DIR))
+        
         self.menubar.add_cascade(label="CLEAR", menu=self.clearmenu)
 
         self.popmenu.add_separator()

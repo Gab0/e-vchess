@@ -11,6 +11,7 @@ from shutil import copyfile
 machine_dir = "machines"
 
 from evchess_evolve.machine import machine
+from evchess_evolve.management import bareDeleteMachine
 
 
 def populate(population, popsize, Randomize, ID=None):
@@ -198,7 +199,6 @@ def deltheworst_clonethebest(population, action, MODlimit, ID=None):
     MEDIUMSCORE = 0
     VALIDPOP = 0
     REMOVED = []
-
     for k in range(len(population)):
         if population[k].PARAMETERS[0].value == 0:
             POP_SCORETABLE.append(-1)
@@ -226,8 +226,9 @@ def deltheworst_clonethebest(population, action, MODlimit, ID=None):
                                     CURRENT_SCORE[1] = population[k].ELO
 
                 try:
-                    print('subject deleted. ' +
-                          population[CURRENT_SCORE[0]].filename)
+                    delname = population[CURRENT_SCORE[0]].filename
+                    print("subject deleted. %s" % delname)
+                    bareDeleteMachine(machine_dir, delname)
                 except AttributeError:
                     print("ERROR on Delete the Worst/Clone the Best")
                     pass

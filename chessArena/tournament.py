@@ -30,10 +30,14 @@ class Tournament():
 
         self.verboseBoards = False
 
+        self.FormerElo = {}        
+
         self.Competitors = loadmachines(DIR=settings.TOPmachineDIR)
+        for machine in self.Competitors:
+            self.FormerElo[machine.filename] = machine.ELO
         self.Competitors = [ machine.filename for machine in self.Competitors ]
+
         self.Scores = {}
-        
 
         self.ToDeleteLosers = DELETE
         for PLAYER in self.Competitors:
@@ -172,6 +176,8 @@ class Tournament():
                 for MACHINE in range(len(ROUND[GAME])):
                     if SCORE[GAME][1-MACHINE] - SCORE[GAME][MACHINE] >= 2:
                         deadmac = ROUND[GAME][MACHINE]
+                        self.log("%s dies. [%i]" % (deadmac,
+                            self.FormerElo[deadmac]))
                         self.Competitors.pop(self.Competitors.index(deadmac))
                         bareDeleteMachine(settings.TOPmachineDIR, deadmac)
                         RemovedMachineCount+=1
@@ -358,7 +364,10 @@ class Tournament():
         else:
             return False
 
-
+    def log(self, text):
+        logfile = open("log.txt", "a")
+        logfile.write(text)
+        logfile.close()
 def checknumberofPROCS():
     pids = [pid for pid in listdir('/proc') if pid.isdigit()]
     ENGINE_COUNT = 0

@@ -206,22 +206,23 @@ class Table(Frame):
         self.startThread = 0
 
     def ReadMachineTextContent(self, MachineLocation):
-        try:
-            del self.MACcontent
-            self.MACcontent = []
-            for NAME in self.MACnames:
+      
+        del self.MACcontent
+        self.MACcontent = []
+        for NAME in self.MACnames:
+            try:
+
                 MachinePath = "%s%s" % (MachineLocation, NAME)
                 file_read = open(MachinePath, 'r')
                 self.MACcontent.append(file_read.readlines())
                 file_read.close()
-            return 1
-        except FileNotFoundError:
-            self.log(
-                "filename not found ( %s ). " % MachinePath +
-                "Maybe coudn't be read properly by arena.", "")
+                return 1
+            except FileNotFoundError:
+                self.log(
+                    "filename not found ( %s ). " % MachinePath +
+                    "Maybe coudn't be read properly by arena.", "")
+                self.MACcontent.append([])
 
-            self.initialize = 0
-            return 0
 
     def Pout(self, readobj):
         for line in readobj:
@@ -594,19 +595,11 @@ class Table(Frame):
 
         ELO = []
         index = []
-
-        if not self.ReadMachineTextContent("machines/"):
-            print("ERROR reading machine text content.")
-
-        """machineContentIndexes = [{"stat_elo": -1,
-                                 "stat_wins": -1,
-                                 "stat_draws": -1,
-                                 "stat_loss": -1} for k in [0,1]]"""
+            
         for macIndex in range(len(self.MACcontent)):
             for lineIndex in range(len(self.MACcontent[macIndex])):
-                """for searchingKey in machineContentIndexes[macIndex].keys():
-                    if searchingKey in self.MACcontent[macIndex][lineIndex]:"""
-
+                if not self.MACcontent[macIndex]:
+                    ELO.append(1000)
                 if 'stat_elo' in self.MACcontent[macIndex][lineIndex].split(' = ')[0]:
                     ELO.append(int(self.MACcontent[macIndex][
                                lineIndex].split(' = ')[1][:-1]))
@@ -659,6 +652,9 @@ class Table(Frame):
                 self.MACcontent[1 - winner].append('\nL\n')
             try:
                 for macIndex in range(len(self.MACcontent)):
+                    if not self.MACcontent[macIndex]:
+                        continue
+                    
                     self.MACcontent[macIndex][index[macIndex]
                                               ] = "stat_elo = %i\n" % newELO[macIndex]
                     F = open('machines/%s' % self.MACnames[macIndex], 'w')

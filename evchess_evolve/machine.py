@@ -19,6 +19,7 @@ class machine():
             parameter("stat_draws", 1, 0, 0),
             parameter("stat_loss", 1, 0, 0),
             parameter("stat_K", 1, 0, 0),
+            parameter("real_world_score", 1, 0, 0)
         ]
 
         self.ELO = 1000
@@ -96,3 +97,12 @@ class machine():
     def resetscores(self):
         for P in self.TPARAMETERS:
             P.value = 0
+
+    def getParameter(self, paramname, toSUM=0):
+        for k in self.PARAMETERS + self.TPARAMETERS:
+            if k.name == paramname:
+                if not toSUM:
+                    return k.value
+                else:
+                    k.value += 1
+                    return k.value

@@ -339,9 +339,9 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       }
      
     if (PLAYER==Machineplays)
-      score = -17000;
+      score = -170000;
     else
-      score = 17000;	   
+      score = 170000;	   
 
     // Movelist iteration.
 

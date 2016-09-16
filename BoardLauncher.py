@@ -9,68 +9,36 @@ from json import dumps, loads
 from chessArena import settings
 settings.initialize()
 
-from evchess_evolve.core import loadmachines
+from evchess_evolve.core import loadmachines, setmachines
 
 # print(VerboseMove)
-
-
-def loadscores():
-    try:
-        F = open(settings.TOPmachineDIR + '/scoreData')
-        Content = F.read()
-        ScoreData = loads(Content)
-        return ScoreData
-    except:
-        return {}
-        pass
-
-
-def savescores(DATA):
-    F = open(settings.TOPmachineDIR + '/scoreData', 'w')
-
-    F.write(dumps(DATA))
-    F.close()
-
-
-def ModifyScore(DATA, MacName, Operator):
-    try:
-        DATA[MacName] += Operator
-    except:
-        DATA[MacName] = Operator
-
-    return DATA
-
 
 class DuelTable():
 
     def __init__(self):
-        ScoreData = loadscores()
         print("""
         loading machines from Hall of Fame.
 
           Choose your opponent:
 
                       """)
-
-        LegalMachines = ["random"] +\
-                        [mac.filename for mac in loadmachines(
-                            DIR=settings.TOPmachineDIR)]
+        self.AllMachines = loadmachines(DIR=settings.TOPmachineDIR)
                         
         print("zero")
-        for M in range(len(LegalMachines)):
-            view = '%i - %s' % (M, LegalMachines[M])
-            try:
-                view += "   :%i" % ScoreData[LegalMachines[M]]
-            except:
-                pass
+        print("0 - random")
+        for M in range(len(self.AllMachines)):
+            view = '%i - %s' % (M+1, self.AllMachines[M].filename)
+            view += "      %i :%i" %\
+                (self.AllMachines[M].ELO,
+                        self.AllMachines[M].getParameter("real_world_score"))
             print(view)
         print("")
         LOADED = 0
         userchoice = self.CollectInput(
-            [x for x in range(len(LegalMachines))])
+            [x for x in range(len(self.AllMachines)+1)])
 
         if not userchoice:
-            userchoice = randrange(1, len(LegalMachines))
+            userchoice = randrange(len(self.AllMachines))+1
         else:
             pass
             #choices = userchoice.split(" ")
@@ -78,8 +46,9 @@ class DuelTable():
 
         if userchoice != "zero":
             LOADED = 1
-            print('Loading %s. glhf' % LegalMachines[userchoice])
-            Callargs += ['--specific', LegalMachines[userchoice]]
+            userchoice -= 1
+            print('Loading %s. glhf' % self.AllMachines[userchoice].filename)
+            Callargs += ['--specific', self.AllMachines[userchoice].filename]
         engineCALL = " ".join(Callargs)
 
         Command = ['xboard', '-fcp', engineCALL]
@@ -95,15 +64,14 @@ class DuelTable():
                 exit()
 
             if FeedBack == 'y':
-                ScoreData = ModifyScore(
-                    ScoreData, LegalMachines[userchoice], 1)
+                result = 1
                 print("logically.")
             else:
-                ScoreData = ModifyScore(
-                    ScoreData, LegalMachines[userchoice], -1)
+                result = -1
                 print("a bad day for the computer age.")
-
-            savescores(ScoreData)
+            self.AllMachines[userchoice].getParameter("real_world_score",
+                        toSUM=result)
+            setmachines(self.AllMachines, DIR=settings.TOPmachineDIR)
 
     def CollectInput(self, ValidValues):
         userchoice = None

@@ -48,3 +48,14 @@ def bareDeleteMachine(machine_dir, machine_name):
     for line in MachineList:
         WriteToList.write(line)
     WriteToList.close()
+    
+# linux only;
+def rebuildMachineList(machine_dir):
+    FileList = listdir(machine_dir)
+    MachineList = open("%s/machines.list" % machine_dir, 'w')
+    for FILE in FileList:
+        if FILE.endswith('.mac'):
+            MachineList.write('%s\n' % FILE)
+
+
+    MachineList.close()
