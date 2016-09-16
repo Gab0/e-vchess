@@ -1,9 +1,0 @@
--> No more 'clone the best' on regular arena evolution process.
--> Added param_parallelcheck.
--> Locked 'param_evalmethod' to 0.
--> Traded off the messy first encarnation of thinkinterate method for a more clear one. Dumped off 'param_aperture' method in favour of full movelist iteration.
--> Deprecated many parameters like 'param_seekatk' & 'param_seekpieces'
--> Added Alpha-Beta prunning scheme. Going past DEEP 3 was impossible because of the thinking time involved.
--> param_aperture deprecated in favour of AB pruning.
--> Proper move ordering before iteration, so to help the AB prunning.
--> Post re-evaluation, doing other round of the full DEEP value of movements in alpha-beta pruning evaluation starting resulting best move-value board of prior result.
