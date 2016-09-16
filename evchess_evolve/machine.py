@@ -7,7 +7,8 @@ from evchess_evolve.core import machine_dir
 
 class machine():
 
-    def __init__(self, fname):
+    def __init__(self, fname, DIR=machine_dir):
+        self.DIR = DIR
         self.filename = fname
         self.wasmodified = 0
 
@@ -60,7 +61,7 @@ class machine():
             self.ELO = int(split_line[2])
 
     def write(self):
-        Fo = open(machine_dir + '/' + self.filename, "w+")
+        Fo = open(self.DIR + '/' + self.filename, "w+")
         for parameter in self.PARAMETERS + self.TPARAMETERS:
             Fo.write(parameter.write())
             Fo.write('\n')
@@ -92,7 +93,7 @@ class machine():
             parameter.randomize()
 
     def delete(self):
-        os.remove(machine_dir + '/' + self.filename)
+        os.remove(self.DIR + '/' + self.filename)
 
     def resetscores(self):
         for P in self.TPARAMETERS:

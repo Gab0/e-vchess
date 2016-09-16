@@ -44,7 +44,7 @@ def loadmachines(DIR=machine_dir):
 
         if file.endswith(".mac"):
             Fo = open(DIR + '/' + file, "r+")
-            population.append(machine(file))
+            population.append(machine(file,DIR=DIR))
 
             for line in Fo.readlines():
                 if line == "\n":
