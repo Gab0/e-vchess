@@ -6,7 +6,7 @@ def STDPARAMETERS():
 
         parameter("eval_randomness", 0, 30, 20, INCR=10, bLIM=1, LIM=270),
 
-        parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
+        #parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
 
         #parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2),
 
@@ -34,7 +34,9 @@ def STDPARAMETERS():
 
         #parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05)
 
-        parameter("param_moveFocus", 0, 40, 0, LIM=4, bLIM=0, INCR=0.1)
+        parameter("param_moveFocus", 0, 40, 0, LIM=4, bLIM=0, INCR=0.1),
+
+        parameter("param_boardcontrol", 0, 40, 0, LIM=3, bLIM=0, INCR=0.25)
     ]
 
 

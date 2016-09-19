@@ -105,5 +105,5 @@ class machine():
                 if not toSUM:
                     return k.value
                 else:
-                    k.value += 1
+                    k.value += toSUM
                     return k.value

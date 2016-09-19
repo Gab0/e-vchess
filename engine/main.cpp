@@ -116,7 +116,9 @@ int main(int argc, char** argv) {
     Brain.MODbackup = 0;
     Brain.MODmobility = 0;
 
-    Brain.moveFocus = 0.2;
+    Brain.moveFocus = 0;
+
+    Brain.boardcontrol = 0;
 
     int i=0;
     signal(SIGINT, SIG_IGN);    

@@ -17,7 +17,7 @@ from subprocess import call
 
 from evchess_evolve.core import *
 from evchess_evolve.management import *
-
+from evchess_evolve.statistics import showBestParameterValues
 from chessArena import settings
 settings.initialize()
 
@@ -341,6 +341,8 @@ class Application(Frame):
         self.machinemenu.add_separator()
         self.machinemenu.add_command(
             label="Launch Machine", command=self.TOLaunchMachine)
+        self.machinemenu.add_command(
+            label="View Statistics", command=self.TOviewStatistics)
         self.menubar.add_cascade(label="MACHINE", menu=self.machinemenu)
 
         self.actionmenu.add_command(
@@ -435,7 +437,10 @@ class Application(Frame):
             if CHILD:
                 self.machines.append(CHILD)
         self.savemac()
-
+    def TOviewStatistics(self):
+        stats = showBestParameterValues(DIR=self.DIR)
+        self.blackboard.delete('1.0', END)
+        self.blackboard.insert(END, stats)
     def TOswitchstatlock(self):
         self.machines = PrepareCyclingStatLock(self.machines)
 
@@ -521,7 +526,7 @@ class Application(Frame):
         self.VIEWDUMP.config(yscrollcommand=self.VIEWDUMPscrollbar.set)
         self.VIEWDUMPscrollbar.grid(column=6, row=0, sticky=NSEW, rowspan=10)
 
-        self.blackboard = Text(self, font=("Helvetica", 13), width=23)
+        self.blackboard = Text(self, font=("Helvetica", 13), width=38)
         self.blackboard.grid(column=5, row=0, sticky=NSEW, rowspan=10)
 
         self.DIR = settings.machineDIR

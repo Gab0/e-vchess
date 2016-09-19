@@ -57,6 +57,7 @@ class Tournament():
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
                           for k in range(self.MaxTableboardSize)]
         if RUN:
+            print("\n\n")
             T = None
             if RUN == "tournament":
                 T = Thread(target=self.ProperTournament)
@@ -169,9 +170,10 @@ class Tournament():
         RemovedMachineCount = 0
         I=0
         while len(self.Competitors) > 3:
+            print("Starting ffa tournament round, with %i competitors." %\
+                  (len(self.Competitors)))
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
-            #self.TABLEBOARD = self.TABLEBOARD[:len(ROUND)-1]
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
                     if SCORE[GAME][1-MACHINE] - SCORE[GAME][MACHINE] >= 2:
@@ -235,10 +237,8 @@ class Tournament():
                     if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
                        and not DRAWS[G] > 2:
                         GAMELENGHT[G]=0
-                        print("Starting Game at Table %i [%s x %s]" % (G,
-                                                                       ROUND[G][
-                                                                           0],
-                                                                       ROUND[G][1]))
+                        """ print("Starting Game at Table " +\
+                               %i [%s x %s]" % (G, ROUND[G][0],ROUND[G][1]))"""
 
                         engineCommand = [ copy(self.EngineCommand) for k in range(2) ]
                         engineCommand[0] += [ROUND[G][0]]
@@ -298,15 +298,22 @@ class Tournament():
             if I>len(SCORE)-1:
                 continue
             try:
-                TableInfo = "{%i} %s %.1f x %.1f %s {%i} (%i)   %s" % (
+                TableInfoMA = "{%i} %s %.1f" % (
                     self.Scores[iTABLE.MACnames[0]],
                     iTABLE.MACnames[0],
-                    SCORE[I][0],
+                    SCORE[I][0])
+                TableInfoMB = "%.1f %s {%i}" % (
                     SCORE[I][1],
                     iTABLE.MACnames[1],
-                    self.Scores[iTABLE.MACnames[1]],
-                    DRAWS[I],
-                    ActiveSymbol[ACTIVE[I]])
+                    self.Scores[iTABLE.MACnames[1]])
+
+                TableInfo = "%s%sx%s%s   (%i)    %s" % (
+                        " " * (28-len(TableInfoMA)),
+                        TableInfoMA,
+                        TableInfoMB,
+                        " " * (28-len(TableInfoMB)),
+                        DRAWS[I],
+                        ActiveSymbol[ACTIVE[I]])
 
                 TableBoard = str(iTABLE.board)
 

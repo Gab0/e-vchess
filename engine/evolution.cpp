@@ -120,6 +120,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_MODbackup", &Brain.MODbackup);
 	   readparam(line, V, "param_MODmobility", &Brain.MODmobility);
 	   readparam(line, V, "param_moveFocus", &Brain.moveFocus);
+	   readparam(line, V, "param_boardcontrol", &BRAIN.boardcontrol);
 
        }
 	 printf("\n");

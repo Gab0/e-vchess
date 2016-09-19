@@ -125,6 +125,7 @@ struct param {
   float MODbackup;
   float MODmobility;
   float moveFocus;
+  float boardcontrol;
 };
 
 extern struct move movehistory[512];

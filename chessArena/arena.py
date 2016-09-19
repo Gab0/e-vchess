@@ -167,7 +167,7 @@ class Arena():
             # each N rounds, do maintenance management,
             # in order to get best evolving performance.
             # also prints running info to log.
-            if (self.ROUND) and not (self.ROUND % self.EvolveRatio):
+            if self.ROUND and not self.ROUND % self.EvolveRatio:
                 LEVEL = ""
 
                 if not self.ROUND % self.EvolveRatio:
@@ -279,8 +279,8 @@ class Arena():
             halloffame = loadmachines(DIR=TOPmachineDIR)
             halloffame = [mac.filename for mac in halloffame]
 
-            currentbestinds= select_best_inds(population, 6)
-
+            currentbestinds = select_best_inds(population, 18)
+            
             for mac in range(len(currentbestinds)):
                 if currentbestinds[mac].filename not in halloffame:
                     sendtoHallOfFame(currentbestinds[mac])

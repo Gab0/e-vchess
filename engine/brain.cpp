@@ -7,7 +7,7 @@
 int think (struct move *out, int PL, int DEEP, int verbose) {
     
   int i=0; int ChosenMovementIndex=0;
-  long score = -17000;
+  long score = -99917000;
   time_t startT = time(NULL);
   
   searchNODEcount = 0;
@@ -18,8 +18,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
   //Vb printf("Master Address: %p\n", (void *)_board); 
     
-  long Alpha = -169000;
-  long Beta = 169000;
+  long Alpha = -16999000;
+  long Beta = 16999000;
     
   struct movelist *moves =
     (struct movelist *) calloc(1, sizeof(struct movelist));
@@ -126,9 +126,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
     int secondTOP[T], I=0, M=0;
 
-    long sessionSCORE=0;
-    long movelistSCORE=0;
-     
+    long sessionSCORE=-9990000;
+    long movelistSCORE=-9900000;
+    
+    long satellite = 0;
     int OtherPlayer=0;
     selectBestMoves(moves->movements, moves->k, secondTOP, T);
 
@@ -140,13 +141,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     for (R=0;R<BRAIN.xDEEP;R++) {
       AllowCutoff = 1;
       if (R + 1 == BRAIN.xDEEP) AllowCutoff = 1;
-      sessionSCORE = -169000;
+      sessionSCORE = -999690000;
 
       
       // printf("\n\n");
       for (i=0;i<T;i++) {
        
-	movelistSCORE = -169000;
+	movelistSCORE = -1690000;
 	//Alpha = -17000;
 	//Beta = 17000;
 	I = secondTOP[i];
@@ -207,11 +208,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        
        
 	if (movelistSCORE VariableSignal sessionSCORE) {
-
-	  if (movelistSCORE + satellite_evaluation(&moves->movements[I]) VariableSignal sessionSCORE) {
+	  satellite = satellite_evaluation(&moves->movements[I]);
+	  if (movelistSCORE + satellite  VariableSignal sessionSCORE) {
 	   
 	    ChosenMovementIndex = I;
-	    sessionSCORE = movelistSCORE;
+	    sessionSCORE = movelistSCORE + satellite;
 	   
 	   
 	  }
@@ -339,9 +340,9 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       }
      
     if (PLAYER==Machineplays)
-      score = -170000;
+      score = -99170000;
     else
-      score = 170000;	   
+      score = 99170000;	   
 
     // Movelist iteration.
 
@@ -485,7 +486,13 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     
     
   forsquares {
-    if (evalboard->squares[i][j] == 'x') continue;
+    //this slows da thinking process by a lot.
+    //score += ifsquare_attacked(evalboard->squares, i, j, P, 0) * 5 *
+    //	BRAIN.boardcontrol;
+
+      
+      if (evalboard->squares[i][j] == 'x') continue;
+      
     PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
     if (PieceIndex < 0) continue;
     K = BRAIN.pvalues[PieceIndex];
@@ -497,7 +504,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
             
             
    
-    score += K * BRAIN.seekpieces + 
+    score += K * BRAIN.seekpieces + K/10 *
       //((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
       (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
       * BRAIN.seekmiddle;    
@@ -515,23 +522,28 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
                 
     if (PieceIndex == 5 && BRAIN.parallelcheck) {
       if (parallelatks>1) 
-	score += parallelatks * BRAIN.parallelcheck;}
+	score += parallelatks * 10 * BRAIN.parallelcheck;
+    }
     else {
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);
         
-      score = score - paralleldefenders * BRAIN.MODbackup;
-         
-         
+      score += (paralleldefenders * 25 * BRAIN.MODbackup);
+        
     }       
                                
     score += BRAIN.pvalues[PieceIndex] * BRAIN.seekatk;
          
     PieceIndex = getindex(moves->attackers[Z][0],Pieces[P],6);
-    score -= BRAIN.pvalues[PieceIndex]/2 * BRAIN.balanceoffense;
+    score -= BRAIN.pvalues[PieceIndex]/10 * BRAIN.balanceoffense;
          
          
+  }
+
+  else {
+    
+
   }
 
   
@@ -565,16 +577,7 @@ Host Device float scoremod (int DEEP, int method) {
     modifier = modifier/(helper/1.1);
   }
     
-    
-  /*  if (method == 3) {
-
-      modifier = BRAIN.TIMEweight[(int)(BRAIN.DEEP-(float)DEEP)];
         
-      }*/
-    
-    
-    
-    
   return modifier;
 }
 
