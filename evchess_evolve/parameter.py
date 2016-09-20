@@ -78,34 +78,26 @@ class parameter():
 
     def putonlimits(self):
 
-        TYPE = type(self.value)
+        if self.LIM != None:
+            if self.value > self.LIM:
+                self.value = self.LIM
 
-        def RUN(self, value):
-            if self.LIM:
-                if value > self.LIM:
-                    value = random.uniform(self.stdvalue, self.LIM)
-                value -= value % self.INCR
-            if self.bLIM:
-                if value < self.bLIM:
-                    value = random.uniform(self.bLIM, self.stdvalue)
-                value -= value % self.INCR
-            if self.alwaysPOSITIVE:
-                value = abs(value)
+        if self.bLIM != None:
+            if self.value < self.bLIM:
+                self.value = self.bLIM
 
-            if type(value) == float:
-                value = round(value, 2)
+        if self.alwaysPOSITIVE:
+            self.value = abs(self.value)
 
-            elif type(value) == int:
-                value = int(round(value))
+        if type(self.value) == float:
+            self.value = round(self.value, 2)
 
-            return value
+        elif type(self.value) == int:
+            self.value = int(round(self.value))
 
-        if TYPE == list:
-            for X in range(len(self.value)):
-                self.value[X] = RUN(self, self.value[X])
 
-        else:
-            self.value = RUN(self, self.value)
+
+        
 
     def mutate(self, MutateProbabilityDamper, Aggro):
         if (self.marks_dumpable) or (self.locked):

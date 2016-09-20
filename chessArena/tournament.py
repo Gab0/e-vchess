@@ -102,14 +102,15 @@ class Tournament():
         RoundIndex = 0
         U = 0
  
-        while len(ROUNDS[-1]) < self.MaxTableboardSize and U < 5:
+        while len(ROUNDS[-1]) < self.MaxTableboardSize  and U < 100:
             x = choice(allGames)
             if not searchPlayersInBracket(x, ROUNDS[RoundIndex]):
                 ROUNDS[RoundIndex].append(x)
                 RoundIndex += 1
                 if RoundIndex == len(ROUNDS):
                     RoundIndex = 0
-                    U += 1
+                    
+            U += 1
 
         shuffle(ROUNDS)
         return ROUNDS
@@ -235,7 +236,7 @@ class Tournament():
                         # print(SCORE)
 
                     if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
-                       and not DRAWS[G] > 2:
+                       and not DRAWS[G] > 0:
                         GAMELENGHT[G]=0
                         """ print("Starting Game at Table " +\
                                %i [%s x %s]" % (G, ROUND[G][0],ROUND[G][1]))"""

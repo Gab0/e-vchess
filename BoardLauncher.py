@@ -116,7 +116,7 @@ class DuelTable():
         Command =['xboard', '-fcp', self.engineCALL, '-scp', 'gnuchess']
         call(Command)
         
-
+    def StraceAndLogGame(self):
         PID = check_output(['ps', 'aux'])
         PID = PID.decode('utf-8').split("\n")
         print(len(PID))

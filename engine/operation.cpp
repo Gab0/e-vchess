@@ -127,7 +127,7 @@ Device int append_move(struct board *board, struct movelist *moves, int i,int j,
 
 Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
     //show_board(squares);
-    
+    //P is the victim player.
     int i = 0;
     int j =0;
     int offender = 0;

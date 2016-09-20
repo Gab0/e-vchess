@@ -329,6 +329,8 @@ class Application(Frame):
             label="ABORT bad machines", command=self.abort_machines)
         self.popmenu.add_command(
             label="LOAD files directly", command=lambda: self.TOloadmacfolder(64))
+        self.popmenu.add_command(
+            label="Normalize Parameters", command=self.TOnormalizeValues)
 
         self.menubar.add_cascade(label="POPULATION", menu=self.popmenu)
 
@@ -437,6 +439,11 @@ class Application(Frame):
             if CHILD:
                 self.machines.append(CHILD)
         self.savemac()
+    def TOnormalizeValues(self):
+        for I in self.machines:
+            for P in I.PARAMETERS:
+                P.putonlimits()
+            
     def TOviewStatistics(self):
         stats = showBestParameterValues(DIR=self.DIR)
         self.blackboard.delete('1.0', END)

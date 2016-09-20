@@ -448,7 +448,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     machine_score = evaluate(_board, &moves, Machineplays, PLAYER);
     enemy_score = evaluate(_board, &moves, 1-Machineplays, PLAYER);
     //show_board(_board->squares);
-     
+
     _board->score = machine_score - enemy_score * (1 + BRAIN.presumeOPPaggro);
 
     //ADDITIONAL EVALUATION:
@@ -512,7 +512,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
   }
         
   
-  if (P == Attacker)   
+    if (P == Attacker)   
     for (Z=0;Z<moves->kad;Z++) {
     PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
         
@@ -520,16 +520,16 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
       (evalboard->squares,moves->defenders[Z][1],
        moves->defenders[Z][2], 1-P, 0);
                 
-    if (PieceIndex == 5 && BRAIN.parallelcheck) {
+    if (BRAIN.parallelcheck) {
       if (parallelatks>1) 
-	score += parallelatks * 10 * BRAIN.parallelcheck;
+	score += parallelatks * 5 * BRAIN.parallelcheck;
     }
     else {
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);
         
-      score += (paralleldefenders * 25 * BRAIN.MODbackup);
+      score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
         
     }       
                                
@@ -537,14 +537,14 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
          
     PieceIndex = getindex(moves->attackers[Z][0],Pieces[P],6);
     score -= BRAIN.pvalues[PieceIndex]/10 * BRAIN.balanceoffense;
-         
+
          
   }
 
-  else {
+    //    else {}
     
 
-  }
+  
 
   
   score += chaos;       

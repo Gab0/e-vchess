@@ -14,7 +14,7 @@ from evchess_evolve.machine import machine
 from evchess_evolve.management import bareDeleteMachine
 
 
-def populate(population, popsize, Randomize, ID=None):
+def populate(population, popsize, Randomize, ID=""):
     NEWINDS = []
     for i in range(popsize):
         NEWINDS.append(machine(NewMacName(ID=ID)))
@@ -355,7 +355,7 @@ def clone_from_template(ID=None):
     return CHILD
 
 
-def NewMacName(Tail="", ID=None):
+def NewMacName(Tail="", ID=""):
     # used tail coding:
     # &   stands for machine cloned from hall of fame template.
     # #   stands for machine created by mating.
