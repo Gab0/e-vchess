@@ -11,6 +11,7 @@ from random import randrange
 from weakref import ref
 
 from chessArena.enginewrap import Engine
+from evchess_evolve.core import machine
 from chessArena.settings import *
 
 
@@ -187,7 +188,7 @@ class Table(Frame):
         if self.GUI:
             self.Maximize["background"] = "brown"
 
-        if not self.ReadMachineTextContent(MachineDirectory):
+        if not self.LoadMachineData(MachineDirectory):
             return
 
         if self.GUI:
@@ -205,24 +206,21 @@ class Table(Frame):
 
         self.startThread = 0
 
-    def ReadMachineTextContent(self, MachineLocation):
-      
+    def LoadMachineData(self, MachineLocation):
         del self.MACcontent
         self.MACcontent = []
         for NAME in self.MACnames:
             try:
+                self.MACcontent.append(machine(NAME, DIR=MachineLocation))
+                self.MACcontent[-1].Load()
 
-                MachinePath = "%s%s" % (MachineLocation, NAME)
-                file_read = open(MachinePath, 'r')
-                self.MACcontent.append(file_read.readlines())
-                file_read.close()
-                return 1
+                
             except FileNotFoundError:
                 self.log(
-                    "filename not found ( %s ). " % MachinePath +
+                    "filename not found ( %s %s ). " % (MachineLocation,MachinePath) +
                     "Maybe coudn't be read properly by arena.", "")
-                self.MACcontent.append([])
-
+                self.MACcontent.append(machine('zero'))
+        return 1
 
     def Pout(self, readobj):
         for line in readobj:
@@ -592,78 +590,43 @@ class Table(Frame):
     # def log_wrongmove(self):
 
     def sendELO(self, winner):
-
-        ELO = []
-        index = []
-            
-        for macIndex in range(len(self.MACcontent)):
-            for lineIndex in range(len(self.MACcontent[macIndex])):
-                if not self.MACcontent[macIndex]:
-                    ELO.append(1000)
-                if 'stat_elo' in self.MACcontent[macIndex][lineIndex].split(' = ')[0]:
-                    ELO.append(int(self.MACcontent[macIndex][
-                               lineIndex].split(' = ')[1][:-1]))
-                    index.append(lineIndex)
+        self.LoadMachineData("machines/")
 
         Draw = False
-        if len(ELO) == 2:
-            if winner == 0.5:
-                winner = 0
-                base = 0
-                Draw = True
 
-            else:
-                base = 28
+        if winner == 0.5:
+            winner = 0
+            base = 0
+            Draw = True
+            
+            self.MACcontent[winner].TPARAMETERS[1].value +=1
+            self.MACcontent[1-winner].TPARAMETERS[1].value +=1
+        else:
+            base = 28
+            self.MACcontent[winner].TPARAMETERS[1].value += 1
+            self.MACcontent[1-winner].TPARAMETERS[3].value -=1
+            
+        deltaELO = self.MACcontent[winner].ELO - self.MACcontent[1-winner].ELO
+        deltaELO = base - deltaELO // 18
+            
+        self.MACcontent[winner].TPARAMETERS[0].value +=1    
+        self.MACcontent[1-winner].TPARAMETERS[0].value +=1
+        
+        if not Draw and deltaELO < 0:
+            deltaELO = 0
 
-            deltaELO = ELO[winner] - ELO[1 - winner]
 
-            deltaELO = base - deltaELO // 18
+        self.MACcontent[winner].ELO += deltaELO
+        self.MACcontent[1-winner].ELO -= deltaELO
+                
 
-            newELO = [0, 0]
-            if not Draw and deltaELO < 0:
-                deltaELO = 0
 
-            else:
-                newELO[winner] = ELO[winner] + deltaELO
-                newELO[1 - winner] = ELO[1 - winner] - deltaELO
-
-            ScoreString = []
-            for score in [0, 1]:
-                ScoreString.append("%s (%i -> %i)" % (COLOR[score],
-                                                      ELO[score],
-                                                      newELO[score]))
-
-            if Draw:
-                if VerboseMove:
-                    print("Draw. %s; %s.    delta: %i"
-                          % (ScoreString[winner],
-                             ScoreString[1 - winner],
-                             deltaELO))
-                for k in [0, 1]:
-                    self.MACcontent[k].append('\nD\n')
-            else:
-                if VerboseMove:
-                    print("Winner is %s. %s lost.    delta: %i"
-                          % (ScoreString[winner],
-                             ScoreString[1 - winner],
-                             deltaELO))
-
-                self.MACcontent[winner].append('\nW\n')
-                self.MACcontent[1 - winner].append('\nL\n')
-            try:
-                for macIndex in range(len(self.MACcontent)):
-                    if not self.MACcontent[macIndex]:
-                        continue
-                    
-                    self.MACcontent[macIndex][index[macIndex]
-                                              ] = "stat_elo = %i\n" % newELO[macIndex]
-                    F = open('machines/%s' % self.MACnames[macIndex], 'w')
-                    for line in self.MACcontent[macIndex]:
-                        F.write(line)
-                    F.close()
-
-            except:
-                self.log('sending ELO failed.', '')
+        try:
+            for macIndex in range(len(self.MACcontent)):
+                self.MACcontent[macIndex].write()
+                        
+        except:
+            self.log('sending ELO failed.', '')
 
     def DUMPmovehistory(self, reason):
         CurrentRound = self.arena.ROUND if self.arena else 0

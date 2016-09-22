@@ -92,9 +92,11 @@ class DuelTable():
             if userchoice == "zero":
                 break
             try:
-                if userchoice.endswith('fish'):
-                    userchoice = userchoice[:len(userchoice)-4]
-                    Machine=1
+                engines=['gnuchess', 'roce395', 'rocinante']
+                for E in engines:
+                    if userchoice.endswith(E):
+                        userchoice = userchoice[:len(userchoice)-len(E)]
+                        Machine=E
 
                 userchoice = int(userchoice)
             except ValueError:
@@ -106,14 +108,14 @@ class DuelTable():
                 userchoice = None
                 print("Invalid input. Try again.")
         if Machine:
-            self.AgainstMachine = True
+            self.AgainstMachine = Machine
         return userchoice
 
     def LaunchXboardAgainstMachine(self):
         Command = ['xboard', '-fcp', self.engineCALL]
         call(Command)
     def LaunchXboardMachineXMachine(self):
-        Command =['xboard', '-fcp', self.engineCALL, '-scp', 'gnuchess']
+        Command =['xboard', '-fcp', self.engineCALL, '-scp', self.AgainstMachine]
         call(Command)
         
     def StraceAndLogGame(self):

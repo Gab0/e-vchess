@@ -49,5 +49,6 @@ turned off param_presumeOPPaggro at a point where the engine was getting
 fixed mutation process,  mutations were in a position on the evolving method
 that they were not being save. also, fixed bugs in engine brain. AVG ELO still
 920.
+Engine and evolution mechanics fixed. AVG ELO 1000. Now starting real evolution @ 21/sep
 
 """

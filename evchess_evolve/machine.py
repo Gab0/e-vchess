@@ -37,7 +37,13 @@ class machine():
         self.dumped_draws = 0
         self.dumped_loss = 0
         self.dumped_K = 0
-
+    def Load(self):
+        try:
+            selfContent = open("%s/%s" % (self.DIR, self.filename))
+        except:
+            return
+        for line in selfContent.readlines():
+            self.read(line.split(" "))
     def read(self, split_line):
         for parameter in self.TPARAMETERS + self.PARAMETERS:
             if len(split_line) < 2:

@@ -18,7 +18,7 @@ def populate(population, popsize, Randomize, ID=""):
     NEWINDS = []
     for i in range(popsize):
         NEWINDS.append(machine(NewMacName(ID=ID)))
-
+        
     for I in NEWINDS:
         if Randomize:
             I.randomize()

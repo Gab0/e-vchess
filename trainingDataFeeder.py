@@ -34,6 +34,19 @@ class trainingDataFeeder():
 
         print(self.PassedTests)
         self.subject.destroy()
+        
+    def generateRandomBoard(self):
+        board = chess.Bitboard()
+        
+        def random_move(board):
+            return random.choice(list(board.legal_moves))
+
+        for k in range(round(gauss(3,5)*3)):
+            board.push(random_move(board))
+
+        return board.fen()
+    def runDataColledtor(self):
+        pass
     def loadPGNData(self, PGNfile):
         PGN = open(PGNfile, 'r').read()
         PGN.replace('^M', '')
