@@ -504,7 +504,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
             
             
    
-    score += K * BRAIN.seekpieces + K/10 *
+    score += K * BRAIN.seekpieces + K/2 *
       //((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
       (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
       * BRAIN.seekmiddle;    
@@ -522,7 +522,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
                 
     if (BRAIN.parallelcheck) {
       if (parallelatks>1) 
-	score += parallelatks * 5 * BRAIN.parallelcheck;
+	score += parallelatks * 10 * BRAIN.parallelcheck;
     }
     else {
       paralleldefenders = ifsquare_attacked

@@ -604,7 +604,7 @@ class Table(Frame):
         else:
             base = 28
             self.MACcontent[winner].TPARAMETERS[1].value += 1
-            self.MACcontent[1-winner].TPARAMETERS[3].value -=1
+            self.MACcontent[1-winner].TPARAMETERS[3].value +=1
             
         deltaELO = self.MACcontent[winner].ELO - self.MACcontent[1-winner].ELO
         deltaELO = base - deltaELO // 18

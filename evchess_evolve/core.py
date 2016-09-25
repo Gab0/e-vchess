@@ -39,21 +39,11 @@ def loadmachines(DIR=machine_dir):
     Fo.close()
 
     for file in mLIST:
-        if file[-1] == '\n':
-            file = file[:-1]
+        file = file.strip("\n")
 
         if file.endswith(".mac"):
-            Fo = open(DIR + '/' + file, "r+")
             population.append(machine(file,DIR=DIR))
-
-            for line in Fo.readlines():
-                if line == "\n":
-                    continue
-                L = line.split()
-                if len(L) == 3:
-                    L.append(0)
-
-                population[-1].read(L)
+            population[-1].Load()
 
     return population
 

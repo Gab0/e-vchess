@@ -7,7 +7,7 @@ from threading import Thread
 from random import shuffle, choice
 from time import time
 from copy import copy
-
+import signal
 from evchess_evolve.management import bareDeleteMachine
 from evchess_evolve.core import loadmachines
 
@@ -30,23 +30,20 @@ class Tournament():
 
         self.verboseBoards = False
 
-        self.FormerElo = {}        
+        signal.signal(signal.SIGINT, self.SIGINTFinishAndQuit) 
 
         self.Competitors = loadmachines(DIR=settings.TOPmachineDIR)
-        for machine in self.Competitors:
-            self.FormerElo[machine.filename] = machine.ELO
-        self.Competitors = [ machine.filename for machine in self.Competitors ]
-
-        self.Scores = {}
-
+        
+        self.TotalDead = 0
         self.ToDeleteLosers = DELETE
         for PLAYER in self.Competitors:
-            self.Scores[PLAYER] = 0
+            PLAYER.TournamentScore = 0
 
         self.Deaths = len(self.Competitors) // 4
         L = len(self.Competitors)//2
         self.MaxTableboardSize = L if L < 7 else 7
-        
+
+        print("%i competitors." % len(self.Competitors))
         self.EngineCommand = [settings.enginebin,
                               '-MD', settings.TOPmachineDIR,
                               '--deep', '4',
@@ -57,6 +54,7 @@ class Tournament():
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
                           for k in range(self.MaxTableboardSize)]
         if RUN:
+            self.TypeOfTournament = RUN
             print("\n\n")
             T = None
             if RUN == "tournament":
@@ -77,22 +75,12 @@ class Tournament():
                 if found:
                     break
                 for match in Round:
-                    if participant in match:
-                        found = 1
-                        break
+                    for matchplayer in match:
+                        if participant.filename == matchplayer.filename:
+                            found = 1
+                            break
 
             return found
-
-        def countUniqueMachines(Round):
-            space = []
-
-            for game in Round:
-                for player in game:
-                    if not player in space:
-                        space.append(player)
-
-            # print("space len %i " % len(space))
-            return space
 
 
         for T in range(len(self.Competitors)):
@@ -102,7 +90,7 @@ class Tournament():
         RoundIndex = 0
         U = 0
  
-        while len(ROUNDS[-1]) < self.MaxTableboardSize  and U < 100:
+        while len(ROUNDS[-1]) < self.MaxTableboardSize  and U < 1000:
             x = choice(allGames)
             if not searchPlayersInBracket(x, ROUNDS[RoundIndex]):
                 ROUNDS[RoundIndex].append(x)
@@ -116,42 +104,40 @@ class Tournament():
         return ROUNDS
 
     def DeleteLosers(self):
-        for machine in list(self.Scores.keys()):
-            print("%s: %s" % (machine, self.Scores[machine]))
+        for machine in self.Competitors:
+            print("%s: %s" % (machine.filename, machine.TournamentScore))
 
         self.Deaths = 1 if not self.Deaths else self.Deaths
 
         for k in range(self.Deaths):
             Worst = ["", 666]
-            KEYS = list(self.Scores.keys())
-            for K in KEYS:
-                if self.Scores[K] < Worst[1]:
-                    Worst[0] = K
-                    Worst[1] = self.Scores[K]
+
+            for K in self.Competitors:
+                if K.TournamentScore < Worst[1]:
+                    Worst[0] = K.filename
+                    Worst[1] = K.TournamentScore
 
 
             print("Deleting %s; %i points." % (Worst[0], Worst[1]))
 
-            self.Scores.pop(Worst[0])
-
             bareDeleteMachine(settings.TOPmachineDIR, Worst[0])
-
+            self.TotalDead += 1
     def ProperTournament(self):
 
-        TournamentRounds = self.DefineGames(len(self.Competitors))
+        self.TournamentRounds = self.DefineGames(len(self.Competitors))
  
-        for ROUND in TournamentRounds:
-            CURRENT = TournamentRounds.index(ROUND)
+        for ROUND in self.TournamentRounds:
+            CURRENT = self.TournamentRounds.index(ROUND)
             GOING = 1
             END = 0
 
             SCORE = self.RunTournamentRound(ROUND,
-                    CURRENT, len(TournamentRounds))
+                    CURRENT, len(self.TournamentRounds))
 
             print("Round Ends. %s" % SCORE)
             for GAME in range(len(ROUND)):
                 for MAC in range(len(ROUND[GAME])):
-                    self.Scores[ROUND[GAME][MAC]] += SCORE[GAME][MAC]
+                    ROUND[GAME][MAC].TournamentScore += SCORE[GAME][MAC]
 
             # to end tournament prematurely if one machine is really crap.
             if CURRENT > (len(self.TournamentRounds) / 4):
@@ -166,7 +152,18 @@ class Tournament():
             self.DeleteLosers()
 
         print("Tournament Ends.")
-
+        
+    def KillEmAallCheckDead(self, Score, Round):
+        if Score[1-MACHINE] - Score[MACHINE] >= 2:
+            deadmac = Round[MACHINE]
+            self.log("%s dies. [%i]" % (deadmac.filename,
+                deadmac.ELO))
+            self.Competitors.pop(self.Competitors.index(deadmac))
+            bareDeleteMachine(settings.TOPmachineDIR, deadmac.filename)
+            RemovedMachineCount+=1
+            print("%s dies." % deadmac.filename)
+            self.TotalDead += 1
+            
     def KillEmAllTournament(self):
         RemovedMachineCount = 0
         I=0
@@ -177,22 +174,18 @@ class Tournament():
             SCORE = self.RunTournamentRound(ROUND, I, 0)
             for GAME in range(len(ROUND)):
                 for MACHINE in range(len(ROUND[GAME])):
-                    if SCORE[GAME][1-MACHINE] - SCORE[GAME][MACHINE] >= 2:
-                        deadmac = ROUND[GAME][MACHINE]
-                        self.log("%s dies. [%i]" % (deadmac,
-                            self.FormerElo[deadmac]))
-                        self.Competitors.pop(self.Competitors.index(deadmac))
-                        bareDeleteMachine(settings.TOPmachineDIR, deadmac)
-                        RemovedMachineCount+=1
-                        print("%s dies." % deadmac)
+                    self.KillEmAllCheckDead(SCORE[GAME], ROUND[GAME])
             I+=1
         print("Ending bloodbath. removed count: %i" % RemovedMachineCount)
 
     def RunTournamentRound(self, ROUND, ThisRoundNumber, ExpectedRoundNumber):
+        for MAC in self.Competitors:
+            MAC.Load()
         ACTIVE = [True for i in ROUND]
         SCORE = [[0, 0] for i in ROUND]
         DRAWS = [0 for i in ROUND]
         GAMELENGHT = [0 for i in ROUND]
+        elapsed = 0
         I = 0
 
         last_time = time()
@@ -209,11 +202,50 @@ class Tournament():
 
                 if self.TABLEBOARD[G].initialize:
                     continue
+                
                 elif not ACTIVE[G]:
-                    continue
+                    # CREATE NEW GAME ON THE FLY.
+                    if self.TypeOfTournament == "killemall":
+
+                        ROUND[G][0].TournamentScore += SCORE[G][0]
+                        ROUND[G][1].TournamentScore += SCORE[G][1]
+                        
+                        self.KillEmAllCheckDead(SCORE[G], ROUND[G])
+                        DRAWS[G] = 0
+                        SCORE[G] = [0,0]
+                        ACTIVE[G] = True
+
+                        ROUND[G] = self.DefineGames(1)[0][0]
+                        
+                    else:
+                    # NORMAL METHOD, WAIT FOR ROUND TO FINISH.
+                        continue
+                    
                 elif GAMELENGHT[G] > 96:
                     self.TABLEBOARD[G].online = 0
-                    self.TABLEBOARD[G].result = 0.5
+
+                    PIECES = [0,0]
+                    for p in range(64):
+                        piece = self.TABLEBOARD[G].board.piece_at(p)
+                        if piece != None:
+                            piece = 0 if piece.color else 1
+
+                            PIECES[piece] += 1
+
+                    print("drawn game by movelenght"+\
+                          ("WHITE got %i pieces;" % PIECES[0]) +\
+                          (" while BLACK got %i." % PIECES[1]))
+                    wonbyadvantage = 0
+                    for k in [0,1]:
+                        if PIECES[k]>3 and PIECES[1-k] == 1:
+                            self.TABLEBOARD[G].result = k
+                            print("%i wins by piece advantage." % k)
+                            wonbyadvantage = 1
+                            print(self.TABLEBOARD[G].board)
+
+                    if not wonbyadvantage:
+                        self.TABLEBOARD[G].result = 0.5
+                        
                 if not self.TABLEBOARD[G].online:
                     R = self.TABLEBOARD[G].result
                     if R != None:
@@ -229,10 +261,11 @@ class Tournament():
                             print("Game Draws. %i %s" % (G, nameTAG))
                             SCORE[G][0] += 0.5
                             SCORE[G][1] += 0.5
-
+                            
                             DRAWS[G] += 1
 
                         self.TABLEBOARD[G].result = None
+                        
                         # print(SCORE)
 
                     if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
@@ -242,8 +275,8 @@ class Tournament():
                                %i [%s x %s]" % (G, ROUND[G][0],ROUND[G][1]))"""
 
                         engineCommand = [ copy(self.EngineCommand) for k in range(2) ]
-                        engineCommand[0] += [ROUND[G][0]]
-                        engineCommand[1] += [ROUND[G][1]]
+                        engineCommand[0] += [ROUND[G][0].filename]
+                        engineCommand[1] += [ROUND[G][1].filename]
                         self.TABLEBOARD[G].endgame()
                         self.TABLEBOARD[G].newmatch(
                             specificMatch=engineCommand)
@@ -261,7 +294,7 @@ class Tournament():
                     
             print(' '.join(STATUS))
             if not I % 10:
-                elapsed = time() - last_time
+                elapsed += time() - last_time
                 last_time = time()
                 self.showStatus(I,
                                 ThisRoundNumber,
@@ -284,29 +317,38 @@ class Tournament():
 
 
         
-    def showStatus(self, I, RoundIndex, TotalRounds, SCORE, ACTIVE, DRAWS, ROUND, elapsed):
+    def showStatus(self, I, RoundIndex, TotalRounds, SCORE,
+                   ACTIVE, DRAWS, ROUND, elapsed):
         if self.stdscr:
             self.stdscr.clear()
         ActiveSymbol = {True: 'o', False: 'x'}
-        print("\nPlay %i of Round %i/%i.  t: %is" %
-              (I,
-               RoundIndex,
-               TotalRounds,
-               elapsed))
+        if self.TypeOfTournament == "killemall":
+            print("\n Play %i; %i deads already.\n" % (I, self.TotalDead))
+        else:
+            print("\nPlay %i of Round %i/%i.  t: %is" %
+                  (I,
+                   RoundIndex,
+                   TotalRounds,
+                   elapsed))
 
         I = 0
         for iTABLE in self.TABLEBOARD:
             if I>len(SCORE)-1:
                 continue
             try:
+                score = [0,0]
+                for k in [0,1]:
+                    for mac in self.Competitors:
+                        if iTABLE.MACnames[k] == mac.filename:
+                            score[k] = mac.TournamentScore
                 TableInfoMA = "{%i} %s %.1f" % (
-                    self.Scores[iTABLE.MACnames[0]],
+                    score[0],
                     iTABLE.MACnames[0],
                     SCORE[I][0])
                 TableInfoMB = "%.1f %s {%i}" % (
                     SCORE[I][1],
                     iTABLE.MACnames[1],
-                    self.Scores[iTABLE.MACnames[1]])
+                    score[1])
 
                 TableInfo = "%s%sx%s%s   (%i)    %s" % (
                         " " * (28-len(TableInfoMA)),
@@ -357,8 +399,8 @@ class Tournament():
         for DEATH in range(self.Deaths + 1):
             LASTPOORBEST = POORBEST
             POORBEST = 1000
-            for MACHINE in self.Scores:
-                SCORE = self.Scores[MACHINE]
+            for MACHINE in self.Competitors:
+                SCORE = MACHINE.TournamentScore
                 if SCORE <= WORST:
                     continue
                 elif SCORE < POORBEST:
@@ -376,6 +418,11 @@ class Tournament():
         logfile = open("log.txt", "a")
         logfile.write(text)
         logfile.close()
+
+    def SIGINTFinishAndQuit(self, signum, frame):
+        self.cleanup()
+        exit()
+        
 def checknumberofPROCS():
     pids = [pid for pid in listdir('/proc') if pid.isdigit()]
     ENGINE_COUNT = 0
@@ -384,7 +431,7 @@ def checknumberofPROCS():
             PROC = open(path.join('/proc', pid, 'cmdline'),
                         'rb').read().decode('utf-8', 'ignore')
             # print(PROC)
-            if "e-vchess" in PROC:
+            if "engine/e-vchess" in PROC:
                 ENGINE_COUNT += 1
 
         except IOError:  # proc has already terminated

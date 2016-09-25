@@ -1,6 +1,6 @@
 #include "ev_chess.h"
 
-
+const char *Version = "v0.801";
 struct board board;
 struct param Brain;
 struct movelist moves;
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     signal(SIGTERM, SIG_IGN); 
     signal(SIGCHLD, SIG_IGN);
     
-    printf("e-vchess engine v0.8\n");
+    printf("e-vchess engine %s\n", Version);
     printf("author afrogabs\n\n");
     
     char *inp;
