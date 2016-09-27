@@ -351,7 +351,15 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
 }
 
+Host Device void undo_lastMove(struct board *board, int Number) {
+  int N=0;
+  for (N=0; N<Number;N++)
+    undo_move(board,
+	      &board->movements[board->MovementCount-1]);  
 
+
+}
+    
 Device void attackers_defenders (char squares[8][8], struct movelist moves, int P) {
     int i = 0;
     moves.kad = 0;

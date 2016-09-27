@@ -27,7 +27,7 @@
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
 
-#define VariableSignal <
+
 
 #define Vb if (verbose)
 
@@ -208,7 +208,7 @@ Host Device int cancastle
 Host Device void movement_generator
     (struct board *board, struct movelist *moves, 
             int limit, char direction, int i, int j, int P);
-
+Host Device void undo_lastMove(struct board *board, int Number);
 
 //functions from operation.cpp;##################################################
 void cord2pos (char out[]); 
@@ -237,13 +237,16 @@ Host Device void reorder_movelist(struct movelist *movelist);
 
 Host Device void movement_to_string(struct move *move, char *target);
 
+Host Device int variableComparation(long A, long B, int startPlayer, int endPlayer);
+
 //functions from interface.cpp;##################################################
 int parse_move (struct move *target, char *s, int P);
 void print_movement (struct move *move, int full);
 int read_movelines (char txt[128], int verbose);
 int fehn2board (char str[]);
 void eval_info_move(struct move *move, int DEEP, time_t startT, int P);
-void eval_info_group_move(struct move *primary, struct move *secondary, int DEEP, time_t startT, int P);
+void eval_info_group_move(struct move *primary, struct move *secondary,
+			  int DEEP, time_t startT, int P);
 void stdoutWrite(const char * text);
 void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
 
@@ -268,6 +271,7 @@ Device int satellite_evaluation (struct move *movement);
 
 
 //functions from evolution.cpp;
+unsigned long long rndseed();
 int loadmachine (int verbose, char *dir);
 //int applyresult (int result);
 //int countpieces (void);

@@ -16,8 +16,8 @@ settings.initialize()
 
 from chessArena.table import Table
 
-xDeepValue = 2
-
+xDeepValue = 1
+yDeepValue = 5
 class Tournament():
 
     def __init__(self, scr, RUN, DELETE):
@@ -48,7 +48,7 @@ class Tournament():
                               '-MD', settings.TOPmachineDIR,
                               '--deep', '4',
                               '--xdeep', str(xDeepValue),
-                              '--ydeep', '6',
+                              '--ydeep', str(yDeepValue),
                               '--specific']
 
         self.TABLEBOARD = [Table(None, forceNoGUI=True)
@@ -153,16 +153,21 @@ class Tournament():
 
         print("Tournament Ends.")
         
-    def KillEmAallCheckDead(self, Score, Round):
-        if Score[1-MACHINE] - Score[MACHINE] >= 2:
-            deadmac = Round[MACHINE]
-            self.log("%s dies. [%i]" % (deadmac.filename,
-                deadmac.ELO))
-            self.Competitors.pop(self.Competitors.index(deadmac))
-            bareDeleteMachine(settings.TOPmachineDIR, deadmac.filename)
-            RemovedMachineCount+=1
-            print("%s dies." % deadmac.filename)
-            self.TotalDead += 1
+    def KillEmAllCheckDead(self, Score, Round):
+        for MACHINE in range(len(Round)):
+            if Score[1-MACHINE] - Score[MACHINE] >= 2:
+                deadmac = Round[MACHINE]
+                self.log("%s dies. [%i]" % (deadmac.filename,
+                    deadmac.ELO))
+                try:
+                    self.Competitors.pop(self.Competitors.index(deadmac))
+                except:
+                    print("Tried to kill %s but it's already deleted." % deadmac.filename)
+                    return
+                bareDeleteMachine(settings.TOPmachineDIR, deadmac.filename)
+                
+                print("%s dies." % deadmac.filename)
+                self.TotalDead += 1
             
     def KillEmAllTournament(self):
         RemovedMachineCount = 0
@@ -173,8 +178,8 @@ class Tournament():
             ROUND = self.DefineGames(1)[0]
             SCORE = self.RunTournamentRound(ROUND, I, 0)
             for GAME in range(len(ROUND)):
-                for MACHINE in range(len(ROUND[GAME])):
-                    self.KillEmAllCheckDead(SCORE[GAME], ROUND[GAME])
+                self.KillEmAllCheckDead(SCORE[GAME], ROUND[GAME])
+               
             I+=1
         print("Ending bloodbath. removed count: %i" % RemovedMachineCount)
 
@@ -237,7 +242,7 @@ class Tournament():
                           (" while BLACK got %i." % PIECES[1]))
                     wonbyadvantage = 0
                     for k in [0,1]:
-                        if PIECES[k]>3 and PIECES[1-k] == 1:
+                        if PIECES[k] > 3 and PIECES[1-k] == 1:
                             self.TABLEBOARD[G].result = k
                             print("%i wins by piece advantage." % k)
                             wonbyadvantage = 1
@@ -304,7 +309,7 @@ class Tournament():
                                 DRAWS,
                                 ROUND,
                                 elapsed)
-            sleep(0.5 + xDeepValue*1)
+            sleep(0.5 + xDeepValue*2)
             I += 1
 
             if not True in ACTIVE:

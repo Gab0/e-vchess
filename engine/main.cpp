@@ -1,6 +1,6 @@
 #include "ev_chess.h"
 
-const char *Version = "v0.801";
+const char *Version = "v0.803";
 struct board board;
 struct param Brain;
 struct movelist moves;

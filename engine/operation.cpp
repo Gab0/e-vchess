@@ -432,3 +432,21 @@ Host Device void movement_to_string(struct move *move, char *target) {
   target[3] = movement_buffer.to[1];
 }
 
+Host Device int variableComparation(long A, long B, int startPlayer, int endPlayer) {
+  if (A>B) return 1;
+  return 0;
+
+  /*if (B < -990000) return 1;
+ 
+  int RESULT = 0;
+  
+  if (startPlayer == Machineplays && A > B) RESULT = 1;
+  else if (startPlayer != Machineplays && A < B) RESULT = 1;
+
+  if (startPlayer != endPlayer) RESULT = 1 - RESULT;
+
+
+  return RESULT;*/
+}
+
+  

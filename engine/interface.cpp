@@ -227,7 +227,7 @@ void show_moveline(struct board *finalboard, int bottom_span, time_t startT) {
   for (I=bottom_span; I < finalboard->MovementCount; I++) {
     movement_to_string(&finalboard->movements[I], buffer);
 
-      asprintf(&output, "%s %s", output, buffer);
+    asprintf(&output, "%s %c%c%c%c", output, buffer[0],buffer[1],buffer[2],buffer[3]);
 
   }
     asprintf(&output, "%s\n", output);
