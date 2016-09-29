@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/bash
 FILES=( "main" "brain" "board" "operation" "evolution" "interface" )
 if [ "$1" = "cuda" ]
 then
