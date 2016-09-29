@@ -357,7 +357,6 @@ Host Device void undo_lastMove(struct board *board, int Number) {
     undo_move(board,
 	      &board->movements[board->MovementCount-1]);  
 
-
 }
     
 Device void attackers_defenders (char squares[8][8], struct movelist moves, int P) {

@@ -26,6 +26,7 @@
 #define expand_play(p) p.from[0],p.from[1],p.to[0],p.to[1]
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
+#define invert(x) x = -x;
 
 
 

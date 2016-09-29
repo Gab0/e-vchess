@@ -71,10 +71,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 #else           
   if(canNullMove(DEEP, _board, moves->k, PLAYER)) {
     flip(_board->whoplays);
-    BufferBoard = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
+    BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
     flip(_board->whoplays);
-    if (PLAYER==Machineplays && BufferBoard->score > Alpha) Alpha = -BufferBoard->score;
-    if (PLAYER!=Machineplays && BufferBoard->score < Beta)  Beta = -BufferBoard->score;
+    invert(BufferBoard->score);
+    if (BufferBoard->score > Alpha) Alpha = BufferBoard->score;
+
     DUMP(BufferBoard)
       }
     
@@ -82,28 +83,28 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   for (i=0;i<moves->k;i++) {
 
     move_pc(_board, &moves->movements[i]);    
-    BufferBoard = thinkiterate(_board, DEEP-1, verbose, Alpha, Beta, AllowCutoff);
-      
-
-    moves->movements[i].score = -BufferBoard->score;
+    BufferBoard = thinkiterate(_board, DEEP-1, verbose,
+			       -Beta, -Alpha, AllowCutoff);      
+    invert(BufferBoard->score);
+    moves->movements[i].score = BufferBoard->score;
    
     finalboardsArray[i] = BufferBoard;
 
     BufferBoard = NULL;
     
     if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
-    if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
+    //if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
       
       
-    if (variableComparation(moves->movements[i].score, score,
-			    PLAYER, finalboardsArray[i]->whoplays)) {
+    if (moves->movements[i].score > score) {
       score = moves->movements[i].score;
       ChosenMovementIndex=i;
     }
     printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
     
-    undo_lastMove(finalboardsArray[i], 1);
+    undo_lastMove(finalboardsArray[i], 2);
 
+    //finalboardsArray[i]->score = -finalboardsArray[i]->score;
     undo_move(_board, &moves->movements[i]);
   }     
              
@@ -126,7 +127,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     long satellite = 0;
     int OtherPlayer=0;
     int PLAYER=0;
-    selectBestMoves(moves->movements, moves->k, secondTOP, -T);
+    selectBestMoves(moves->movements, moves->k, secondTOP, T);
 
     struct movelist *nextlevelMovelist =
       (struct movelist*) calloc(T, sizeof(struct movelist));
@@ -168,11 +169,11 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	    move_pc(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
 	    
 	    dummyboard =
-	      thinkiterate(finalboardsArray[I], DEEP-1-OtherPlayer,
-			   0, -Alpha, -Beta, AllowCutoff);
+	      thinkiterate(finalboardsArray[I], DEEP-1,
+			   0, -Beta, -Alpha, AllowCutoff);
 
-
-	    nextlevelMovelist[i].movements[M].score = -dummyboard->score;
+	    if (PLAYER == Machineplays) invert(dummyboard->score);
+	    nextlevelMovelist[i].movements[M].score = dummyboard->score;
 	    
 	    undo_move(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
 
@@ -203,7 +204,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
 	if (movelistSCORE > sessionSCORE) {
 	  satellite = satellite_evaluation(&moves->movements[I]);
-	  if (movelistSCORE + satellite) {
+	  if (movelistSCORE + satellite > sessionSCORE) {
 	   
 	    ChosenMovementIndex = I;
 	    sessionSCORE = movelistSCORE + satellite;
@@ -296,7 +297,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 			  findking(_board->squares, 'X', PLAYER),
 			  PLAYER, 0)) {
       score = 13000 - 50*(BRAIN.DEEP-DEEP); 
-      if (PLAYER != Machineplays) score = -score;
+      if (PLAYER != Machineplays) invert(score);
     }
        
     else score = 0; 
@@ -320,17 +321,13 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       if(canNullMove(DEEP, _board, moves.k, PLAYER)) {
 	flip(_board->whoplays);
 	DisposableBuffer = thinkiterate(_board, DEEP-1, verbose,
-					-Alpha, -Beta, AllowCutoff);
-	DisposableBuffer->score = -DisposableBuffer->score;
+					-Beta, -Alpha, AllowCutoff);
+	invert(DisposableBuffer->score);
 	flip(_board->whoplays);
-	if (PLAYER==Machineplays && DisposableBuffer->score > Alpha)
+	if (DisposableBuffer->score > Alpha)
 	  Alpha = DisposableBuffer->score;
-	if (PLAYER!=Machineplays && DisposableBuffer->score < Beta )
-	  Beta  = DisposableBuffer->score;
-	 
-	DUMP(DisposableBuffer);
 
-	 
+	DUMP(DisposableBuffer);
       }
      
 
@@ -344,9 +341,10 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
        
       move_pc(_board, &moves.movements[i]);  
 
-      DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, -Alpha, -Beta, AllowCutoff);
-	
-      moves.movements[i].score = -DisposableBuffer->score;
+      DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
+
+      invert(DisposableBuffer->score);
+      moves.movements[i].score = DisposableBuffer->score;
 
        
       //if (PLAYER==Machineplays) {
@@ -358,7 +356,9 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	  DisposableBuffer=NULL;
 	  PersistentBufferOnline=1;
 	}
-	 
+	
+
+
 	if (moves.movements[i].score > Alpha) {
 	  Alpha = moves.movements[i].score;
 	   
@@ -366,34 +366,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	      ABcutoff=1;
 	  
 	}
-	//}
-       
-	
-	/*  if (PLAYER!=Machineplays) {
-	if (moves.movements[i].score < score) {
-	  if (PersistentBufferOnline)
-	    DUMP(PersistentBuffer);
-	  PersistentBuffer = DisposableBuffer;
-	  score = moves.movements[i].score;
-	  DisposableBuffer=NULL;
-	  PersistentBufferOnline=1;
-	}
-	if (moves.movements[i].score < Beta) {
-	  //printf("**.\n");
-	  //OBeta = Beta;    
-	  Beta = moves.movements[i].score;
-	   
-	  //cloneboard(Buffer, BoardBuffer);
-	  //if(Buffer->score != BoardBuffer->score) printf("FAIL b !\n");
-	   
-	  if (Beta<=Alpha) 
-	      ABcutoff=1;
-
-	     
-	       
-	      }
-	      }*/	       
-       
        
       if (ABcutoff && AllowCutoff){
 	DUMP(DisposableBuffer);  
@@ -421,7 +393,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     //show_board(_board->squares);
 
     _board->score = machine_score - (enemy_score * (1 + BRAIN.presumeOPPaggro));
-   
+    if (PLAYER != Machineplays) invert(_board->score);
     return _board;
   }
 
