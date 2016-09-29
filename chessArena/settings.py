@@ -1,3 +1,4 @@
+#!/bin/python
 def initialize():
     global COLOR
     global engineARGS
