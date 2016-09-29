@@ -1,7 +1,10 @@
 #!/bin/python
-
-import matplotlib.pyplot as plt
 import sys
+try:
+    import matplotlib.pyplot as plt
+except:
+    def show_mem_graphic():
+        print("no matplotlib lib.")
 def show_mem_graphic():
     source = open('mempertime', 'r')
 
