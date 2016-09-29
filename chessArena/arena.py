@@ -23,14 +23,14 @@ from makegraphic import show_mem_graphic
 #from evchess_evolve.management import *
 
 # DEBUG, MEMORY SCAN MODULES;
-import objgraph
-import resource
-from pympler import muppy, asizeof, tracker
-import matplotlib.pyplot as plt
-from json import dumps
-import sys
-import tracemalloc
-import gc
+#import objgraph
+#import resource
+#from pympler import muppy, asizeof, tracker
+#import matplotlib.pyplot as plt
+#from json import dumps
+#import sys
+#import tracemalloc
+#import gc
 
 
 class Arena():
