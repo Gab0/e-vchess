@@ -16,8 +16,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   _board->MovementCount=0;
   int CurrentMovementIndex = _board->MovementCount;
 
-  //Vb printf("Master Address: %p\n", (void *)_board); 
-    
+  
   long Alpha = -16999000;
   long Beta = 16999000;
     
@@ -101,8 +100,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       ChosenMovementIndex=i;
     }
     printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
-    
-    undo_lastMove(finalboardsArray[i], 2);
+    if (BRAIN.xDEEP)
+      undo_lastMove(finalboardsArray[i], 2);
 
     //finalboardsArray[i]->score = -finalboardsArray[i]->score;
     undo_move(_board, &moves->movements[i]);
@@ -296,8 +295,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 			  findking(_board->squares, 'Y', PLAYER), 
 			  findking(_board->squares, 'X', PLAYER),
 			  PLAYER, 0)) {
-      score = 13000 - 50*(BRAIN.DEEP-DEEP); 
-      if (PLAYER != Machineplays) invert(score);
+      score = -13000 + 50*(BRAIN.DEEP-DEEP); 
+      //if (PLAYER != Machineplays) invert(score);
     }
        
     else score = 0; 
