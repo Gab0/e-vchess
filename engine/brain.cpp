@@ -166,13 +166,16 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	  for (M=0;M<nextlevelMovelist[i].k;M++) {
 
 	    move_pc(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
-	    
-	    dummyboard =
-	      thinkiterate(finalboardsArray[I], DEEP-1,
-			   0, -Beta, -Alpha, AllowCutoff);
 
-	    if (PLAYER == Machineplays)
-	      invert(dummyboard->score);
+
+	    if (PLAYER == Machineplays)	{
+	    dummyboard = thinkiterate(finalboardsArray[I], DEEP-1,
+			   0, -Beta, -Alpha, AllowCutoff);
+	    invert(dummyboard->score);}
+
+	    else dummyboard = thinkiterate(finalboardsArray[I], DEEP-1, 0, Alpha, Beta, AllowCutoff);
+
+
 	    nextlevelMovelist[i].movements[M].score = dummyboard->score;
 	    
 	    undo_move(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
@@ -200,6 +203,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	}
 	else {
 	  movelistSCORE = moves->movements[I].score;
+	  if(PLAYER == Machineplays)
+	    invert(movelistSCORE);
 
 	}
 
