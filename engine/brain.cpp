@@ -134,7 +134,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     int R=0;
     
     for (R=0;R<BRAIN.xDEEP;R++) {
-      AllowCutoff = 0;
+      AllowCutoff = 1;
       if (R + 1 == BRAIN.xDEEP) AllowCutoff = 1;
 
 	sessionSCORE = -9990000;
@@ -171,7 +171,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	      thinkiterate(finalboardsArray[I], DEEP-1,
 			   0, -Beta, -Alpha, AllowCutoff);
 
-	    if (PLAYER == Machineplays) invert(dummyboard->score);
+	    if (PLAYER == Machineplays)
+	      invert(dummyboard->score);
 	    nextlevelMovelist[i].movements[M].score = dummyboard->score;
 	    
 	    undo_move(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
@@ -192,6 +193,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
        
 	  if (BufferBoard==NULL){printf("BufferBoard not found failure!\n");exit(0);}
 	  DUMP(finalboardsArray[I]);
+
 	  finalboardsArray[I] = BufferBoard;
 	  //finalboardsArray[I]->score = movelistSCORE;
 	  BufferBoard = NULL;
@@ -219,6 +221,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	
 	if (Show_Info) show_moveline(finalboardsArray[I], CurrentMovementIndex, startT);
         
+	  undo_lastMove(finalboardsArray[I], 2);
       }
 
     }
@@ -296,7 +299,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 			  findking(_board->squares, 'X', PLAYER),
 			  PLAYER, 0)) {
       score = -13000 + 50*(BRAIN.DEEP-DEEP); 
-      //if (PLAYER != Machineplays) invert(score);
     }
        
     else score = 0; 
@@ -445,7 +447,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 
   }
   
-    if (P == Attacker)   
+     if (P == Attacker)   
     for (Z=0;Z<moves->kad;Z++) {
     PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
         
@@ -472,13 +474,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     score -= (BRAIN.pvalues[PieceIndex]/10 * BRAIN.balanceoffense);
 
          
-  }
-
-    //    else {}
-    
-
-  
-
+    }
   
   score += chaos;       
   score += moves->k * BRAIN.MODmobility;
@@ -525,9 +521,9 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
       if (board->squares[i][j]==Pieces[P][5])
 	if (ifsquare_attacked (board->squares,i,j,P,0)) return 0;
     }
-       
-  return NullMove;       
-               
+  //OFF!!!
+  //return NullMove;       
+  return 0;             
 }
 
 

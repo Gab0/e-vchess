@@ -16,8 +16,8 @@ settings.initialize()
 
 from chessArena.table import Table
 
-xDeepValue = 1
-yDeepValue = 5
+xDeepValue = 0
+yDeepValue = 0 
 class Tournament():
 
     def __init__(self, scr, RUN, DELETE):
@@ -309,7 +309,7 @@ class Tournament():
                                 DRAWS,
                                 ROUND,
                                 elapsed)
-            sleep(0.5 + xDeepValue*2)
+            sleep(1 + xDeepValue * 1.5)
             I += 1
 
             if not True in ACTIVE:

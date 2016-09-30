@@ -13,7 +13,7 @@ case  "$1" in
 
 "longtournament") python ${BASEDIR}/launch_tournament.py --t;;
 
-"make") cd ${BASEDIR}/engine ./make.sh;;
+"make") cd ${BASEDIR}/engine && ./make.sh;;
 
 "memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
 

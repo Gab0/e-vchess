@@ -247,10 +247,6 @@ Host Device void move_pc(struct board *tg_board, struct move *movement) {
     char to[2] = {movement->to[0], movement->to[1]};
     
     
-    
-
-
-
     tg_board->squares[to[0]][to[1]] = tg_board->squares[from[0]][from[1]];
     tg_board->squares[from[0]][from[1]] = 'x';
     
@@ -505,9 +501,7 @@ Host Device void movement_generator(struct board *board, struct movelist *moves,
         matrix[3][0] = 0;
         matrix[3][1] = -1;
     }       
-    
-    
-    
+
        for (X=0;X<4;X++){
            q=1;
            while (q>0) {
