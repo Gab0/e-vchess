@@ -18,6 +18,7 @@
 #include <ctype.h>
 
 
+#define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 
 #define onboard(i,j) i >=0 && i < 8 && j >= 0 && j <8
 #define comp_arr(a,b) (a[0] == b[0] && a[1] == b[1])
@@ -28,7 +29,7 @@
 #define flip(x) x = 1 - x
 #define invert(x) x = -x;
 
-
+#define INFINITE 9999000;
 
 #define Vb if (verbose)
 
@@ -179,7 +180,7 @@ extern bool toloadmachine;
 extern char *specificMachine;
 
 extern bool thinkVerbose;
-
+extern bool fastmode;
 extern bool loadDEEP;
 
 extern int searchNODEcount;
@@ -268,8 +269,10 @@ Device void Testdevice(int *Test);
 Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
 Device int satellite_evaluation (struct move *movement);
 
-
-
+//functions from brain_fast.cpp;#################################################
+int think_fast(struct move *out, int PL, int DEEP, int verbose);
+Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
+			      long Alpha, long Beta, int AllowCutoff);
 
 //functions from evolution.cpp;
 unsigned long long rndseed();
@@ -279,5 +282,6 @@ int loadmachine (int verbose, char *dir);
 void readparam(char *line, int verbose, const char *keyword, float *Parameter);
 void dump_history();
 void chesslog(char *location, const char content[]);
+
 #define	EV_CHESS_H
 #endif	/* BOARD_H */

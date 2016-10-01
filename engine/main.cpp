@@ -19,6 +19,7 @@ char *output = (char *)malloc(364 * sizeof(char));
 int machineplays = 1;
 Device int GPUmachineplays = 1;
 
+bool fastmode = false;
 
 bool loadedmachine = false;
 char *specificMachine = (char *)malloc(64 * sizeof(char));
@@ -160,6 +161,8 @@ int main(int argc, char** argv) {
 	  Brain.yDEEP = (int) atoi(argv[i+1]);
 	
 	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
+
+	if (strstr(argv[i], "--fast") != NULL) fastmode = true;
 	
         }  
     
@@ -293,9 +296,17 @@ void computer(int verbose) {
 
     struct move move;
 
-    
-    if (think(&move, P , Brain.DEEP, verbose) < 0) {
+    if (fastmode) {
+      if (think_fast(&move, P , Brain.DEEP, verbose) < 0) {
         printf("Checkmate.\n");return;}
+    }
+    else
+      if (think(&move, P , Brain.DEEP, verbose) < 0) {
+	printf("Checkmate.\n");return;}
+
+
+
+    
     //sleep(1);
     move_pc(&board, &move);
     

@@ -25,7 +25,7 @@ def initialize():
     TOPmachineDIR = machineDIR + "/top_machines"  # % machineDIR
 
     # path and arguments to run those chess engines.
-    engineARGS = [enginebin, "-MD", machineDIR, "--deep", "4", "--xdeep", "0"]
+    engineARGS = [enginebin, "-MD", machineDIR, "--deep", "4", "--xdeep", "0", "--fast"]
 
     # if each movement done should be logged on stdout.
     VerboseMove = 0

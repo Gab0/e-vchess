@@ -171,8 +171,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	    if (PLAYER == Machineplays)	{
 	    dummyboard = thinkiterate(finalboardsArray[I], DEEP-1,
 			   0, -Beta, -Alpha, AllowCutoff);
-	    invert(dummyboard->score);}
-
+	    invert(dummyboard->score);
+	  }
 	    else dummyboard = thinkiterate(finalboardsArray[I], DEEP-1, 0, Alpha, Beta, AllowCutoff);
 
 
@@ -353,7 +353,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       moves.movements[i].score = DisposableBuffer->score;
 
        
-      //if (PLAYER==Machineplays) {
 	if (moves.movements[i].score > score) {
 	  if (PersistentBufferOnline)
 	    DUMP(PersistentBuffer);
@@ -361,17 +360,16 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	  score = moves.movements[i].score;
 	  DisposableBuffer=NULL;
 	  PersistentBufferOnline=1;
-	}
 	
-
-
-	if (moves.movements[i].score > Alpha) {
-	  Alpha = moves.movements[i].score;
-	   
-	  if (Beta<=Alpha) 
-	      ABcutoff=1;
-	  
 	}
+	if (moves.movements[i].score > Alpha) 
+	  Alpha = moves.movements[i].score;
+	
+	if (Beta<=Alpha) 
+	  ABcutoff=1;
+	  
+
+	
        
       if (ABcutoff && AllowCutoff){
 	DUMP(DisposableBuffer);  
@@ -452,7 +450,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 
   }
   
-     if (P == Attacker)   
+  //if (P == Attacker)   
     for (Z=0;Z<moves->kad;Z++) {
     PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
         
