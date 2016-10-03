@@ -121,6 +121,8 @@ class Tournament():
             print("Deleting %s; %i points." % (Worst[0], Worst[1]))
 
             bareDeleteMachine(settings.TOPmachineDIR, Worst[0])
+            self.Competitors = [
+                    x for x in self.Competitors if x.filename != Worst[-1] ]
             self.TotalDead += 1
     def ProperTournament(self):
 

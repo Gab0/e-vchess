@@ -252,6 +252,8 @@ void eval_info_group_move(struct move *primary, struct move *secondary,
 void stdoutWrite(const char * text);
 void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
 
+void show_movelist(struct movelist *moves);
+
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker);

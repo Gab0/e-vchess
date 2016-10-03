@@ -99,7 +99,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       score = moves->movements[i].score;
       ChosenMovementIndex=i;
     }
-    printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
+    //printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
     if (BRAIN.xDEEP)
       undo_lastMove(finalboardsArray[i], 2);
 

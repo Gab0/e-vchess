@@ -225,6 +225,8 @@ int main(int argc, char** argv) {
       break;}
     
     if (strstr(inp, "new") != NULL) setup_board(1);
+
+    if (strstr(inp, "reorder") != NULL) reorder_movelist(&moves);
     
     if (strstr(inp, "test") != NULL) fehn2board(testfehn);
     
@@ -257,19 +259,18 @@ int main(int argc, char** argv) {
 
     if (strstr(inp, "list") !=NULL)  {
         legal_moves(&board, &moves,0,0);
-        printf("list [%i]:\n", moves.k);
-        for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
-        printf("attacker? %c.\n", moves.movements[i].casualty);}
+
     }   
              
     if (strstr(inp, "lis1") !=NULL)  {
         legal_moves(&board,&moves,1,0);
-        printf("list [%i]:\n", moves.k);
-        for (i=0; i < moves.k; i++) { print_movement(&moves.movements[i],0);
-        printf("attacker? %c.\n", moves.movements[i].casualty);}
+
     }   
 
-  
+    if (strstr(inp, "showlist") !=NULL) {
+      show_movelist(&moves);
+
+    }
  
     if(strstr(inp, "echo") !=NULL) {
         write(1, output, strlen(output));fflush(stdout);
@@ -303,11 +304,9 @@ void computer(int verbose) {
     else
       if (think(&move, P , Brain.DEEP, verbose) < 0) {
 	printf("Checkmate.\n");return;}
-
-
-
     
-    //sleep(1);
+   
+
     move_pc(&board, &move);
     
  

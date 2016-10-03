@@ -10,7 +10,7 @@ import gc
 from random import randrange
 from weakref import ref
 
-from chessArena.enginewrap import Engine
+from chessArena.enginewrapper import Engine
 from evchess_evolve.core import machine
 from chessArena.settings import *
 
@@ -251,6 +251,8 @@ class Table(Frame):
 
         try:
             self.LastFlush = self.MACHINE[self.turn].receive()
+            if VerboseMove:
+                print(self.LastFlush)
 
         except BrokenPipeError:
             print("broken pipe @ " + str(self.number) + " while gaming.")

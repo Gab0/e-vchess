@@ -28,12 +28,14 @@ class Engine():
     def receive(self, method="lines"):
 
         if method == "lines":
+            self.engine.stdout.flush()
             data = self.engine.stdout.readlines()
             data = [x.decode('utf-8', 'ignore') for x in data]
             if self.recordComm:
                 for c in data:
-                    self.recordedData +=c
+                    self.recordedData += c
         else:
+            self.engine.stdout.flush()
             data = self.engine.stdout.read().decode('utf-8', 'ignore')
             if self.recordComm:
                 self.recordedData +=data
@@ -50,11 +52,11 @@ class Engine():
             line = line.replace('\n', '').split(" ")
             try:
                 P = line.index("move")
+                return line[P + 1]
             except ValueError:
-
-                return None
-            return line[P + 1]
-
+                print("ERR")
+                pass
+            
         return None
 
     def pid(self):

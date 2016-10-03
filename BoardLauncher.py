@@ -47,7 +47,7 @@ class DuelTable():
             pass
             #choices = userchoice.split(" ")
 
-        Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '1', '--showinfo']
+        Callargs = [settings.enginebin, "--deep", '3', '--xdeep', '0', '--showinfo']
 
         if userchoice != "zero":
             LOADED = 1

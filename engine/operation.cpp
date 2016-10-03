@@ -396,23 +396,22 @@ Host Device void reorder_movelist(struct movelist *movelist) {
     struct move temp;
     
     int Freeindex[128];
-    int bFK=0, tFK=0;
+    int bottomFK=0, topFK=0;
     
     for (i=1;i<movelist->k;i++) {
         if (movelist->movements[i].casualty == 'x') {
-            Freeindex[tFK] = i;
-            tFK++;
+            Freeindex[topFK] = i;
+            topFK++;
             }
         
-        else if (tFK>bFK) {
-            replicate_move(&temp, &movelist->movements[Freeindex[bFK]]);
-            //temp = movelist->movements[Freeindex[bFK]];
-            //movelist->movements[Freeindex[bFK]] = movelist->movements[i];
-            replicate_move(&movelist->movements[Freeindex[bFK]], &movelist->movements[i]);;
+        else if (topFK > bottomFK) {
+            replicate_move(&temp, &movelist->movements[Freeindex[bottomFK]]);
+
+            replicate_move(&movelist->movements[Freeindex[bottomFK]], &movelist->movements[i]);;
             
-            replicate_move(&movelist->movements[i],&temp);
-            //movelist->movements[i] = temp;
-            bFK++;
+            replicate_move(&movelist->movements[i], &temp);
+
+            bottomFK++;
         }
     }
 }

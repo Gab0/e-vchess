@@ -18,10 +18,10 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
   
   long Alpha = -INFINITE;
   long Beta = INFINITE;
-    
+  
   struct movelist *moves =
     (struct movelist *) calloc(1, sizeof(struct movelist));
-    
+  
   int PLAYER = Machineplays;
   legal_moves(_board, moves, PLAYER, 0);
   
@@ -31,19 +31,19 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
 		       19, //g1f3
 		       5,}; //c2c4
       
-       srand ( rndseed() );
-       ChosenMovementIndex = moveBook[rand() % 4];
+    srand ( rndseed() );
+    ChosenMovementIndex = moveBook[rand() % 4];
 
 
-       replicate_move(out, &moves->movements[ChosenMovementIndex]);
+    replicate_move(out, &moves->movements[ChosenMovementIndex]);
       
-       DUMP(moves);
-       DUMP(_board);
-       return ChosenMovementIndex;
+    DUMP(moves);
+    DUMP(_board);
+    return ChosenMovementIndex;
 		       
   }
   
-  //reorder_movelist(moves);
+  reorder_movelist(moves);
 
   if (moves->k == 0) {
     DUMP(_board);
@@ -68,7 +68,7 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
   for (i=0;i<moves->k;i++) {
 
     move_pc(_board, &moves->movements[i]);    
-    moves->movements[i].score = - thinkiterate_fast(_board, DEEP-1, verbose,
+    moves->movements[i].score = -thinkiterate_fast(_board, DEEP-1, verbose,
 			       -Beta, -Alpha, AllowCutoff);      
 
 
@@ -77,7 +77,7 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
       score = moves->movements[i].score;
       ChosenMovementIndex=i;
     }
-    //    if (moves->movements[i].score > Alpha)      Alpha = moves->movements[i].score;
+    if (moves->movements[i].score > Alpha)      Alpha = moves->movements[i].score;
 
     undo_move(_board, &moves->movements[i]);
   }     
@@ -133,7 +133,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
   //IFnotGPU( Vb show_board(_board->squares); )
   if (DEEP>0) {
 
-    //reorder_movelist(&moves); 
+    reorder_movelist(&moves); 
     
     //NULL MOVE: guaranteed as long as if PL is not in check,
     //and its not K+P endgame.

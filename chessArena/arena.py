@@ -191,7 +191,7 @@ class Arena():
                     self.routine_pop_management(LEVEL)
 
             self.move_read_reliability = 0
-            if not self.ROUND % 10:
+            if not self.ROUND % ArenaRoundInfoRate:
                 print(" < ROUND %i   %.1fs  Active: %.2f%% > " % (
                     self.ROUND,
                     SLEEPTIME,

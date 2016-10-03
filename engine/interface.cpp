@@ -239,3 +239,13 @@ void stdoutWrite(const char * text) {
   asprintf(&output, text);
   write(1, output, strlen(output));
 }
+
+
+
+void show_movelist(struct movelist *moves) {
+  int i=0;
+        printf("list [%i]:\n", moves->k);
+        for (i=0; i < moves->k; i++) { print_movement(&moves->movements[i], 0);
+        printf("attacker? %c.\n", moves->movements[i].casualty);}
+
+}
