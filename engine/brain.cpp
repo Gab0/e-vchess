@@ -392,12 +392,12 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
      
   else {
 
-    machine_score = evaluate(_board, &moves, Machineplays, PLAYER);
-    enemy_score = evaluate(_board, &moves, 1-Machineplays, PLAYER);
+    machine_score = evaluate(_board, &moves, PLAYER, PLAYER);
+    enemy_score = evaluate(_board, &moves, 1-PLAYER, PLAYER);
     //show_board(_board->squares);
 
     _board->score = machine_score - (enemy_score * (1 + BRAIN.presumeOPPaggro));
-    if (PLAYER != Machineplays) invert(_board->score);
+    //if (PLAYER != Machineplays) invert(_board->score);
     return _board;
   }
 

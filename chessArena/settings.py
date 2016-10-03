@@ -34,7 +34,7 @@ def initialize():
     GUI = 1
 
     # sets the number of simultaneous chess tables to be created and played.
-    TABLECOUNT = 32
+    TABLECOUNT = 16
     # number of tables to be shown on each row of machines.
     TABLEonROW = 8
     # allow chessarena to plot memory usage on graphic.

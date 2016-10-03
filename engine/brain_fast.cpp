@@ -184,7 +184,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     enemy_score = evaluate(_board, &moves, 1-PLAYER, PLAYER) * ( 1+BRAIN.presumeOPPaggro);
 
     score = machine_score - enemy_score;
-    if (PLAYER != Machineplays) invert(score);
+    //if (PLAYER != Machineplays) invert(score);
 
     return score;
   }

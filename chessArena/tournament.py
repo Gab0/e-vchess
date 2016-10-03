@@ -237,7 +237,7 @@ class Tournament():
 
                             PIECES[piece] += 1
 
-                    print("drawn game by movelenght"+\
+                    print("drawn game by movelenght "+\
                           ("WHITE got %i pieces;" % PIECES[0]) +\
                           (" while BLACK got %i." % PIECES[1]))
                     wonbyadvantage = 0
