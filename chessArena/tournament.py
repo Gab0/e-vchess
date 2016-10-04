@@ -11,8 +11,8 @@ import signal
 from evchess_evolve.management import bareDeleteMachine
 from evchess_evolve.core import loadmachines
 
-from chessArena import settings
-settings.initialize()
+from chessArena.settings import Settings
+settings = Settings()
 
 from chessArena.table import Table
 

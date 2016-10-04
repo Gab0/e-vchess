@@ -7,8 +7,8 @@ from os import path, chdir
 import threading
 import gc
 
-import chessArena.settings
-chessArena.settings.initialize()
+from chessArena.settings import Settings
+settings = Settings()
 from chessArena.arena import Arena
 
 

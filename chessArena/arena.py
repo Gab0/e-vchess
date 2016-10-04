@@ -9,7 +9,7 @@ from threading import Thread
 from subprocess import *
 import psutil
 
-from chessArena.settings import *
+from chessArena.settings import Settings
 from chessArena.table import Table
 from chessArena.tournament import Tournament
 
@@ -32,7 +32,7 @@ from makegraphic import show_mem_graphic
 #import tracemalloc
 #import gc
 
-
+settings = Settings()
 class Arena():
 
     def __init__(self, GraphicInterface=True, GO=False):
@@ -69,7 +69,7 @@ class Arena():
 
         self.TABLEBOARD = []
 
-        for i in range(TABLECOUNT):
+        for i in range(settings.TABLECOUNT):
             if self.GraphicInterface:
                 self.TABLEBOARD.append(Table(self, master=self.root))
                 self.TABLEBOARD[i].grid(column=k, row=j, stick=NSEW)
@@ -77,7 +77,7 @@ class Arena():
                 self.TABLEBOARD.append(Table(self, forceNoGUI=True))
 
             k += 1
-            if k == TABLEonROW:
+            if k == settings.TABLEonROW:
                 k = 0
                 j += 1
 
@@ -105,7 +105,7 @@ class Arena():
         self.graphpath = "mempertime"
         self.InitTime = time()
         if GO:
-            self.setlooplimit(TABLECOUNT - 1)
+            self.setlooplimit(settings.TABLECOUNT - 1)
             self.startcycle()
 
         if self.GraphicInterface:
@@ -161,7 +161,7 @@ class Arena():
                 ))
 
             if not self.ROUND % 100:
-                if arena_showmemuse:
+                if settings.arena_showmemuse:
                     self.show_memory_usage()    
 
             # each N rounds, do maintenance management,
@@ -191,7 +191,7 @@ class Arena():
                     self.routine_pop_management(LEVEL)
 
             self.move_read_reliability = 0
-            if not self.ROUND % ArenaRoundInfoRate:
+            if not self.ROUND % settings.ArenaRoundInfoRate:
                 print(" < ROUND %i   %.1fs  Active: %.2f%% > " % (
                     self.ROUND,
                     SLEEPTIME,
@@ -276,7 +276,7 @@ class Arena():
         DELTAind = originalPOPLEN // 16
 
         if "T" in LEVEL:
-            halloffame = loadmachines(DIR=TOPmachineDIR)
+            halloffame = loadmachines(DIR=settings.TOPmachineDIR)
             halloffame = [mac.filename for mac in halloffame]
 
             currentbestinds = select_best_inds(population, 18)

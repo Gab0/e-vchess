@@ -8,8 +8,8 @@ from threading import Thread
 from sys import argv
 from os import path, chdir
 from json import dumps, loads
-from chessArena import settings
-settings.initialize()
+from chessArena.settings import Settings
+settings = Settings()
 
 from evchess_evolve.core import loadmachines, setmachines
 
@@ -47,7 +47,7 @@ class DuelTable():
             pass
             #choices = userchoice.split(" ")
 
-        Callargs = [settings.enginebin, "--deep", '3', '--xdeep', '0', '--showinfo']
+        Callargs = [settings.enginebin, "--deep", '4', '--xdeep', '1', '--showinfo']
 
         if userchoice != "zero":
             LOADED = 1

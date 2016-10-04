@@ -18,8 +18,8 @@ from subprocess import call
 from evchess_evolve.core import *
 from evchess_evolve.management import *
 from evchess_evolve.statistics import showBestParameterValues
-from chessArena import settings
-settings.initialize()
+from chessArena.settings import Settings
+settings = Settings()
 
 
 class Application(Frame):

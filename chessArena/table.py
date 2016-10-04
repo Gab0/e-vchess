@@ -12,14 +12,15 @@ from weakref import ref
 
 from chessArena.enginewrapper import Engine
 from evchess_evolve.core import machine
-from chessArena.settings import *
 
+from chessArena.settings import Settings
+settings = Settings()
 
 class Table(Frame):
 
     def __init__(self, arena, master=None, forceNoGUI=False):
 
-        if GUI and not forceNoGUI:
+        if settings.GUI and not forceNoGUI:
             Frame.__init__(self, master)
             self.GUI = 1
         else:
@@ -104,7 +105,7 @@ class Table(Frame):
                 CURRENTengineARGS = specificMatch[0]
                 # print(' '.join(CURRENTengineARGS))
             else:
-                CURRENTengineARGS = engineARGS
+                CURRENTengineARGS = settings.engineARGS
 
             self.MACHINE.append(
                 Engine(CURRENTengineARGS))
@@ -112,7 +113,7 @@ class Table(Frame):
             if specificMatch:
                 CURRENTengineARGS = specificMatch[1]
             else:
-                CURRENTengineARGS = engineARGS
+                CURRENTengineARGS = settings.engineARGS
 
             self.MACHINE.append(
                 Engine(CURRENTengineARGS))
@@ -240,7 +241,7 @@ class Table(Frame):
             self.endgame()
             return
 
-        if VerboseMove:
+        if settings.VerboseMove:
             print(COLOR[self.turn] + " @  table " + str(self.number))
 
         if self.GUI:
@@ -251,7 +252,7 @@ class Table(Frame):
 
         try:
             self.LastFlush = self.MACHINE[self.turn].receive()
-            if VerboseMove:
+            if settings.VerboseMove:
                 print(self.LastFlush)
 
         except BrokenPipeError:
@@ -281,7 +282,7 @@ class Table(Frame):
                     self.consec_failure = 0
                     if self.GUI:
                         self.setlimit["text"] = "0"
-                    if VerboseMove:
+                    if settings.VerboseMove:
                         print("move done " + MOVE + "\n")
                 except TypeError:
                     self.log("BOARD.PUSH ERROR.", MOVE)
@@ -440,7 +441,7 @@ class Table(Frame):
                 self.visor.delete('1.0', END)
 
     def sendresult(self, result):
-        if VerboseMove:
+        if settings.VerboseMove:
             print("game ends @ " + str(self.number))
 
         if not self.arena:
