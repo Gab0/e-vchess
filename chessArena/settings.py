@@ -28,3 +28,5 @@ class Settings():
         self.TABLEonROW = 8
         # allow chessarena to plot memory usage on graphic.
         self.arena_showmemuse = 0
+
+        self.standard_popsize = 128

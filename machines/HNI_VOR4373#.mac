@@ -1,0 +1,33 @@
+eval_randomness = 61.0
+
+param_seekatk = 0.6
+
+param_seekmiddle = 0.0
+
+param_pawnrankMOD = 1.0
+
+param_parallelcheck = 2.0
+
+param_balanceoffense = 0.6
+
+param_MODbackup = 3.0
+
+param_MODmobility = 2.8
+
+param_moveFocus = 1.4
+
+param_boardcontrol = 3.0
+
+stat_games = 1029 0
+
+stat_wins = 641 0
+
+stat_draws = 0 0
+
+stat_loss = 388 0
+
+stat_K = 0 0
+
+real_world_score = 0 0
+
+stat_elo = 1116

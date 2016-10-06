@@ -78,6 +78,13 @@ class machine():
         Fo.write('stat_elo = %i\n' % self.ELO)
 
         Fo.close()
+    def toJson(self):
+        P = {}
+
+        for T in self.PARAMETERS:
+            P.update({T.name: T.value})
+        
+        O = {self.filename: T}
 
     def mutate(self, MutateProbabilityDamper, Aggro):
         print("mutating %s [ MPD: %i, ELO: %i ] " % (self.filename,
