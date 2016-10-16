@@ -45,6 +45,7 @@ int  infomoveINDEX;
 
 char *machinepath = (char *)malloc(sizeof(char)*128);
 
+
 bool Show_Info = false;
 Device bool show_info = false;
 
@@ -126,6 +127,9 @@ int main(int argc, char** argv) {
     signal(SIGTERM, SIG_IGN); 
     signal(SIGCHLD, SIG_IGN);
     
+   
+    asprintf(&machinepath, "../machines");
+    
     printf("e-vchess engine %s\n", Version);
     printf("author afrogabs\n\n");
     
@@ -135,15 +139,18 @@ int main(int argc, char** argv) {
      for (i=0;i<argc;i++) {
         
             
-        if (strstr(argv[i], "-TOP") != NULL)
+       if (strstr(argv[i], "-TOP") != NULL || strstr(argv[i], "-t") != NULL)
 	  selectTOPmachines = true;
 	
 	if (strstr(argv[i], "--specific") != NULL)
 	  sprintf(specificMachine, "%s", argv[i+1]);
-
+	
+	if (strstr(argv[i], "-l") != NULL)
+	  toloadmachine = true;
             
         if (strstr(argv[i], "-MD") != NULL) {
 	  toloadmachine = true;
+	  
 	  machinepath = argv[i+1];
 	}
         
