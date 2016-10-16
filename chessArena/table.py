@@ -355,7 +355,7 @@ class Table(Frame):
                         FLOG = open('log/log_illegal%i.txt' %
                                     self.arena.ROUND, 'w+')
                         FLOG.write('illegal move. by %s. %s -> %s\n' %
-                                   (COLOR[self.turn], self.MACnames[self.turn], MOVE))
+                                   (settings.COLOR[self.turn], self.MACnames[self.turn], MOVE))
                         FLOG.write('')
                         FLOG.write(Hdump)
                         FLOG.write(str(self.board))

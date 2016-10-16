@@ -42,21 +42,17 @@ class Engine():
 
         return data
 
-    def readMove(self, data=None):
+    def readMove(self, data=None, moveKeyword="move", Verbose=False):
         if not data:
             data = self.receive()
 
         for line in data:
-            if not "move" in line:
-                continue
-            line = line.replace('\n', '').split(" ")
-            try:
-                P = line.index("move")
-                return line[P + 1]
-            except ValueError:
-                print("ERR")
-                pass
-            
+            if Verbose:
+                print(">%s" % line)
+            if moveKeyword in line and not line.startswith("param"):
+                line = line.replace('\n', '').strip().split(" ")
+                return line[-1]
+    
         return None
 
     def pid(self):
@@ -67,7 +63,11 @@ class Engine():
             File = open("log/%i.dump" % self.pid(),'w')
             File.write(self.recordedData)
             File.close()
-        
+    def __del__(self):
+        try:
+            self.destroy()
+        except:
+            pass
     def destroy(self):
         try:
             call(['kill', '-9', str(self.engine.pid)])

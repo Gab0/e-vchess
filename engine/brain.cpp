@@ -6,7 +6,7 @@
 int think (struct move *out, int PL, int DEEP, int verbose) {
     
   int i=0; int ChosenMovementIndex=0;
-  long score = -99917000;
+  long score = -INFINITE;
 
   time_t startT = time(NULL);
   
@@ -17,8 +17,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   int CurrentMovementIndex = _board->MovementCount;
 
   
-  long Alpha = -16999000;
-  long Beta = 16999000;
+  long Alpha = -INFINITE;
+  long Beta = INFINITE;
     
   struct movelist *moves =
     (struct movelist *) calloc(1, sizeof(struct movelist));
@@ -203,8 +203,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	}
 	else {
 	  movelistSCORE = moves->movements[I].score;
-	  if(PLAYER == Machineplays)
-	    invert(movelistSCORE);
+	  //	  if(PLAYER == Machineplays)
+	  // invert(movelistSCORE);
 
 	}
 
@@ -225,7 +225,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	Vb fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I]->MovementCount, finalboardsArray[I]->whoplays);
 	
 	if (Show_Info) show_moveline(finalboardsArray[I], CurrentMovementIndex, startT);
-        
+        if(R+1<BRAIN.xDEEP)
 	  undo_lastMove(finalboardsArray[I], 2);
       }
 
@@ -443,14 +443,17 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
       else K += (7-i) * BRAIN.pawnrankMOD;
     }
 
-    score += K * BRAIN.seekpieces + K/2 *
+    score += K * BRAIN.seekpieces;
+
+      if(PieceIndex != 5)
+	score += K/2 *
       //((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
       (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
       * BRAIN.seekmiddle;    
 
   }
   
-  //if (P == Attacker)   
+  if (P == Attacker)   
     for (Z=0;Z<moves->kad;Z++) {
     PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
         
