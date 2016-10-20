@@ -33,13 +33,15 @@ class Tournament():
         signal.signal(signal.SIGINT, self.SIGINTFinishAndQuit) 
 
         self.Competitors = loadmachines(DIR=settings.TOPmachineDIR)
+        shuffle(self.Competitors)
+        self.Competitors = self.Competitors[:settings.TournamentPoolSize]
         
         self.TotalDead = 0
         self.ToDeleteLosers = DELETE
         for PLAYER in self.Competitors:
             PLAYER.TournamentScore = 0
 
-        self.Deaths = len(self.Competitors) // 4
+        self.Deaths = len(self.Competitors) // 2
         L = len(self.Competitors)//2
         self.MaxTableboardSize = L if L < 7 else 7
 

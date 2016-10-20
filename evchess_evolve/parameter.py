@@ -5,7 +5,7 @@ import random
 class parameter():
 
     def __init__(self, name, dumpable, chanceMutate, value, aP=0,
-                 LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0):
+                 LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0, promoter=None):
 
         self.name = name
         self.marks_dumpable = dumpable
@@ -21,7 +21,8 @@ class parameter():
         self.LIM = LIM
         self.bLIM = bLIM
         self.INCR = INCR
-
+        
+        self.promoter = promoter
         self.locked = locked
 
     def read(self, split_line):
@@ -264,4 +265,21 @@ class parameter():
             v += self.INCR
             
         return values
-            
+
+    def toGene(self):
+        Range = self.LIM - self.bLIM
+        NumberOfSteps = round(self.value/self.incr)
+
+        b = str(int(bin(NumberOfSteps)[2:]))
+
+        b = "%s%s" % ((8 - len(b)) * "0", b)
+        return b
+
+    def fromGene(self, Gene):
+        
+        NumberOfSteps = int(Gene, 2)
+
+        self.value = self.bLIM + NumberOfSteps * self.incr
+        
+        
+    

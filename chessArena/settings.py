@@ -30,3 +30,6 @@ class Settings():
         self.arena_showmemuse = 0
 
         self.standard_popsize = 128
+        self.TournamentPoolSize = 16
+
+        self.ChromosomeSize =100

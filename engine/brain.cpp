@@ -411,7 +411,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     
   int i=0, j=0;
     
-  int PieceIndex=0,Z=0,K=0;
+  int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0,K=0;
     
 
   int chaos = 1;   
@@ -453,34 +453,33 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 
   }
   
-  if (P == Attacker)   
-    for (Z=0;Z<moves->kad;Z++) {
-    PieceIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
+ 
+  for (Z=0;Z<moves->kad;Z++) {
+    DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
+    if (P == Attacker)  {
+      AttackerIndex =  getindex(moves->attackers[Z][0], Pieces[P], 6);
         
-    parallelatks = ifsquare_attacked
-      (evalboard->squares,moves->defenders[Z][1],
-       moves->defenders[Z][2], 1-P, 0);
+      parallelatks = ifsquare_attacked
+	(evalboard->squares,moves->defenders[Z][1],
+	 moves->defenders[Z][2], 1-P, 0);
                 
-    if (BRAIN.parallelcheck) {
-      if (parallelatks>1) 
-	score += (parallelatks * 10 * BRAIN.parallelcheck);
+      if (BRAIN.parallelcheck) {
+	if (parallelatks>1) 
+	  score += (parallelatks * 10 * BRAIN.parallelcheck);
+      }
+				
+      score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
+      score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
     }
-    else {
+      else if(DefenderIndex !=5){
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);
-        
-      score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
+	score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
         
     }       
-                               
-    score += BRAIN.pvalues[PieceIndex] * BRAIN.seekatk;
          
-    PieceIndex = (getindex(moves->attackers[Z][0],Pieces[P],6));
-    score -= (BRAIN.pvalues[PieceIndex]/10 * BRAIN.balanceoffense);
-
-         
-    }
+  }
   
   score += chaos;       
   score += moves->k * BRAIN.MODmobility;

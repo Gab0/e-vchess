@@ -106,7 +106,8 @@ class machine():
             parameter.randomize()
 
     def delete(self):
-        os.remove(self.DIR + '/' + self.filename)
+        DataLocation = "%s/%s" %(self.DIR, self.filename)
+        os.remove(DataLocation)
 
     def resetscores(self):
         for P in self.TPARAMETERS:
@@ -120,3 +121,30 @@ class machine():
                 else:
                     k.value += toSUM
                     return k.value
+
+    def fromParameterToChromosomes(self):
+        Chromosome = ""
+
+        for P in self.PARAMETERS:
+            V = P.toGene()
+            Chromosome += P.promoter
+            Chromosome += V
+            spacer = ''.join([choice['0','1'] for k in range(randrange(32))])
+            Chromosome += spacer
+
+        self.Chromosome = Chromosome
+        return Chromosome
+
+
+    def readOwnChromosomes(self):
+        for P in self.PARAMETERS:
+            PositionsOnChromosomes = [c.index(P.promoter) for c in self.Chromosomes]
+            Values = [ 0 for c in range(len(self.Chromosomes)) ]
+            for c in range(len(self.Chromosomes)):
+                coordinates = [ PositionsOnChromosomes[c], PositionsOnChromosomes[c]+8 ] 
+                ChromosomeRegion = self.Chromosomes[c][coordinates[0]:coordinates[1]]
+                Values[c] = Ch
+
+        
+            
+        
