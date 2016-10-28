@@ -77,7 +77,8 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
       score = moves->movements[i].score;
       ChosenMovementIndex=i;
     }
-    if (moves->movements[i].score > Alpha)      Alpha = moves->movements[i].score;
+    if (moves->movements[i].score > Alpha)
+      Alpha = moves->movements[i].score;
 
     undo_move(_board, &moves->movements[i]);
   }     

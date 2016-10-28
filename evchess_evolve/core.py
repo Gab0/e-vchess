@@ -8,6 +8,7 @@ import copy
 from shutil import copyfile
 # machine directory.
 
+
 machine_dir = "machines"
 
 from evchess_evolve.machine import machine

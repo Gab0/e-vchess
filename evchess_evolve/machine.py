@@ -4,6 +4,7 @@ from evchess_evolve.std_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
 from evchess_evolve.core import machine_dir
 
+from random import choice, randrange
 
 class machine():
 
@@ -32,11 +33,7 @@ class machine():
         self.stat_loss = 0
         self.K = 0
 
-        self.dumped_games = 0
-        self.dumped_wins = 0
-        self.dumped_draws = 0
-        self.dumped_loss = 0
-        self.dumped_K = 0
+
     def Load(self):
         try:
             selfContent = open("%s/%s" % (self.DIR, self.filename))
@@ -78,6 +75,7 @@ class machine():
         Fo.write('stat_elo = %i\n' % self.ELO)
 
         Fo.close()
+        
     def toJson(self):
         P = {}
 
@@ -92,14 +90,6 @@ class machine():
                                                      self.ELO))
         for parameter in self.PARAMETERS:
             parameter.mutate(MutateProbabilityDamper, Aggro)
-
-    def dump_parameter_stat(self):
-        for parameter in self.PARAMETERS:
-            if parameter.marks_dumpable == 0:
-                parameter.dump_parameter_stat(self)
-
-        for i in range(4):
-            self.PARAMETERS[i].dumpedvalue = self.PARAMETERS[i].value
 
     def randomize(self):
         for parameter in self.PARAMETERS:
@@ -122,29 +112,28 @@ class machine():
                     k.value += toSUM
                     return k.value
 
-    def fromParameterToChromosomes(self):
+    def generateOwnChromosomes(self):
         Chromosome = ""
 
         for P in self.PARAMETERS:
             V = P.toGene()
             Chromosome += P.promoter
             Chromosome += V
-            spacer = ''.join([choice['0','1'] for k in range(randrange(32))])
+            spacer = ''.join([choice(['0','1']) for k in range(randrange(32))])
             Chromosome += spacer
 
-        self.Chromosome = Chromosome
+        self.Chromosomes = [Chromosome] * 2
         return Chromosome
-
 
     def readOwnChromosomes(self):
         for P in self.PARAMETERS:
             PositionsOnChromosomes = [c.index(P.promoter) for c in self.Chromosomes]
-            Values = [ 0 for c in range(len(self.Chromosomes)) ]
+            Values=[]
             for c in range(len(self.Chromosomes)):
                 coordinates = [ PositionsOnChromosomes[c], PositionsOnChromosomes[c]+8 ] 
                 ChromosomeRegion = self.Chromosomes[c][coordinates[0]:coordinates[1]]
-                Values[c] = Ch
-
+                Values.append(ChromosomeRegion)
+            
         
             
         

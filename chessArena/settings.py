@@ -29,7 +29,7 @@ class Settings():
         # allow chessarena to plot memory usage on graphic.
         self.arena_showmemuse = 0
 
-        self.standard_popsize = 128
+        self.standard_popsize = 64 
         self.TournamentPoolSize = 16
 
         self.ChromosomeSize =100

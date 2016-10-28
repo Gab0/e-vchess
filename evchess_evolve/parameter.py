@@ -141,85 +141,6 @@ class parameter():
         #print("mutated %c" % GRAPHIC[x])
         return VALUE[x]
 
-    def dump_parameter_stat(self, individual):
-        parameter = self.name
-
-        DUMP_games = individual.PARAMETERS[
-            0].value - individual.PARAMETERS[0].dumpedvalue
-        DUMP_wins = individual.PARAMETERS[
-            1].value - individual.PARAMETERS[1].dumpedvalue
-        DUMP_draws = individual.PARAMETERS[
-            2].value - individual.PARAMETERS[2].dumpedvalue
-        DUMP_loss = individual.PARAMETERS[
-            3].value - individual.PARAMETERS[3].dumpedvalue
-        DUMP_K = individual.PARAMETERS[4].value - \
-            individual.PARAMETERS[4].dumpedvalue
-
-        value = self.value
-
-        if type(self.value) == list:
-            BUF = ""
-            for ind in value:
-                BUF += str(ind) + "x"
-            value = BUF[:-1]
-        value = 'x' + str(value)
-
-        if not os.path.exists(Fdir + "/paramstats.xml"):
-
-            root = ET.Element('root')
-            tree = ET.ElementTree(root)
-
-        else:
-            tree = ET.parse(Fdir + "/paramstats.xml")
-            root = tree.getroot()
-
-        ISNEWPARAM = True
-        ISNEWPARAMVAL = True
-
-        if len(root) > 0:
-            #print("searching for '" + parameter + "'.")
-            for child in root:
-                #print("match? '" +child.tag + "'.")
-                if child.tag == parameter:
-                    # print('match!')
-                    ISNEWPARAM = False
-
-                    #print("searching for '" + value + "'.")
-                    for PRchild in child:
-                        #print("match? '" +PRchild.tag + "'.")
-                        if PRchild.tag == value:
-                            # print('match!')
-                            ISNEWPARAMVAL = False
-                            PRchild[0].text = str(
-                                int(PRchild[0].text) + DUMP_wins)
-                            PRchild[1].text = str(
-                                int(PRchild[1].text) + DUMP_draws)
-                            PRchild[2].text = str(
-                                int(PRchild[2].text) + DUMP_loss)
-                            PRchild[3].text = str(
-                                int(PRchild[3].text) + DUMP_games)
-                            PRchild[4].text = str(
-                                int(PRchild[4].text) + DUMP_K)
-
-        if ISNEWPARAM == True:
-            PARAM = ET.SubElement(root, parameter)
-
-        else:
-            PARAM = root.find(parameter)
-
-        if ISNEWPARAMVAL == True:
-
-            NEWPARAMVAL = ET.SubElement(PARAM, value)
-
-            ET.SubElement(NEWPARAMVAL, "wins").text = str(DUMP_wins)
-            ET.SubElement(NEWPARAMVAL, "draws").text = str(DUMP_draws)
-            ET.SubElement(NEWPARAMVAL, "loss").text = str(DUMP_loss)
-            ET.SubElement(NEWPARAMVAL, "games").text = str(DUMP_games)
-            ET.SubElement(NEWPARAMVAL, "K").text = str(DUMP_K)
-
-        # ET.dump(root)
-        tree.write(Fdir + "/paramstats.xml")
-
     def randomize(self):
         if self.locked:
             print('locked')
@@ -268,7 +189,7 @@ class parameter():
 
     def toGene(self):
         Range = self.LIM - self.bLIM
-        NumberOfSteps = round(self.value/self.incr)
+        NumberOfSteps = round(self.value/self.INCR)
 
         b = str(int(bin(NumberOfSteps)[2:]))
 
@@ -276,10 +197,8 @@ class parameter():
         return b
 
     def fromGene(self, Gene):
-        
         NumberOfSteps = int(Gene, 2)
-
-        self.value = self.bLIM + NumberOfSteps * self.incr
+        self.value = self.bLIM + NumberOfSteps * self.INCR
         
         
     

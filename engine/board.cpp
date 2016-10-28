@@ -476,7 +476,7 @@ Host Device int cancastle (struct board *board, int P, int direction) {
 Host Device void movement_generator(struct board *board, struct movelist *moves, int limit, 
                         char direction, int i, int j, int P) {
     int X=0, q=0;
-    int Ti=0,Tj=0;
+    int Ti=0, Tj=0;
     
     int matrix[4][2];
     

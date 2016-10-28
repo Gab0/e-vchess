@@ -137,10 +137,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       AllowCutoff = 1;
       if (R + 1 == BRAIN.xDEEP) AllowCutoff = 1;
 
-	sessionSCORE = -9990000;
+	sessionSCORE = -INFINITE;
 	
-	Alpha = -1700000;
-	Beta = 1700000;      
+	Alpha = -INFINITE;
+	Beta = INFINITE;      
 
       for (i=0;i<T;i++) {
 
@@ -337,7 +337,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       }
      
 
-      score = -99170000;
+    score = -INFINITE;
 
 
     // Movelist iteration.
@@ -352,29 +352,28 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       invert(DisposableBuffer->score);
       moves.movements[i].score = DisposableBuffer->score;
 
-       
-	if (moves.movements[i].score > score) {
-	  if (PersistentBufferOnline)
-	    DUMP(PersistentBuffer);
-	  PersistentBuffer = DisposableBuffer;
-	  score = moves.movements[i].score;
-	  DisposableBuffer=NULL;
-	  PersistentBufferOnline=1;
+      
+      if (moves.movements[i].score > score) {
+	if (PersistentBufferOnline)
+	  DUMP(PersistentBuffer);
+	PersistentBuffer = DisposableBuffer;
+	score = moves.movements[i].score;
+	DisposableBuffer=NULL;
+	PersistentBufferOnline = 1;
 	
-	}
-	if (moves.movements[i].score > Alpha) 
-	  Alpha = moves.movements[i].score;
+      }
+      if (moves.movements[i].score > Alpha) 
+	Alpha = moves.movements[i].score;
 	
-	if (Beta<=Alpha) 
-	  ABcutoff=1;
+      if (Beta<=Alpha) 
+	if(AllowCutoff)
+	  if (PersistentBufferOnline) {
+	    DUMP(DisposableBuffer);  
+	    break;
+	  }
 	  
+    
 
-	
-       
-      if (ABcutoff && AllowCutoff){
-	DUMP(DisposableBuffer);  
-	break;
-      }	
       undo_move(_board, &moves.movements[i]);
        
       DUMP(DisposableBuffer);  
@@ -397,7 +396,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     //show_board(_board->squares);
 
     _board->score = machine_score - (enemy_score * (1 + BRAIN.presumeOPPaggro));
-    //if (PLAYER != Machineplays) invert(_board->score);
     return _board;
   }
 
@@ -446,7 +444,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     score += K * BRAIN.seekpieces;
 
       if(PieceIndex != 5)
-	score += K/2 *
+	score +=  50 *
       //((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
       (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
       * BRAIN.seekmiddle;    
@@ -467,9 +465,10 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 	if (parallelatks>1) 
 	  score += (parallelatks * 10 * BRAIN.parallelcheck);
       }
-				
+      if (DefenderIndex != 5) {	
       score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
       score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
+      }
     }
       else if(DefenderIndex !=5){
       paralleldefenders = ifsquare_attacked
