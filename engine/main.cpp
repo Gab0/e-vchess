@@ -75,8 +75,8 @@ IFGPU( __device__ bool allow_castling = true; )
 int main(int argc, char** argv) {
     Brain.pvalues[0] = 100;
     Brain.pvalues[1] = 500;
-    Brain.pvalues[2] = 300;
-    Brain.pvalues[3] = 300;
+    Brain.pvalues[2] = 320;
+    Brain.pvalues[3] = 330;
     Brain.pvalues[4] = 900;
     Brain.pvalues[5] = 2000;
     

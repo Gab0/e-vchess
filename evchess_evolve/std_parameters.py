@@ -4,7 +4,7 @@ from evchess_evolve.parameter import parameter
 def STDPARAMETERS():
     return [
 
-        parameter("eval_randomness", 0, 30, 20,
+        parameter("eval_randomness", 0, 10, 20,
                   INCR=10, bLIM=1, LIM=270, promoter='R'),
 
         #parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
@@ -13,7 +13,7 @@ def STDPARAMETERS():
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 20, 0.4,
+        parameter("param_seekatk", 0, 12, 0.4,
                   bLIM=-0.2, INCR=0.2, LIM=0.8, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 0,
@@ -24,16 +24,16 @@ def STDPARAMETERS():
         parameter("param_pawnrankMOD", 0, 20, 0,
                   LIM=37, bLIM=0, promoter='p'),
 
-        parameter("param_parallelcheck", 0, 30, 0,
+        parameter("param_parallelcheck", 0, 12, 0,
                   LIM=2, bLIM=0, INCR=0.3, promoter='c'),
 
-        parameter("param_balanceoffense", 0, 30, 0,
-                  LIM=5, bLIM=-0.2, INCR=0.2, promoter='o'),
+        parameter("param_balanceoffense", 0, 6, 0,
+                  LIM=0.6, bLIM=-0.2, INCR=0.2, promoter='o'),
 
-        parameter("param_MODbackup", 0, 40, 0,
+        parameter("param_MODbackup", 0, 20, 0,
                   LIM=3, bLIM=-0.2, INCR=0.2, promoter='B'),
 
-        parameter("param_MODmobility", 0, 40, 0,
+        parameter("param_MODmobility", 0, 15, 0,
                   LIM=3, bLIM=-0.2, INCR=0.2, promoter='M'),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
@@ -42,10 +42,10 @@ def STDPARAMETERS():
 
         #parameter("param_TIMEweight", 0, 30, [0.9, 0.85, 0.9, 0.85, 0.81, 0.765, 0.825, 0.789, 0.844, 0.85], LIM=1.3, bLIM=0.01, INCR = 0.05)
 
-        parameter("param_moveFocus", 0, 40, 0,
+        parameter("param_moveFocus", 0, 12, 0,
                   LIM=4, bLIM=0, INCR=0.1, promoter='F'),
 
-        parameter("param_boardcontrol", 0, 40, 0,
+        parameter("param_boardcontrol", 0, 12, 0,
                   LIM=3, bLIM=0, INCR=0.25, promoter='C')
     ]
 

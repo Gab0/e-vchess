@@ -470,7 +470,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
       score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
       }
     }
-      else if(DefenderIndex !=5){
+      else if (DefenderIndex !=5){
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);

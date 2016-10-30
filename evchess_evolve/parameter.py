@@ -117,7 +117,6 @@ class parameter():
                     * AggroModifier * self.INCR
 
         else:
-
             self.value += self.mutateDecideIfProceed\
                 (self.chanceMutate, MutateProbabilityDamper)\
                 * AggroModifier * self.INCR
