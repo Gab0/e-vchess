@@ -6,13 +6,13 @@ import xml.etree.ElementTree as ET
 import copy
 
 from shutil import copyfile
+
 # machine directory.
-
-
 machine_dir = "machines"
 
 from evchess_evolve.machine import machine
 from evchess_evolve.management import bareDeleteMachine
+from evchess_evolve import chromossome
 
 
 def populate(population, popsize, Randomize, ID=""):
@@ -223,10 +223,7 @@ def deltheworst_clonethebest(population, action, MODlimit, ID=None):
                 except AttributeError:
                     print("ERROR on Delete the Worst/Clone the Best")
                     pass
-                """try:
-                    os.remove(machine_dir+'/'+population[CURRENT_SCORE[0]].filename)
-                except FileNotFoundError:
-                    print("can't find machine file, but it's ok.")"""
+
                 population[CURRENT_SCORE[0]] = 0
                 population = [x for x in population if x != 0]
 
@@ -370,7 +367,8 @@ def IsEqual(model, against):
     return EQUAL
 
 
-def EliminateEquals(population, Range):
+def EliminateEquals(population, Range, delete=True):
+    blacklist = []
     for I in range(Range, len(population)):
         if population[I] == 0:
             continue
@@ -378,8 +376,12 @@ def EliminateEquals(population, Range):
             if population[T] == 0:
                 continue
             if IsEqual(population[I], population[T]):
+                blacklist.append(population[T].filename)
                 population[T] = 0
-
+    if delete:
+        for Name in blacklist:
+            bareDeleteMachine(machine_dir, Name)
+                                 
     return list(filter((0).__ne__, population))
 
 def EvaluateSimilarityTwoMachines(mac1, mac2):
@@ -417,3 +419,5 @@ def sendtoHallOfFame(MACHINE):
     print('machine %s sent to top.' % MACHINE.filename)
     MACHINE.onTOP = 1
     MACHINE.write()
+
+

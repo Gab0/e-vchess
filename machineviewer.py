@@ -49,25 +49,25 @@ class Application(Frame):
 
         SUBJECT = self.machines[self.N]
 
-        self.VIEW_wins["text"] = SUBJECT.TPARAMETERS[1].value
+        self.VIEW_wins["text"] = SUBJECT.STAT_PARAMETERS[1].value
 
-        self.VIEW_loss["text"] = SUBJECT.TPARAMETERS[3].value
+        self.VIEW_loss["text"] = SUBJECT.STAT_PARAMETERS[3].value
 
-        self.VIEW_games["text"] = SUBJECT.TPARAMETERS[0].value
+        self.VIEW_games["text"] = SUBJECT.STAT_PARAMETERS[0].value
 
-        self.VIEW_draws["text"] = SUBJECT.TPARAMETERS[2].value
+        self.VIEW_draws["text"] = SUBJECT.STAT_PARAMETERS[2].value
 
         self.VIEW_elo["text"] = SUBJECT.ELO
 
         self.macname["text"] = SUBJECT.filename
 
-        self.viewK["text"] = str(SUBJECT.TPARAMETERS[4].value)
+        self.viewK["text"] = str(SUBJECT.STAT_PARAMETERS[4].value)
 
-        self.winrate["text"] = self.percentageValueAgainst(SUBJECT.TPARAMETERS[1].value,
-                                                           SUBJECT.TPARAMETERS[0].value)
+        self.winrate["text"] = self.percentageValueAgainst(SUBJECT.STAT_PARAMETERS[1].value,
+                                                           SUBJECT.STAT_PARAMETERS[0].value)
 
-        self.drawrate["text"] = self.percentageValueAgainst(SUBJECT.TPARAMETERS[2].value,
-                                                            SUBJECT.TPARAMETERS[0].value)
+        self.drawrate["text"] = self.percentageValueAgainst(SUBJECT.STAT_PARAMETERS[2].value,
+                                                            SUBJECT.STAT_PARAMETERS[0].value)
         UNCONFORMITY = 0
         self.paramNAMES = []
         for VW in range(len(self.paramVIEWER)):

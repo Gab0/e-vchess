@@ -283,7 +283,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
   //struct move result;
     
     
-  long score=-999900;
+  long score = -INFINITE;
   int HoldBuffer=0;
   struct movelist moves;
 
@@ -430,7 +430,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     //	BRAIN.boardcontrol;
 
       
-      if (evalboard->squares[i][j] == 'x') continue;
+    if (evalboard->squares[i][j] == 'x') continue;
       
     PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
     if (PieceIndex < 0) continue;
@@ -443,11 +443,11 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 
     score += K * BRAIN.seekpieces;
 
-      if(PieceIndex != 5)
-	score +=  50 *
-      //((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
-      (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
-      * BRAIN.seekmiddle;    
+    if (PieceIndex != 5)
+      score += sqrt(BRAIN.pvalues[PieceIndex]) * 2 *
+	//((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
+	(BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
+	* BRAIN.seekmiddle;    
 
   }
   
@@ -466,15 +466,15 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 	  score += (parallelatks * 10 * BRAIN.parallelcheck);
       }
       if (DefenderIndex != 5) {	
-      score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
-      score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
+	score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
+	score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
       }
     }
-      else if (DefenderIndex !=5){
+    else if (DefenderIndex != 5){
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);
-	score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
+      score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
         
     }       
          

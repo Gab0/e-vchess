@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <ctype.h>
-
+#include <math.h>
 
 #define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 

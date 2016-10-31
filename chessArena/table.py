@@ -602,18 +602,18 @@ class Table(Frame):
             base = 0
             Draw = True
             
-            self.MACcontent[winner].TPARAMETERS[1].value +=1
-            self.MACcontent[1-winner].TPARAMETERS[1].value +=1
+            self.MACcontent[winner].STAT_PARAMETERS[1].value +=1
+            self.MACcontent[1-winner].STAT_PARAMETERS[1].value +=1
         else:
             base = 28
-            self.MACcontent[winner].TPARAMETERS[1].value += 1
-            self.MACcontent[1-winner].TPARAMETERS[3].value +=1
+            self.MACcontent[winner].STAT_PARAMETERS[1].value += 1
+            self.MACcontent[1-winner].STAT_PARAMETERS[3].value +=1
             
         deltaELO = self.MACcontent[winner].ELO - self.MACcontent[1-winner].ELO
         deltaELO = base - deltaELO // 18
             
-        self.MACcontent[winner].TPARAMETERS[0].value +=1    
-        self.MACcontent[1-winner].TPARAMETERS[0].value +=1
+        self.MACcontent[winner].STAT_PARAMETERS[0].value +=1    
+        self.MACcontent[1-winner].STAT_PARAMETERS[0].value +=1
         
         if not Draw and deltaELO < 0:
             deltaELO = 0
@@ -626,7 +626,8 @@ class Table(Frame):
 
         try:
             for macIndex in range(len(self.MACcontent)):
-                self.MACcontent[macIndex].write()
+                if self.MACcontent[macIndex].checkExistence():
+                    self.MACcontent[macIndex].write()
                         
         except:
             self.log('sending ELO failed.', '')

@@ -15,7 +15,7 @@ class machine():
 
         self.PARAMETERS = STDPARAMETERS()
 
-        self.TPARAMETERS = [
+        self.STAT_PARAMETERS = [
             parameter("stat_games", 1, 0, 0),
             parameter("stat_wins", 1, 0, 0),
             parameter("stat_draws", 1, 0, 0),
@@ -23,7 +23,9 @@ class machine():
             parameter("stat_K", 1, 0, 0),
             parameter("real_world_score", 1, 0, 0)
         ]
-
+        
+        self.Chromosomes = []
+        
         self.ELO = 1000
         self.onTOP = 0
 
@@ -41,18 +43,19 @@ class machine():
             return
         for line in selfContent.readlines():
             self.read(line.split(" "))
+            
     def read(self, split_line):
-        for parameter in self.TPARAMETERS + self.PARAMETERS:
+        for parameter in self.STAT_PARAMETERS + self.PARAMETERS:
             if len(split_line) < 2:
                 if split_line[0] == 'W':
-                    self.TPARAMETERS[1].value += 1
-                    self.TPARAMETERS[0].value += 1
+                    self.STAT_PARAMETERS[1].value += 1
+                    self.STAT_PARAMETERS[0].value += 1
                 elif split_line[0] == 'L':
-                    self.TPARAMETERS[3].value += 1
-                    self.TPARAMETERS[0].value += 1
+                    self.STAT_PARAMETERS[3].value += 1
+                    self.STAT_PARAMETERS[0].value += 1
                 elif split_line[0] == 'D':
-                    self.TPARAMETERS[2].value += 1
-                    self.TPARAMETERS[0].value += 1
+                    self.STAT_PARAMETERS[2].value += 1
+                    self.STAT_PARAMETERS[0].value += 1
 
             if parameter.name == split_line[0]:
                 parameter.read(split_line)
@@ -65,7 +68,8 @@ class machine():
 
     def write(self):
         Fo = open(self.DIR + '/' + self.filename, "w+")
-        for parameter in self.PARAMETERS + self.TPARAMETERS:
+        for parameter in self.PARAMETERS + self.STAT_PARAMETERS:
+            
             Fo.write(parameter.write())
             Fo.write('\n')
 
@@ -75,7 +79,11 @@ class machine():
         Fo.write('stat_elo = %i\n' % self.ELO)
 
         Fo.close()
-        
+    def checkExistence(self):
+        if os.path.isfile("%s/%s" % self.DIR, self.filename):
+            return True
+        return False
+            
     def toJson(self):
         P = {}
 
@@ -84,27 +92,23 @@ class machine():
         
         O = {self.filename: T}
 
-    def mutate(self, MutateProbabilityDamper, Aggro):
+    def mutate(self, MutateProbabilityDamper, MutationStrenght):
         print("mutating %s [ MPD: %i, ELO: %i ] " % (self.filename,
                                                      MutateProbabilityDamper,
                                                      self.ELO))
         for parameter in self.PARAMETERS:
-            parameter.mutate(MutateProbabilityDamper, Aggro)
+            parameter.mutate(MutateProbabilityDamper, MutationStrenght)
 
     def randomize(self):
         for parameter in self.PARAMETERS:
             parameter.randomize()
 
-    def delete(self):
-        DataLocation = "%s/%s" %(self.DIR, self.filename)
-        os.remove(DataLocation)
-
     def resetscores(self):
-        for P in self.TPARAMETERS:
+        for P in self.STAT_PARAMETERS:
             P.value = 0
 
     def getParameter(self, paramname, toSUM=0):
-        for k in self.PARAMETERS + self.TPARAMETERS:
+        for k in self.PARAMETERS + self.STAT_PARAMETERS:
             if k.name == paramname:
                 if not toSUM:
                     return k.value

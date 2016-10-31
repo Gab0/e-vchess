@@ -174,6 +174,7 @@ class parameter():
         self.locked = 0
         if rnd:
             self.randomize()
+            
     def getValidValues(self):
         lower = self.bLIM if self.bLIM != None else 0
         upper = self.LIM if self.LIM != None else 0
