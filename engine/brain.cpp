@@ -155,7 +155,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	Vb fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I]->whoplays, I);
 
 	PLAYER = finalboardsArray[I]->whoplays;
-	movelistSCORE = -16900000;
+	movelistSCORE = -INFINITE;
 
 	legal_moves(finalboardsArray[I], &nextlevelMovelist[i], PLAYER, 0);
 	reorder_movelist(&nextlevelMovelist[i]);
@@ -409,7 +409,7 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     
   int i=0, j=0;
     
-  int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0,K=0;
+  int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0, PieceMaterialValue=0;
     
 
   int chaos = 1;   
@@ -434,14 +434,14 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
       
     PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
     if (PieceIndex < 0) continue;
-    K = BRAIN.pvalues[PieceIndex];
+    PieceMaterialValue = BRAIN.pvalues[PieceIndex];
         
     if (PieceIndex==0) {
-      if (P) K += i * BRAIN.pawnrankMOD;
-      else K += (7-i) * BRAIN.pawnrankMOD;
+      if (P) PieceMaterialValue += i * BRAIN.pawnrankMOD;
+      else PieceMaterialValue += (7-i) * BRAIN.pawnrankMOD;
     }
 
-    score += K * BRAIN.seekpieces;
+    score += PieceMaterialValue * BRAIN.seekpieces;
 
     if (PieceIndex != 5)
       score += sqrt(BRAIN.pvalues[PieceIndex]) * 2 *
@@ -457,14 +457,14 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     if (P == Attacker)  {
       AttackerIndex =  getindex(moves->attackers[Z][0], Pieces[P], 6);
         
-      parallelatks = ifsquare_attacked
+      /*      parallelatks = ifsquare_attacked
 	(evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], 1-P, 0);
                 
       if (BRAIN.parallelcheck) {
 	if (parallelatks>1) 
 	  score += (parallelatks * 10 * BRAIN.parallelcheck);
-      }
+	  }*/
       if (DefenderIndex != 5) {	
 	score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
 	score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);

@@ -13,7 +13,7 @@ from chessArena.settings import Settings
 from chessArena.table import Table
 from chessArena.tournament import Tournament
 
-from evchess_evolve.advanced import *
+from evchess_evolve.evolution import *
 from evchess_evolve.core import populate, loadmachines, mutatemachines,\
     setmachines, deltheworst_clonethebest, select_best_inds, Mate,\
     replicate_best_inds, clone_from_template, EliminateEquals,\
