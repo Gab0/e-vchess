@@ -29,6 +29,8 @@
 #define flip(x) x = 1 - x
 #define invert(x) x = -x;
 
+#define F(v,x) for (v=0;v<x;v++)
+
 #define INFINITE 9999000;
 
 #define Vb if (verbose)
@@ -128,6 +130,7 @@ struct param {
   float MODmobility;
   float moveFocus;
   float boardcontrol;
+  float endgameWeight;
 };
 
 extern struct move movehistory[512];
@@ -189,7 +192,7 @@ IFGPU( extern __device__ bool allow_castling; )
 //functions from main.cpp;#######################################################
 void computer(int verbose);
 void SIGthink(int signum);
-//l void UpdateGPUBrain();     
+Global void setBrainStandardValues(void);
 
 //functions from board.cpp;######################################################
 void setup_board(int setup);
@@ -223,7 +226,7 @@ Host Device int append_move
         int i,int j, int mod_i, int mod_j, int P);
 //void erase_moves(struct board *tgt, int eraseall);
 Host Device int ifsquare_attacked (char squares[8][8],
-				   int TGi, int TGj, int P, int verbose); 
+				   int TGi, int TGj, int AttackingPlayer, int verbose); 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
 Host Device int getindex (char x, char array[],int size);
 
@@ -271,6 +274,8 @@ Device void Testdevice(int *Test);
 Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
 Device int satellite_evaluation (struct move *movement);
 
+Device int compare_movements (struct move *move_A, struct move *move_B);
+Device int check_fivemove_repetition (void);
 //functions from brain_fast.cpp;#################################################
 int think_fast(struct move *out, int PL, int DEEP, int verbose);
 Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,

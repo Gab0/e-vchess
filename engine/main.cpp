@@ -62,66 +62,16 @@ int searchNODEcount;
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
         
-        
-            //iniatializing variables with standard values.
-    
-    //pvalues is the value of each piece in centipawns. 
-    //order is pawn-rook-knight-bishop-queen-king.
+
 
     
     
     
     
 int main(int argc, char** argv) {
-    Brain.pvalues[0] = 100;
-    Brain.pvalues[1] = 500;
-    Brain.pvalues[2] = 320;
-    Brain.pvalues[3] = 330;
-    Brain.pvalues[4] = 900;
-    Brain.pvalues[5] = 2000;
-    
-    //randomness is the limit to the randomic small variability on the score, 
-    //in centipawns.
-    Brain.randomness = 50;
-    //seekmiddle augments the score for pieces in the center of the board.
-    Brain.seekmiddle = 0;
-    
-    //DEEP is the number of future moves to be evaluated.
-    //must be an even number, in order to always end in a engine move.
-    Brain.DEEP = 4;
-
-    
-    //xDEEP is the number of evaluations on top of the original one will be made,
-    //'artificially' increasing total ply deepness by xDEEP * DEEP;
-    Brain.xDEEP = 0;
 
 
-    //yDEEP is the number of movements from the first section of evaluating
-    //to be considered for the second, yDEEP top movements.
-    Brain.yDEEP = 8;
-
-    
-    //seekpieces augments the score for attacked enemy pieces.
-    Brain.seekpieces = 1;
-    
-    Brain.deviationcalc = 0;
-    Brain.evalmethod = 0;
-    //seekatk augments the score for taken pieces.
-    Brain.seekatk = 0;
-    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    Brain.presumeOPPaggro = 0;
-    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
-    Brain.pawnrankMOD = 0;
-    Brain.parallelcheck = 0;
-    Brain.balanceoffense = 0;    
-    Brain.cumulative = 0;
-    Brain.MODbackup = 0;
-    Brain.MODmobility = 0;
-
-    Brain.moveFocus = 0;
-
-    Brain.boardcontrol = 0;
-
+  setBrainStandardValues();
     int i=0;
     signal(SIGINT, SIG_IGN);    
     signal(SIGTERM, SIG_IGN); 
@@ -170,7 +120,8 @@ int main(int argc, char** argv) {
 	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
 
 	if (strstr(argv[i], "--fast") != NULL) fastmode = true;
-	
+
+
         }  
     
         
@@ -254,6 +205,21 @@ int main(int argc, char** argv) {
         for (i=0; i < hindex; i++) {
             print_movement(&movehistory[i],0);
         }
+    }
+
+    if (strstr(inp, "load") != NULL) {
+      char *reading = strtok(inp, " ");
+      reading = strtok(NULL, " ");
+
+      if (reading == '\0') continue;
+      if (strstr(reading, ".mac") != NULL)
+	sprintf(specificMachine, "%s", reading);
+      else
+	sprintf(specificMachine, "any");
+      setBrainStandardValues();
+      loadmachine(0, machinepath);
+      printf("loading  machine %s on runtime\n", reading);
+
     }
     
 
@@ -340,44 +306,64 @@ void SIGthink(int signum) {
     computer(1);
 }
 
-/*#ifdef __CUDACC__
-Global void UpdateGPUBrain() {
-       
-    //iniatializing variables with standard values.
+
+Global void setBrainStandardValues(void) {
+               
+  //iniatializing variables with standard values.
     
-    //pvalues is the value of each piece in centipawns. 
-    //order is pawn-rook-knight-bishop-queen-king.
-    GBrain.pvalues[0] = Brain.pvalues[0];
-    GBrain.pvalues[1] = Brain.pvalues[1];
-    GBrain.pvalues[2] = Brain.pvalues[2];
-    GBrain.pvalues[3] = Brain.pvalues[3];
-    GBrain.pvalues[4] = Brain.pvalues[4]; 
-    GBrain.pvalues[5] = Brain.pvalues[5];
+  //pvalues is the value of each piece in centipawns. 
+  //order is pawn-rook-knight-bishop-queen-king.
+  Brain.pvalues[0] = 100;
+  Brain.pvalues[1] = 500;
+  Brain.pvalues[2] = 320;
+  Brain.pvalues[3] = 330;
+  Brain.pvalues[4] = 900;
+  Brain.pvalues[5] = 2000;
     
-    //randomness is the limit to the randomic small variability on the score, 
-    //in centipawns.
-    GBrain.randomness = Brain.randomness;
-    //seekmiddle augments the score for pieces in the center of the board.
-    GBrain.seekmiddle = Brain.seekmiddle;
-    //DEEP is the number of future moves to be evaluated.
-    //must be an even number, in order to always end in a engine move.
-    GBrain.DEEP = Brain.DEEP;
-    //seekpieces augments the score for attacked enemy pieces.
-    GBrain.seekpieces = Brain.seekpieces;
+  //randomness is the limit to the randomic small variability on the score, 
+  //in centipawns.
+  Brain.randomness = 50;
+  //seekmiddle augments the score for pieces in the center of the board.
+  Brain.seekmiddle = 0;
     
-    GBrain.deviationcalc = Brain.deviationcalc;
-    GBrain.evalmethod = Brain.evalmethod;
-    //seekatk augments the score for taken pieces.
-    GBrain.seekatk = Brain.seekatk;
-    //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
-    GBrain.presumeOPPaggro = Brain.presumeOPPaggro;
-    //pawnrankMOD augments the score of the pawns, by the rank he occupies.
-    GBrain.pawnrankMOD = Brain.pawnrankMOD;
-    GBrain.parallelcheck = Brain.parallelcheck;
-    GBrain.balanceoffense = Brain.balanceoffense;
-    GBrain.cumulative = Brain.cumulative;
-    GBrain.MODbackup = Brain.MODbackup;
-    GBrain.MODmobility = Brain.MODmobility;
+  //DEEP is the number of future moves to be evaluated.
+  //must be an even number, in order to always end in a engine move.
+  Brain.DEEP = 4;
+
+    
+  //xDEEP is the number of evaluations on top of the original one will be made,
+  //'artificially' increasing total ply deepness by xDEEP * DEEP;
+  Brain.xDEEP = 0;
+
+
+  //yDEEP is the number of movements from the first section of evaluating
+  //to be considered for the second, yDEEP top movements.
+  Brain.yDEEP = 8;
+
+    
+  //seekpieces augments the score for attacked enemy pieces.
+  Brain.seekpieces = 1;
+    
+  Brain.deviationcalc = 0;
+  Brain.evalmethod = 0;
+  //seekatk augments the score for taken pieces.
+  Brain.seekatk = 0;
+  //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
+  Brain.presumeOPPaggro = 0;
+  //pawnrankMOD augments the score of the pawns, by the rank he occupies.
+  Brain.pawnrankMOD = 0;
+  Brain.parallelcheck = 0;
+  Brain.balanceoffense = 0;    
+  Brain.cumulative = 0;
+  Brain.MODbackup = 0;
+  Brain.MODmobility = 0;
+
+  Brain.moveFocus = 0;
+
+  Brain.boardcontrol = 0;
+
+  Brain.endgameWeight = 0;
+
     
 }
-#endif*/
+

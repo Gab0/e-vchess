@@ -17,6 +17,8 @@ case  "$1" in
 
 "memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
 
+"engine") cd ${BASEDIR}/ && ./engine/e-vchess;;
+
 *) 
 echo ""
 echo " Invalid Option."

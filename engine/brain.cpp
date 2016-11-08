@@ -6,6 +6,7 @@
 int think (struct move *out, int PL, int DEEP, int verbose) {
     
   int i=0; int ChosenMovementIndex=0;
+  int FivemoveRepetitionRisk=0;
   long score = -INFINITE;
 
   time_t startT = time(NULL);
@@ -46,6 +47,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   
   reorder_movelist(moves);
 
+  if (check_fivemove_repetition()) FivemoveRepetitionRisk = 1;
   if (moves->k == 0) {
     DUMP(_board);
     DUMP(moves);
@@ -94,7 +96,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
     //if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
       
-      
+    if (FivemoveRepetitionRisk)
+      if (compare_movements(&moves->movements[i], &movehistory[hindex-4])){
+	asprintf(&output, "Downgrading score due to move repetition draw menace.\n");
+	write(1, output, strlen(output));
+	  moves->movements[i].score = 0;
+      }
+    
     if (moves->movements[i].score > score) {
       score = moves->movements[i].score;
       ChosenMovementIndex=i;
@@ -302,7 +310,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     if (ifsquare_attacked(_board->squares,
 			  findking(_board->squares, 'Y', PLAYER), 
 			  findking(_board->squares, 'X', PLAYER),
-			  PLAYER, 0)) {
+			  1-PLAYER, 0)) {
       score = -13000 + 50*(BRAIN.DEEP-DEEP); 
     }
        
@@ -410,8 +418,9 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
   int i=0, j=0;
     
   int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0, PieceMaterialValue=0;
-    
 
+  int pawnEffectiveHeight = 0;
+  int piecePositionalValue = 0;
   int chaos = 1;   
 
   if (BRAIN.randomness) chaos = rand() % (int)(BRAIN.randomness);
@@ -437,17 +446,25 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     PieceMaterialValue = BRAIN.pvalues[PieceIndex];
         
     if (PieceIndex==0) {
-      if (P) PieceMaterialValue += i * BRAIN.pawnrankMOD;
-      else PieceMaterialValue += (7-i) * BRAIN.pawnrankMOD;
+      if (P) pawnEffectiveHeight = i;
+      else pawnEffectiveHeight = 7-i;
+      PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
+      PieceMaterialValue += pawnEffectiveHeight * board.MovementCount * BRAIN.endgameWeight;
+      
+
     }
 
     score += PieceMaterialValue * BRAIN.seekpieces;
 
+    piecePositionalValue = (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j]);
+    	//old method: ((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) 
     if (PieceIndex != 5)
-      score += sqrt(BRAIN.pvalues[PieceIndex]) * 2 *
-	//((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) *
-	(BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j])
-	* BRAIN.seekmiddle;    
+      score += sqrt(BRAIN.pvalues[PieceIndex])  *
+	piecePositionalValue * BRAIN.seekmiddle;
+    else
+      score += sqrt(BRAIN.pvalues[5])  *
+	piecePositionalValue * BRAIN.seekmiddle *
+	board.MovementCount * BRAIN.endgameWeight;
 
   }
   
@@ -466,15 +483,15 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 	  score += (parallelatks * 10 * BRAIN.parallelcheck);
 	  }*/
       if (DefenderIndex != 5) {	
-	score += BRAIN.pvalues[DefenderIndex] * BRAIN.seekatk;
-	score -= (BRAIN.pvalues[AttackerIndex]/10 * BRAIN.balanceoffense);
+	score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
+	score -=  sqrt(BRAIN.pvalues[AttackerIndex]) *2 * BRAIN.balanceoffense;
       }
     }
     else if (DefenderIndex != 5){
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);
-      score += (paralleldefenders * BRAIN.pvalues[PieceIndex]/10 * BRAIN.MODbackup);
+      score += (paralleldefenders * sqrt(BRAIN.pvalues[PieceIndex])/2 * BRAIN.MODbackup);
         
     }       
          
@@ -523,7 +540,7 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
 	  board->squares[i][j]!=Pieces[P][0]&&
 	  !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
       if (board->squares[i][j]==Pieces[P][5])
-	if (ifsquare_attacked (board->squares,i,j,P,0)) return 0;
+	if (ifsquare_attacked (board->squares, i, j, 1-P, 0)) return 0;
     }
   //OFF!!!
   //return NullMove;       
@@ -543,3 +560,26 @@ Device int satellite_evaluation (struct move *movement) {
   return Result;
 }
 
+Device int check_fivemove_repetition (void) {
+  
+  int k=0,v=0;
+  F(k,3){
+    v = -k * 4;
+    if (hindex > k * 4 + 4){
+      if (!compare_movements(&movehistory[hindex-k], &movehistory[hindex-k-4]))
+	return 0;
+    }
+    else return 0;
+  }
+  return 1;
+
+}
+Device int compare_movements (struct move *move_A, struct move *move_B) {
+  int i=0;
+  
+  F(i,2) {
+    if (move_A->from[i] != move_B->from[i]) return 0;
+    if (move_A->to[i] != move_B->to[i]) return 0;
+    }
+  return 1;
+}

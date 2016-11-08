@@ -35,7 +35,8 @@ Host Device bool is_in(char val, char arr[], int size){
 }
 
 
-Device int append_move(struct board *board, struct movelist *moves, int i,int j, int mod_i, int mod_j, int P) {
+Device int append_move(struct board *board, struct movelist *moves,
+		       int i,int j, int mod_i, int mod_j, int P) {
     
   moves->movements[moves->k].passant=0;
   moves->movements[moves->k].passantJ[0]=board->passantJ;
@@ -125,9 +126,9 @@ Device int append_move(struct board *board, struct movelist *moves, int i,int j,
 }
 
 
-Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, int verbose) {
+Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj,
+				   int AttackingPlayer, int verbose) {
     //show_board(squares);
-    //P is the victim player.
     int i = 0;
     int j =0;
     int offender = 0;
@@ -157,63 +158,49 @@ Host Device int ifsquare_attacked (char squares[8][8], int TGi, int TGj, int P, 
         
         
         while (onboard(aim_y,aim_x) && squares[aim_y][aim_x] == 'x')
-     {i++; aim_y=target[0]+i*matrix[z][0]; j++; aim_x=target[1]+j*matrix[z][1];}
+	  {i++; aim_y=target[0]+i*matrix[z][0]; j++; aim_x=target[1]+j*matrix[z][1];}
         
         Vb printf("checking %i%i\n", aim_y,aim_x);
 
         
-        if (onboard(aim_y,aim_x) && is_in(squares[aim_y][aim_x], Pieces[1-P],6)) {
-            offender = getindex(squares[aim_y][aim_x], Pieces[1-P],6);
-            Vb printf("y");
-            //printf("kpos %i%i x=%i\n",aim_y,aim_x,x);
+        if (onboard(aim_y,aim_x) && is_in(squares[aim_y][aim_x], Pieces[AttackingPlayer],6)) {
+	  offender = getindex(squares[aim_y][aim_x], Pieces[AttackingPlayer],6);
+
+	  //printf("kpos %i%i x=%i\n",aim_y,aim_x,x);
             
             
-            if (offender==1||offender==4) if (z==2||z==4||z==6||z==8) result++; 
+	  if (offender==1||offender==4) if (z==2||z==4||z==6||z==8) result++; 
                     
-            if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result++;
+	  if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result++;
             
-            if (offender==5) if (i==1) result++;
+	  if (offender==5) if (i==1) result++;
+          // ??????
+	  if (offender==0) if (i==1) if (1-AttackingPlayer==0) if (z==1||z==3) result++;
             
-            if (offender==0) if (i==1) if (P==0) if (z==1||z==3)  result++;
-            
-            if (offender==0) if (i==1) if (P==1) if (z==7||z==9) result++;
+	  if (offender==0) if (i==1) if (1-AttackingPlayer==1) if (z==7||z==9) result++;
               
 
             
 
-        } }
-    
-    
-    //printf("b.\n");
-    
-    
-    for(z=0;z<2;z++) for(n=0;n<2;n++) {
-    
+        }
+    }
 
-        
+    char Knight = Pieces[AttackingPlayer][2];
+    for(z=0;z<2;z++) for(n=0;n<2;n++) {
+            
         aim_y=target[0]+horse_matrix[1][n];
         aim_x=target[1]+horse_matrix[0][z];
         
-        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Pieces[1-P][2])) result++;
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Knight)) result++;
              
   
         aim_y=target[0]+horse_matrix[0][n];
         aim_x=target[1]+horse_matrix[1][z];
                 
-        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Pieces[1-P][2])) result++;
-        
-
-
-  
+        if ((onboard(aim_y,aim_x)) && (squares[aim_y][aim_x] == Knight)) result++;
+      
     }         
             
-            
-            
-            
-          
-    
-    //printf("%i.\n",result);
-    
     return result;
 }
 
@@ -245,7 +232,7 @@ Host Device int check_move_check (struct board *tg_board, struct move *move, int
 	return 0;
     }
     
-    if (ifsquare_attacked(tg_board->squares, kpos[0],kpos[1], P, verbose)>0)check=1;
+    if (ifsquare_attacked(tg_board->squares, kpos[0],kpos[1], 1-P, verbose)>0)check=1;
 
     undo_move(tg_board, move);
     return check;

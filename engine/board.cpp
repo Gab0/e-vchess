@@ -203,7 +203,7 @@ if (board->squares[i][j] == Pieces[PL][5]){
      movement_generator(board,moves,1, '+', i, j, PL);
      movement_generator(board,moves,1, 'X', i, j, PL);
     
-    if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, PL, 0)) {
+    if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, 1-PL, 0)) {
 
         if (cancastle(board, PL,-1)) append_move(board,moves, 16, 2, 0, 0, PL);
         
@@ -444,9 +444,9 @@ Host Device int cancastle (struct board *board, int P, int direction) {
     
     if (board->castle[P][0] && direction==-1) {
     if (board->squares[ROW][0] == Pieces[P][1]  &&
-        board->squares[ROW][1]=='x' && !ifsquare_attacked(board->squares,ROW,1,P,0) &&
-        board->squares[ROW][2]=='x' && !ifsquare_attacked(board->squares,ROW,2,P,0) &&
-        board->squares[ROW][3]=='x' && !ifsquare_attacked(board->squares,ROW,3,P,0)) {
+        board->squares[ROW][1]=='x' && !ifsquare_attacked(board->squares,ROW,1,1-P,0) &&
+        board->squares[ROW][2]=='x' && !ifsquare_attacked(board->squares,ROW,2,1-P,0) &&
+        board->squares[ROW][3]=='x' && !ifsquare_attacked(board->squares,ROW,3,1-P,0)) {
         
         
         return 1;
@@ -462,8 +462,8 @@ Host Device int cancastle (struct board *board, int P, int direction) {
     
     if (board->castle[P][2] && direction==1) {
     if (board->squares[ROW][7] == Pieces[P][1] &&
-        board->squares[ROW][5]=='x' && !ifsquare_attacked(board->squares,ROW,5,P,0) &&
-        board->squares[ROW][6]=='x' && !ifsquare_attacked(board->squares,ROW,6,P,0)){
+        board->squares[ROW][5]=='x' && !ifsquare_attacked(board->squares,ROW,5,1-P,0) &&
+        board->squares[ROW][6]=='x' && !ifsquare_attacked(board->squares,ROW,6,1-P,0)){
         
         return 1;
     }}

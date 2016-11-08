@@ -65,7 +65,7 @@ class Table(Frame):
     # Threads for engine loading has been cast aside; Performance gain
     # is negible in face of greater RAM comsumption.
     # It depends on the table, who can call newmatch_thread() or newmatch().
-    def newmatch_thread(self, specificMatch=None):
+    def newmatch_thread(self, specificMachines=None):
 
         if not self.online and not self.initialize and not self.startThread:
             try:
@@ -73,13 +73,13 @@ class Table(Frame):
                     self.startThread.join()
 
                 self.startThread = Thread(target=self.newmatch, kwargs={
-                                          'specificMatch': specificMatch})
+                                          'specificMachines': specificMachines})
 
                 self.startThread.start()
             except RuntimeError:
                 print('Error starting match.')
 
-    def newmatch(self, specificMatch=None):
+    def newmatch(self, specificMachines=None, specificOpening=None):
         if self.initialize:
             return
 
@@ -95,14 +95,14 @@ class Table(Frame):
         if self.GUI:
             self.Maximize["background"] = "purple"
 
-        if specificMatch:
+        if specificMachines:
             MachineDirectory = "machines/top_machines/"
         else:
             MachineDirectory = "machines/"
 
         try:
-            if specificMatch:
-                CURRENTengineARGS = specificMatch[0]
+            if specificMachines:
+                CURRENTengineARGS = specificMachines[0]
                 # print(' '.join(CURRENTengineARGS))
             else:
                 CURRENTengineARGS = settings.engineARGS
@@ -110,8 +110,8 @@ class Table(Frame):
             self.MACHINE.append(
                 Engine(CURRENTengineARGS))
 
-            if specificMatch:
-                CURRENTengineARGS = specificMatch[1]
+            if specificMachines:
+                CURRENTengineARGS = specificMachines[1]
             else:
                 CURRENTengineARGS = settings.engineARGS
 
@@ -149,12 +149,6 @@ class Table(Frame):
         sleep(0.1)
         self.startuplog = []
         try:
-            # self.startuplog.append(self.MACHINE[1].stdout.read())
-            # self.startuplog.append(self.MACHINE[0].stdout.read())
-            # self.MACHINE[0].stdout.flush()
-
-            # self.MACHINE[1].stdout.flush()
-
             for i in [0, 1]:
                 for line in self.MACHINE[i].receive():
                     L = line
@@ -165,11 +159,18 @@ class Table(Frame):
                     if "opening machine:" in L:
                         self.MACnames[i] = L.split('/')[-1][:-1]
 
-            self.MACHINE[1].send("new")
-
-            self.MACHINE[0].send("new")
+            if specificOpening:
+                for M in self.MACHINE:
+                    M.send("position %s" % specificOpening)
+                self.board.set_board_fen(specificOpening)
+            else:
+                self.MACHINE[1].send("new")
+                self.MACHINE[0].send("new")
+                
             self.MACHINE[0].send("white")
-            self.MACHINE[0].send("go")
+            SideToPlay = 1 - int(self.board.turn)
+            self.turn = SideToPlay
+            self.MACHINE[SideToPlay].send("go")
 
         except BrokenPipeError:
             print("broken pipe @ " + str(self.number) + " while starting.")
@@ -202,7 +203,7 @@ class Table(Frame):
             self.setlimit["text"] = "0"
 
         self.online = 1
-        self.turn = 0
+        #self.turn = 0
         self.initialize = 0
 
         self.startThread = 0

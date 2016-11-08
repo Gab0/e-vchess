@@ -176,7 +176,7 @@ class Arena():
                     LEVEL += "B"
                 if not self.ROUND % (self.EvolveRatio * 3):
                     LEVEL += "C"
-                if not self.ROUND % (self.EvolveRatio * 10):
+                if not self.ROUND % (self.EvolveRatio * 7):
                     LEVEL += "T"
                 if not self.ROUND % (self.EvolveRatio // 3 * 13):
                     LEVEL += "H"  # better act alone.
@@ -207,8 +207,8 @@ class Arena():
                         # after each sucessfull game.
                         #self.TABLEBOARD[t] = 0
                         #self.TABLEBOARD[t] = Table(self, master=self.root)
-
-                        self.TABLEBOARD[t].newmatch()
+                        opening = self.selectChessOpening()
+                        self.TABLEBOARD[t].newmatch(specificOpening=None)
 
             if not self.ROUND:
                 sleep(0.1)
@@ -250,15 +250,16 @@ class Arena():
             if T > self.looplimit:
                 self.TABLEBOARD[T].endgame()
 
-    def StatLock_routine_management(self):
-        population = loadmachines()
-        population = CyclingStatLock(population)
+    def selectChessOpening(self):
+        database = ["r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3", #ruy lopez
+                    "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq g7 3 3", #king's indian
+                    "rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2" #modern defense
+                    ]
 
-        self.log('')
-        self.log('>>>>>STATLOCK ROUTINE MANAGEMENT')
-        self.log('')
+        if randrange(10) > 8:
+            return choice(database)
+        return None                   
 
-        setmachines(population)
 
     def routine_pop_management(self, LEVEL):
         if not len(LEVEL):
@@ -364,7 +365,7 @@ class Arena():
                         population[k] = None
                     elif Similarity < 1:
                         print("Mutating %s by similarity." % population[k].filename)
-                        population[k].mutate(3,5)
+                        population[k].mutate(3,1)
 
 
             population = [ x for x in population if x ]

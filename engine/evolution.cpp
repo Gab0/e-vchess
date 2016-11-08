@@ -129,15 +129,17 @@ int loadmachine (int verbose, char *MachineDir) {
            free(line);
        
        
-       machinepath = filename;
+       //machinepath = filename;
 
-       printf("machinepath>> %s\n", machinepath);
+       printf("machinepath>> %s\n", filename);
        
        loadedmachine = true;
        
        if (againstHUMAN) 
 	 chesslog(MachineDir, machinepath);
-       
+
+       free(reading);
+       free(filename);
        return 0;
    
     

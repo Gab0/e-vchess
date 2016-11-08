@@ -288,7 +288,7 @@ class Tournament():
                         engineCommand[1] += [ROUND[G][1].filename]
                         self.TABLEBOARD[G].endgame()
                         self.TABLEBOARD[G].newmatch(
-                            specificMatch=engineCommand)
+                            specificMachines=engineCommand)
 
                     else:
                         ACTIVE[G] = False
