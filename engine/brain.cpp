@@ -432,7 +432,9 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
   int parallelatks = 0;
   int paralleldefenders = 0;
     
-    
+  int currentMovementCount= board.MovementCount;
+
+  int PieceCount = countPieces(evalboard->squares, 0);
   forsquares {
     //this slows da thinking process by a lot.
     //score += ifsquare_attacked(evalboard->squares, i, j, P, 0) * 5 *
@@ -446,48 +448,50 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     PieceMaterialValue = BRAIN.pvalues[PieceIndex];
         
     if (PieceIndex==0) {
-      if (P) pawnEffectiveHeight = i;
-      else pawnEffectiveHeight = 7-i;
+      if (P) pawnEffectiveHeight = i-1;
+      else pawnEffectiveHeight = 6-i;
       PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
-      PieceMaterialValue += pawnEffectiveHeight * board.MovementCount * BRAIN.endgameWeight;
+      if (PieceCount < 6)
+	PieceMaterialValue += pawnEffectiveHeight * currentMovementCount * BRAIN.endgameWeight;
       
 
     }
 
     score += PieceMaterialValue * BRAIN.seekpieces;
-
+    
     piecePositionalValue = (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j]);
     	//old method: ((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) 
     if (PieceIndex != 5)
       score += sqrt(BRAIN.pvalues[PieceIndex])  *
 	piecePositionalValue * BRAIN.seekmiddle;
     else
-      score += sqrt(BRAIN.pvalues[5])  *
+      score += sqrt(BRAIN.pvalues[5])/5  *
 	piecePositionalValue * BRAIN.seekmiddle *
-	board.MovementCount * BRAIN.endgameWeight;
+	currentMovementCount * BRAIN.endgameWeight;
 
   }
   
  
   for (Z=0;Z<moves->kad;Z++) {
-    DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6); 
+    DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6);
+    if (DefenderIndex == 5) continue;
     if (P == Attacker)  {
       AttackerIndex =  getindex(moves->attackers[Z][0], Pieces[P], 6);
         
-      /*      parallelatks = ifsquare_attacked
+       parallelatks = ifsquare_attacked
 	(evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], 1-P, 0);
                 
-      if (BRAIN.parallelcheck) {
+      if (BRAIN.parallelAttacks) {
 	if (parallelatks>1) 
-	  score += (parallelatks * 10 * BRAIN.parallelcheck);
-	  }*/
-      if (DefenderIndex != 5) {	
+	  score += (parallelatks * 10 * BRAIN.parallelAttacks);
+	  }
+     
 	score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
-	score -=  sqrt(BRAIN.pvalues[AttackerIndex]) *2 * BRAIN.balanceoffense;
-      }
+	score -= sqrt(BRAIN.pvalues[AttackerIndex]) * BRAIN.balanceoffense;
+      
     }
-    else if (DefenderIndex != 5){
+    else {
       paralleldefenders = ifsquare_attacked
         (evalboard->squares,moves->defenders[Z][1],
 	 moves->defenders[Z][2], P, 0);

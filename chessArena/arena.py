@@ -266,13 +266,7 @@ class Arena():
             return
         population = loadmachines()
 
-        originalPOPLEN = len(population)
-        # for individual in population:
-        # dump_all_paramstat(individual)
-
-        # for k in range(8):
-        #    CHILD = create_hybrid(population)
-        #    if CHILD: population.append(CHILD)
+        originalPOPLEN = settings.standard_popsize #len(population)
 
         DELTAind = originalPOPLEN // 16
 

@@ -532,3 +532,17 @@ Host Device void movement_generator(struct board *board, struct movelist *moves,
     
     
 }
+
+
+int countPieces (char squares[8][8], int CountPawns) {
+  int PieceCount=0, i=0, j=0;
+  if (CountPawns)
+    forsquares  {
+      if (squares[i][j] != 'x') PieceCount += 1;
+    }
+  else
+    forsquares
+      if (squares[i][j] != 'x' && squares[i][j] != 'p' && squares[i][j] != 'P') PieceCount += 1;
+
+  return PieceCount;
+}

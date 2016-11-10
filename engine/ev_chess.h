@@ -123,7 +123,7 @@ struct param {
   float TIMEweight[10];
   float presumeOPPaggro;
   float pawnrankMOD;
-  float parallelcheck;
+  float parallelAttacks;
   float balanceoffense;
   float cumulative;
   float MODbackup;
@@ -215,6 +215,8 @@ Host Device void movement_generator
             int limit, char direction, int i, int j, int P);
 Host Device void undo_lastMove(struct board *board, int Number);
 
+int countPieces (char squares[8][8], int CountPawns);
+
 //functions from operation.cpp;##################################################
 void cord2pos (char out[]); 
 void pos2cord (char out[]);
@@ -285,7 +287,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 unsigned long long rndseed();
 int loadmachine (int verbose, char *dir);
 //int applyresult (int result);
-//int countpieces (void);
+
 void readparam(char *line, int verbose, const char *keyword, float *Parameter);
 void dump_history();
 void chesslog(char *location, const char content[]);

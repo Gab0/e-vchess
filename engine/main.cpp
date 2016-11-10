@@ -62,11 +62,7 @@ int searchNODEcount;
 IFnotGPU( bool allow_castling = true; )
 IFGPU( __device__ bool allow_castling = true; )
         
-
-
-    
-    
-    
+  
     
 int main(int argc, char** argv) {
 
@@ -352,7 +348,7 @@ Global void setBrainStandardValues(void) {
   Brain.presumeOPPaggro = 0;
   //pawnrankMOD augments the score of the pawns, by the rank he occupies.
   Brain.pawnrankMOD = 0;
-  Brain.parallelcheck = 0;
+  Brain.parallelAttacks = 0;
   Brain.balanceoffense = 0;    
   Brain.cumulative = 0;
   Brain.MODbackup = 0;

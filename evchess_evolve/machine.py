@@ -35,6 +35,7 @@ class machine():
         self.stat_loss = 0
         self.K = 0
 
+        self.HallOfFame = False
 
     def Load(self):
         try:
@@ -65,6 +66,8 @@ class machine():
 
         if 'stat_elo' in split_line:
             self.ELO = int(split_line[2])
+        if 'halloffame' in split_line:
+            self.HallOfFame = True
 
     def write(self):
         Fo = open(self.DIR + '/' + self.filename, "w+")
@@ -77,6 +80,9 @@ class machine():
             Fo.write('TOP\n')
 
         Fo.write('stat_elo = %i\n' % self.ELO)
+
+        if self.HallOfFame:
+            Fo.write('halloffame\n')
 
         Fo.close()
     def checkExistence(self):

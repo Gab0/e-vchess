@@ -22,19 +22,19 @@ def STDPARAMETERS():
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
         parameter("param_pawnrankMOD", 0, 20, 0,
-                  LIM=37, bLIM=3, promoter='p'),
+                  LIM=15, bLIM=3, promoter='p'),
 
-        parameter("param_parallelcheck", 0, 12, 0,
-                  LIM=2, bLIM=0, INCR=0.3, promoter='c'),
+        parameter("param_parallelAttacks", 0, 12, 0,
+                  LIM=0.6, bLIM=0, INCR=0.3, promoter='c'),
 
         parameter("param_balanceoffense", 0, 6, 0,
-                  LIM=0.6, bLIM=0, INCR=0.2, promoter='o'),
+                  LIM=0.8, bLIM=0.2, INCR=0.2, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0,
-                  LIM=3, bLIM=0.2, INCR=0.2, promoter='B'),
+                  LIM=0.6, bLIM=0.2, INCR=0.2, promoter='B'),
 
         parameter("param_MODmobility", 0, 15, 0,
-                  LIM=3, bLIM=0, INCR=0.2, promoter='M'),
+                  LIM=2, bLIM=0.6, INCR=0.2, promoter='M'),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
 
@@ -44,7 +44,7 @@ def STDPARAMETERS():
                   LIM=4, bLIM=0, INCR=0.1, promoter='F'),
 
         parameter("param_boardcontrol", 0, 12, 0,
-                  LIM=3, bLIM=0, INCR=0.25, promoter='C')
+                  LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
         parameter("param_endgameWeight", 0, 12, 0,
                   LIM=3, bLIM=0.2, INCR=0.2, promoter="E")
