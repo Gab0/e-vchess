@@ -1,5 +1,5 @@
 #!/bin/bash
-FILES=( "main" "brain_fast" "brain" "board" "operation" "evolution" "interface" )
+FILES=( "main" "brain_fast" "brain" "board" "operation" "evolution" "interface" "evaluate")
 if [ "$1" = "cuda" ]
 then
 
@@ -25,4 +25,4 @@ fi
 #${LINKTOOL} -o e-vchess main.o board.o operation.o evolution.o interface.o brain.o
 
 
-${TOOL} -o e-vchess main.cpp board.cpp operation.cpp evolution.cpp interface.cpp brain.cpp brain_fast.cpp
+${TOOL} -o e-vchess main.cpp board.cpp operation.cpp evolution.cpp interface.cpp brain.cpp brain_fast.cpp evaluate.cpp

@@ -11,13 +11,19 @@ case  "$1" in
 
 "tournament") python ${BASEDIR}/launch_tournament.py;;
 
-"longtournament") python ${BASEDIR}/launch_tournament.py -t;;
+"longtournament") if [ -z ${2} ];
+		  then wN=1;
+		  else wN=$2;
+		  fi
+		  for i in `seq 1 ${wN}`;
+		  do python ${BASEDIR}/launch_tournament.py -t
+		  done;;
 
 "make") cd ${BASEDIR}/engine && ./make.sh;;
 
 "memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
 
-"engine") cd ${BASEDIR}/ && ./engine/e-vchess;;
+"engine") cd ${BASEDIR}/ && ./engine/e-vchess $2 $3 $4 $5;;
 
 *) 
 echo ""

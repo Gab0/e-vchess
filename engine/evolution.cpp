@@ -122,6 +122,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_moveFocus", &Brain.moveFocus);
 	   readparam(line, V, "param_boardcontrol", &BRAIN.boardcontrol);
 	   readparam(line, V, "param_endgameWeight", &BRAIN.endgameWeight);
+	   readparam(line, V, "param_opponentAddMaterialValue", &BRAIN.opponentAddMaterialValue);
 
        }
 	 printf("\n");

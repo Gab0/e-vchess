@@ -5,7 +5,7 @@ from evchess_evolve.parameter import parameter
 from evchess_evolve.core import machine_dir
 
 from random import choice, randrange
-
+import os
 class machine():
 
     def __init__(self, fname, DIR=machine_dir):
@@ -85,8 +85,9 @@ class machine():
             Fo.write('halloffame\n')
 
         Fo.close()
+        
     def checkExistence(self):
-        if os.path.isfile("%s/%s" % self.DIR, self.filename):
+        if os.path.isfile("%s/%s" % (self.DIR, self.filename)):
             return True
         return False
             

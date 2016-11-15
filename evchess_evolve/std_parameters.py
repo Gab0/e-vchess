@@ -17,7 +17,7 @@ def STDPARAMETERS():
                   bLIM=0.6, INCR=0.1, LIM=1.6, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 0,
-                  bLIM= -1, LIM=5, promoter='m'),
+                  bLIM= 1, LIM=5, promoter='m'),
 
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
@@ -31,7 +31,7 @@ def STDPARAMETERS():
                   LIM=0.8, bLIM=0.2, INCR=0.2, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0,
-                  LIM=0.6, bLIM=0.2, INCR=0.2, promoter='B'),
+                  LIM=1, bLIM=0.2, INCR=0.2, promoter='B'),
 
         parameter("param_MODmobility", 0, 15, 0,
                   LIM=2, bLIM=0.6, INCR=0.2, promoter='M'),
@@ -48,6 +48,9 @@ def STDPARAMETERS():
 
         parameter("param_endgameWeight", 0, 12, 0,
                   LIM=3, bLIM=0.2, INCR=0.2, promoter="E")
+
+        parameter("param_opponentAddMaterialValue", 0, 15, 0,
+                  LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
     ]
 
 

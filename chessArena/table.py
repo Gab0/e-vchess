@@ -630,8 +630,9 @@ class Table(Frame):
                 if self.MACcontent[macIndex].checkExistence():
                     self.MACcontent[macIndex].write()
                         
-        except:
-            self.log('sending ELO failed.', '')
+        except Exception as E:
+            #raise
+            self.log('sending ELO failed.', E)
 
     def DUMPmovehistory(self, reason):
         CurrentRound = self.arena.ROUND if self.arena else 0

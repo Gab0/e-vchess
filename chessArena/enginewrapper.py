@@ -30,7 +30,7 @@ class Engine():
         if method == "lines":
             self.engine.stdout.flush()
             data = self.engine.stdout.readlines()
-            data = [x.decode('utf-8', 'ignore') for x in data]
+            data = [ x.decode('utf-8', 'ignore') for x in data ]
             if self.recordComm:
                 for c in data:
                     self.recordedData += c
@@ -51,7 +51,8 @@ class Engine():
                 print(">%s" % line)
             if moveKeyword in line and not line.startswith("param"):
                 line = line.replace('\n', '').strip().split(" ")
-                return line[-1]
+                return line[line.index(moveKeyword)+1]
+
     
         return None
 

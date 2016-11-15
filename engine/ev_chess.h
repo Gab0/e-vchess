@@ -131,6 +131,7 @@ struct param {
   float moveFocus;
   float boardcontrol;
   float endgameWeight;
+  float opponentAddMaterialValue;
 };
 
 extern struct move movehistory[512];
@@ -189,10 +190,13 @@ extern bool loadDEEP;
 extern int searchNODEcount;
 IFnotGPU( extern bool allow_castling; )
 IFGPU( extern __device__ bool allow_castling; )
+
+
 //functions from main.cpp;#######################################################
 void computer(int verbose);
 void SIGthink(int signum);
 Global void setBrainStandardValues(void);
+
 
 //functions from board.cpp;######################################################
 void setup_board(int setup);
@@ -261,7 +265,7 @@ void show_movelist(struct movelist *moves);
 
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
-Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker);
+
 Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				  long Alpha, long Beta, int AllowCutoff);
 Host Device float scoremod (int DEEP, int method);
@@ -278,6 +282,12 @@ Device int satellite_evaluation (struct move *movement);
 
 Device int compare_movements (struct move *move_A, struct move *move_B);
 Device int check_fivemove_repetition (void);
+
+
+//functions from evaluate.cpp;###################################################
+Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker);
+
+
 //functions from brain_fast.cpp;#################################################
 int think_fast(struct move *out, int PL, int DEEP, int verbose);
 Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,

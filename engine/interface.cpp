@@ -11,9 +11,9 @@ int fehn2board (char str[]) {
     int j=0;
     int number=0;
     int PL=0;
+
     fstring = strtok(str, " ");
     
-
     fstring = strtok(NULL, " ");
 
     //read boardmap section.
@@ -37,7 +37,10 @@ int fehn2board (char str[]) {
     fstring = strtok(NULL, " ");
     //read active player section.
     
-    //if (fstring == 'b')
+    if (fstring[0] == 'b')
+      board.whoplays=1;
+    if (fstring[0] == 'w')
+      board.whoplays = 0;
     
     fstring = strtok(NULL, " ");
     //read castling righst section.
@@ -53,10 +56,20 @@ int fehn2board (char str[]) {
         if (fstring[z] == 'q') board.castle[1][0]=1;
         if (fstring[z] == 'k') board.castle[1][1]=1;
     }
+
+    //read en-passant info;
+    fstring = strtok(NULL, " ");
+
     
-    
-    
-    
+
+    //read half move info;
+    fstring = strtok(NULL, " ");
+
+    //read full move clock;
+    fstring = strtok(NULL, " ");
+    board.MovementCount =  atoi(fstring) -1;
+    board.MovementCount *= 2;
+    board.MovementCount += board.whoplays;
     
     
     

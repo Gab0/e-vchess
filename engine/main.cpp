@@ -105,10 +105,10 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
         if (strstr(argv[i], "--deep") != NULL) 
-	  Brain.DEEP = (int)atoi(argv[i+1]);
+	  BRAIN.DEEP = (int)atoi(argv[i+1]);
 
 	if (strstr(argv[i], "--xdeep") != NULL)
-	  Brain.xDEEP = (int)atoi(argv[i+1]);
+	  BRAIN.xDEEP = (int)atoi(argv[i+1]);
 
 	if (strstr(argv[i], "--ydeep") != NULL)
 	  Brain.yDEEP = (int) atoi(argv[i+1]);
@@ -141,8 +141,9 @@ int main(int argc, char** argv) {
     char testfehn[128] = "fen r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
 
     printf("DEEP=%i   xDEEP=%i   yDEEP=%i\n\n", Brain.DEEP, Brain.xDEEP, BRAIN.yDEEP);
-
  
+    if (fastmode)
+      printf("fastmode on\n");
     
     inp =(char *)malloc(128*sizeof(char));
 
@@ -154,7 +155,7 @@ int main(int argc, char** argv) {
     
     fflush(stdout);
     
-    read(0,inp, 128);
+    read(0, inp, 128);
     for (i=0;i<128;i++) if (inp[i] == '\n') inp[i]= ' ';
       
     /*printf("line received ");    
@@ -162,7 +163,7 @@ int main(int argc, char** argv) {
     for (i=0;i<128;i++) inp[i]='0';
     printf("\n");
       */  
-    board.MovementCount=0;
+    //board.MovementCount=0;
     if (strstr(inp, "isready") != NULL) {printf("readyok\n"); fflush(stdout);}
    
     if (strstr(inp, "quit") != NULL) return 0;
@@ -194,8 +195,10 @@ int main(int argc, char** argv) {
     
     if (strstr(inp, "dump") != NULL) dump_history();
     
-    if (strstr(inp, "go") != NULL) computer(0);
-    
+    if (strstr(inp, "go") != NULL) {
+      machineplays = board.whoplays;
+      computer(thinkVerbose);
+    }
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
         for (i=0; i < hindex; i++) {
@@ -245,7 +248,7 @@ int main(int argc, char** argv) {
         write(1, output, strlen(output));fflush(stdout);
     }
     
-    if (read_movelines(inp,0)) {
+    if (read_movelines(inp, 0)) {
        computer(thinkVerbose);
         
 
@@ -312,13 +315,14 @@ Global void setBrainStandardValues(void) {
   Brain.pvalues[0] = 100;
   Brain.pvalues[1] = 500;
   Brain.pvalues[2] = 320;
-  Brain.pvalues[3] = 330;
+  Brain.pvalues[3] = 340;
   Brain.pvalues[4] = 900;
   Brain.pvalues[5] = 2000;
     
   //randomness is the limit to the randomic small variability on the score, 
   //in centipawns.
   Brain.randomness = 50;
+  
   //seekmiddle augments the score for pieces in the center of the board.
   Brain.seekmiddle = 0;
     
@@ -337,18 +341,22 @@ Global void setBrainStandardValues(void) {
   Brain.yDEEP = 8;
 
     
-  //seekpieces augments the score for attacked enemy pieces.
+  //seekpieces modifies pieces' raw material value.
   Brain.seekpieces = 1;
     
-  Brain.deviationcalc = 0;
-  Brain.evalmethod = 0;
-  //seekatk augments the score for taken pieces.
+  //seekatk augments the score for each piece that is under emminent attack.
   Brain.seekatk = 0;
-  //brain.TIMEweight = {1.08,0.918,0.84,0.629,0.398,0.413,0.501,0.557,0.602,1.02};
+
   Brain.presumeOPPaggro = 0;
+  
   //pawnrankMOD augments the score of the pawns, by the rank he occupies.
   Brain.pawnrankMOD = 0;
+
+  // parallelAttacks adds score when a enemy occupied square
+  // is being attacked by multiple pieces.
   Brain.parallelAttacks = 0;
+
+  
   Brain.balanceoffense = 0;    
   Brain.cumulative = 0;
   Brain.MODbackup = 0;
@@ -356,10 +364,15 @@ Global void setBrainStandardValues(void) {
 
   Brain.moveFocus = 0;
 
+  // 
   Brain.boardcontrol = 0;
-
+  
+  // modifies score for various situations that happen only in endgame time.
   Brain.endgameWeight = 0;
 
+  // this add bonus material value for pieces under opponent control,
+  // the idea is to make the engine avoid trading pieces.
+  Brain.opponentAddMaterialValue = 0;
     
 }
 

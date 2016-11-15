@@ -98,7 +98,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       
     if (FivemoveRepetitionRisk)
       if (compare_movements(&moves->movements[i], &movehistory[hindex-4])){
-	asprintf(&output, "Downgrading score due to move repetition draw menace.\n");
+	asprintf(&output, "Neutralizing score due to move repetition draw menace.\n");
 	write(1, output, strlen(output));
 	  moves->movements[i].score = 0;
       }
@@ -358,9 +358,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
 
       invert(DisposableBuffer->score);
-      moves.movements[i].score = DisposableBuffer->score;
+      moves.movements[i].score = DisposableBuffer->score;// + moves.k * 10;
 
-      
       if (moves.movements[i].score > score) {
 	if (PersistentBufferOnline)
 	  DUMP(PersistentBuffer);
@@ -403,110 +402,13 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     enemy_score = evaluate(_board, &moves, 1-PLAYER, PLAYER);
     //show_board(_board->squares);
 
-    _board->score = machine_score - (enemy_score * (1 + BRAIN.presumeOPPaggro));
+    _board->score = machine_score - enemy_score;
     return _board;
   }
 
 }
 
-Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker) {
-  //int Index = blockIdx.x;
-  //printf("E %i\n", Index);
-  
-  int score = 0;
-    
-  int i=0, j=0;
-    
-  int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0, PieceMaterialValue=0;
 
-  int pawnEffectiveHeight = 0;
-  int piecePositionalValue = 0;
-  int chaos = 1;   
-
-  if (BRAIN.randomness) chaos = rand() % (int)(BRAIN.randomness);
-
-  attackers_defenders(evalboard->squares, *moves, P);
-
-    
-  //int deadpiece = 0;
-  int parallelatks = 0;
-  int paralleldefenders = 0;
-    
-  int currentMovementCount= board.MovementCount;
-
-  int PieceCount = countPieces(evalboard->squares, 0);
-  forsquares {
-    //this slows da thinking process by a lot.
-    //score += ifsquare_attacked(evalboard->squares, i, j, P, 0) * 5 *
-    //	BRAIN.boardcontrol;
-
-      
-    if (evalboard->squares[i][j] == 'x') continue;
-      
-    PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
-    if (PieceIndex < 0) continue;
-    PieceMaterialValue = BRAIN.pvalues[PieceIndex];
-        
-    if (PieceIndex==0) {
-      if (P) pawnEffectiveHeight = i-1;
-      else pawnEffectiveHeight = 6-i;
-      PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
-      if (PieceCount < 6)
-	PieceMaterialValue += pawnEffectiveHeight * currentMovementCount * BRAIN.endgameWeight;
-      
-
-    }
-
-    score += PieceMaterialValue * BRAIN.seekpieces;
-    
-    piecePositionalValue = (BoardMiddleScoreWeight[i] + BoardMiddleScoreWeight[j]);
-    	//old method: ((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) 
-    if (PieceIndex != 5)
-      score += sqrt(BRAIN.pvalues[PieceIndex])  *
-	piecePositionalValue * BRAIN.seekmiddle;
-    else
-      score += sqrt(BRAIN.pvalues[5])/5  *
-	piecePositionalValue * BRAIN.seekmiddle *
-	currentMovementCount * BRAIN.endgameWeight;
-
-  }
-  
- 
-  for (Z=0;Z<moves->kad;Z++) {
-    DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6);
-    if (DefenderIndex == 5) continue;
-    if (P == Attacker)  {
-      AttackerIndex =  getindex(moves->attackers[Z][0], Pieces[P], 6);
-        
-       parallelatks = ifsquare_attacked
-	(evalboard->squares,moves->defenders[Z][1],
-	 moves->defenders[Z][2], 1-P, 0);
-                
-      if (BRAIN.parallelAttacks) {
-	if (parallelatks>1) 
-	  score += (parallelatks * 10 * BRAIN.parallelAttacks);
-	  }
-     
-	score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
-	score -= sqrt(BRAIN.pvalues[AttackerIndex]) * BRAIN.balanceoffense;
-      
-    }
-    else {
-      paralleldefenders = ifsquare_attacked
-        (evalboard->squares,moves->defenders[Z][1],
-	 moves->defenders[Z][2], P, 0);
-      score += (paralleldefenders * sqrt(BRAIN.pvalues[PieceIndex])/2 * BRAIN.MODbackup);
-        
-    }       
-         
-  }
-  
-  score += chaos;       
-  score += moves->k * BRAIN.MODmobility;
-    
-  return score;
-    
-}
 
 Host Device float scoremod (int DEEP, int method) {
     

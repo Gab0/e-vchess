@@ -35,10 +35,10 @@ def ReleaseOrphan(machine_dir):
 def bareDeleteMachine(machine_dir, machine_name):
     filename = "%s/%s" % (machine_dir, machine_name)
 
-    R = open(filename).read()
-    if 'halloffame' in R:
-        return
     try:
+        R = open(filename).read()
+        if 'halloffame' in R:
+            return
         remove(filename)
     except FileNotFoundError:
         #raise
