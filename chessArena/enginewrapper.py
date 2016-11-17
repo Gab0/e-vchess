@@ -23,7 +23,11 @@ class Engine():
 
     def send(self, data):
         self.engine.stdin.write(bytearray("%s\n" % data, "utf-8"))
-        self.engine.stdin.flush()
+        try:
+            self.engine.stdin.flush()
+        except BrokenPipeError:
+            #raise
+            print("broken pipe!")
 
     def receive(self, method="lines"):
 

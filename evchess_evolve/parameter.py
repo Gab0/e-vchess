@@ -196,9 +196,15 @@ class parameter():
         b = "%s%s" % ((8 - len(b)) * "0", b)
         return b
 
-    def fromGene(self, Gene):
-        NumberOfSteps = int(Gene, 2)
-        self.value = self.bLIM + NumberOfSteps * self.INCR
+    def fromGene(self, Genes):
+        genomeValue = 0
+        for G in Genes:
+            w = [ x for x in G if x == '1' ]
+            genomeValue += len(w)
+        genomeValue // len(Genes)
+                 
+
+        self.value = self.bLIM + genomeValue * self.INCR
         
         
     

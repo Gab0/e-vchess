@@ -102,7 +102,7 @@ struct board;
      
      int MovementCount;
      int betaCut;
-     struct move movements[64];
+     struct move movements[384];
    }; 
    
   

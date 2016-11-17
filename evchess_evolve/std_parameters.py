@@ -47,7 +47,7 @@ def STDPARAMETERS():
                   LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
         parameter("param_endgameWeight", 0, 12, 0,
-                  LIM=3, bLIM=0.2, INCR=0.2, promoter="E")
+                  LIM=3, bLIM=0.2, INCR=0.2, promoter="E"),
 
         parameter("param_opponentAddMaterialValue", 0, 15, 0,
                   LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")

@@ -137,14 +137,18 @@ class machine():
         return Chromosome
 
     def readOwnChromosomes(self):
+        if not self.Chromosomes:
+            print('No Chromosomes Detected.')
+            raise
         for P in self.PARAMETERS:
             PositionsOnChromosomes = [c.index(P.promoter) for c in self.Chromosomes]
-            Values=[]
+            GeneRead=[]
             for c in range(len(self.Chromosomes)):
                 coordinates = [ PositionsOnChromosomes[c], PositionsOnChromosomes[c]+8 ] 
                 ChromosomeRegion = self.Chromosomes[c][coordinates[0]:coordinates[1]]
-                Values.append(ChromosomeRegion)
+                GeneRead.append(ChromosomeRegion)
+                
+            print(GeneRead[0])
+            print(GeneRead[1])
             
-        
-            
-        
+            P.fromGene(GeneRead)
