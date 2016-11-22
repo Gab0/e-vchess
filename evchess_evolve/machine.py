@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from evchess_evolve.std_parameters import STDPARAMETERS
+from evchess_evolve.current_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
 from evchess_evolve.core import machine_dir
 
@@ -58,6 +58,9 @@ class machine():
                     self.STAT_PARAMETERS[2].value += 1
                     self.STAT_PARAMETERS[0].value += 1
 
+                elif split_line[0] == 'CHR':
+                    self.Chromosomes.append(split_line[2])
+
             if parameter.name == split_line[0]:
                 parameter.read(split_line)
 
@@ -74,6 +77,10 @@ class machine():
         for parameter in self.PARAMETERS + self.STAT_PARAMETERS:
             
             Fo.write(parameter.write())
+            Fo.write('\n')
+
+        for CHR in self.Chromosomes:
+            Fo.write("CHR = %s" % CHR)
             Fo.write('\n')
 
         if self.onTOP:

@@ -132,6 +132,8 @@ struct param {
   float boardcontrol;
   float endgameWeight;
   float opponentAddMaterialValue;
+  float kingPanic;
+  float pawnIssue;
 };
 
 extern struct move movehistory[512];
@@ -230,9 +232,9 @@ bool is_legal(struct move *play, int P);
 Host Device int append_move
     (struct board *board, struct movelist *moves, 
         int i,int j, int mod_i, int mod_j, int P);
-//void erase_moves(struct board *tgt, int eraseall);
+
 Host Device int ifsquare_attacked (char squares[8][8],
-				   int TGi, int TGj, int AttackingPlayer, int verbose); 
+				   int TGi, int TGj, int AttackingPlayer, int xray, int verbose); 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
 Host Device int getindex (char x, char array[],int size);
 
@@ -242,7 +244,6 @@ Host Device void cloneboard (struct board *model, struct board *target);
 Host Device void selectBestMoves (struct move *array, int size, int target[], int quant);
 Host Device void replicate_move(struct move *target, struct move *source);
 
-//void freeboard (struct board *target);
 Host Device int power(int base, unsigned int exp);
 Host Device void reorder_movelist(struct movelist *movelist); 
 

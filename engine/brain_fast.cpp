@@ -118,7 +118,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     if (ifsquare_attacked(_board->squares,
 			  findking(_board->squares, 'Y', PLAYER), 
 			  findking(_board->squares, 'X', PLAYER),
-			  1-PLAYER, 0)) {
+			  1-PLAYER, 0, 0)) {
       score = -13000 + 50*(BRAIN.DEEP-DEEP);
       //if (PLAYER != Machineplays) flip(score);
     }

@@ -310,7 +310,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     if (ifsquare_attacked(_board->squares,
 			  findking(_board->squares, 'Y', PLAYER), 
 			  findking(_board->squares, 'X', PLAYER),
-			  1-PLAYER, 0)) {
+			  1-PLAYER, 0, 0)) {
       score = -13000 + 50*(BRAIN.DEEP-DEEP); 
     }
        
@@ -446,7 +446,7 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
 	  board->squares[i][j]!=Pieces[P][0]&&
 	  !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
       if (board->squares[i][j]==Pieces[P][5])
-	if (ifsquare_attacked (board->squares, i, j, 1-P, 0)) return 0;
+	if (ifsquare_attacked (board->squares, i, j, 1-P, 0, 0)) return 0;
     }
   //OFF!!!
   //return NullMove;       

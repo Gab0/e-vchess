@@ -123,6 +123,8 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_boardcontrol", &BRAIN.boardcontrol);
 	   readparam(line, V, "param_endgameWeight", &BRAIN.endgameWeight);
 	   readparam(line, V, "param_opponentAddMaterialValue", &BRAIN.opponentAddMaterialValue);
+	   readparam(line, V, "param_kingPanic", &BRAIN.kingPanic);
+	   readparam(line, V, "param_pawnIssue", &BRAIN.pawnIssue);
 
        }
 	 printf("\n");

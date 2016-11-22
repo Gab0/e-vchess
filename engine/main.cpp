@@ -66,7 +66,21 @@ IFGPU( __device__ bool allow_castling = true; )
     
 int main(int argc, char** argv) {
 
+  //DEEP is the number of future moves to be evaluated.
+  //must be an even number, in order to always end in a engine move.
+  Brain.DEEP = 4;
 
+    
+  //xDEEP is the number of evaluations on top of the original one will be made,
+  //'artificially' increasing total ply deepness by xDEEP * DEEP;
+  Brain.xDEEP = 0;
+
+
+  //yDEEP is the number of movements from the first section of evaluating
+  //to be considered for the second, yDEEP top movements.
+  Brain.yDEEP = 8;
+
+    
   setBrainStandardValues();
     int i=0;
     signal(SIGINT, SIG_IGN);    
@@ -199,6 +213,20 @@ int main(int argc, char** argv) {
       machineplays = board.whoplays;
       computer(thinkVerbose);
     }
+
+    if (strstr(inp, "isatk") != NULL) {
+      int vI = inp[6] - '0';
+      int vJ = inp[8] - '0';
+      int w = ifsquare_attacked(board.squares, vI, vJ, machineplays, 0 , 0);
+      printf("%i %i is attacked by %i\n", vI, vJ, w);
+
+    }
+    if (strstr(inp, "isxray") != NULL) {
+      int vI = inp[7] - '0';
+      int vJ = inp[9] - '0';
+      int w = ifsquare_attacked(board.squares, vI, vJ, machineplays, 1 , 0);
+      printf("%i %i is attacked by %i\n", vI, vJ, w);
+    }
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
         for (i=0; i < hindex; i++) {
@@ -326,21 +354,7 @@ Global void setBrainStandardValues(void) {
   //seekmiddle augments the score for pieces in the center of the board.
   Brain.seekmiddle = 0;
     
-  //DEEP is the number of future moves to be evaluated.
-  //must be an even number, in order to always end in a engine move.
-  Brain.DEEP = 4;
 
-    
-  //xDEEP is the number of evaluations on top of the original one will be made,
-  //'artificially' increasing total ply deepness by xDEEP * DEEP;
-  Brain.xDEEP = 0;
-
-
-  //yDEEP is the number of movements from the first section of evaluating
-  //to be considered for the second, yDEEP top movements.
-  Brain.yDEEP = 8;
-
-    
   //seekpieces modifies pieces' raw material value.
   Brain.seekpieces = 1;
     
@@ -373,6 +387,8 @@ Global void setBrainStandardValues(void) {
   // this add bonus material value for pieces under opponent control,
   // the idea is to make the engine avoid trading pieces.
   Brain.opponentAddMaterialValue = 0;
-    
+
+  Brain.kingPanic = 0;
+  Brain.pawnIssue = 0;
 }
 
