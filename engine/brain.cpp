@@ -1,5 +1,14 @@
 #include "ev_chess.h"
 
+#define max(a,b)	       \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define min(a,b)	       \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
 
 #define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 
@@ -69,7 +78,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 #include "brain_cuda0.cpp"
 
   // non cuda move evaluating mehthod.        
-#else           
+#else
+  
   if(canNullMove(DEEP, _board, moves->k, PLAYER)) {
     flip(_board->whoplays);
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
@@ -84,167 +94,105 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   for (i=0;i<moves->k;i++) {
 
     move_pc(_board, &moves->movements[i]);    
-    BufferBoard = thinkiterate(_board, DEEP-1, verbose,
+    finalboardsArray[i] = thinkiterate(_board, Brain.DEEP-1, verbose,
 			       -Beta, -Alpha, AllowCutoff);      
-    invert(BufferBoard->score);
-    moves->movements[i].score = BufferBoard->score;
+    invert(finalboardsArray[i]->score);
+    //moves->movements[i].score = BufferBoard->score;
    
-    finalboardsArray[i] = BufferBoard;
+    //finalboardsArray[i] = BufferBoard;
 
-    BufferBoard = NULL;
+    //BufferBoard = NULL;
     
     if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
     //if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
       
     if (FivemoveRepetitionRisk)
-      if (compare_movements(&moves->movements[i], &movehistory[hindex-4])){
-	asprintf(&output, "Neutralizing score due to move repetition draw menace.\n");
-	write(1, output, strlen(output));
+      if (compare_movements(&moves->movements[i], &movehistory[hindex-4]))
+	{
+	  asprintf(&output, "Neutralizing score due to move repetition draw menace.\n");
+	  write(1, output, strlen(output));
 	  moves->movements[i].score = 0;
-      }
+	}
     
-    if (moves->movements[i].score > score) {
-      score = moves->movements[i].score;
-      ChosenMovementIndex=i;
-    }
+    //if (finalboardsArray[i]->score > score) {
+    //  score = moves->movements[i].score;
+    //  ChosenMovementIndex=i;
+    //}
     //printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
-    if (BRAIN.xDEEP)
-      undo_lastMove(finalboardsArray[i], 2);
 
+
+     
     //finalboardsArray[i]->score = -finalboardsArray[i]->score;
     undo_move(_board, &moves->movements[i]);
-  }     
-             
-#endif
-  
-  //second-level deepness move search schematics;##################################
-
-  if (BRAIN.xDEEP) {
-    int MaximumT = (int) BRAIN.yDEEP;
-
-    int T = moves->k;
-    if (T > MaximumT) T = MaximumT;
-
-
-    int secondTOP[T], I=0, M=0;
-
-    long sessionSCORE=-9990000;
-    long movelistSCORE=-9990000;
-    
-    long satellite = 0;
-    int OtherPlayer=0;
-    int PLAYER=0;
-    selectBestMoves(moves->movements, moves->k, secondTOP, T);
-
-    struct movelist *nextlevelMovelist =
-      (struct movelist*) calloc(T, sizeof(struct movelist));
-
-    int R=0;
-    
-    for (R=0;R<BRAIN.xDEEP;R++) {
-      AllowCutoff = 1;
-      if (R + 1 == BRAIN.xDEEP) AllowCutoff = 1;
-
-	sessionSCORE = -INFINITE;
-	
-	Alpha = -INFINITE;
-	Beta = INFINITE;      
-
-      for (i=0;i<T;i++) {
-
-
-	I = secondTOP[i];
-	OtherPlayer = 0;
-	Vb fprintf(stderr, "----------------------------------------------------------\n");
-	Vb fprintf(stderr,
-		   "Nm: %i || original R: %i || current R: %i\n",
-		   finalboardsArray[I]->MovementCount, I,
-		   ChosenMovementIndex);
-	Vb fprintf(stderr, "Wp:%i  || I:  %i\n", finalboardsArray[I]->whoplays, I);
-
-	PLAYER = finalboardsArray[I]->whoplays;
-	movelistSCORE = -INFINITE;
-
-	legal_moves(finalboardsArray[I], &nextlevelMovelist[i], PLAYER, 0);
-	reorder_movelist(&nextlevelMovelist[i]);
-
-
-	if (nextlevelMovelist[i].k) {
-
-	  for (M=0;M<nextlevelMovelist[i].k;M++) {
-
-	    move_pc(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
-
-
-	    if (PLAYER == Machineplays)	{
-	    dummyboard = thinkiterate(finalboardsArray[I], DEEP-1,
-			   0, -Beta, -Alpha, AllowCutoff);
-	    invert(dummyboard->score);
-	  }
-	    else dummyboard = thinkiterate(finalboardsArray[I], DEEP-1, 0, Alpha, Beta, AllowCutoff);
-
-
-	    nextlevelMovelist[i].movements[M].score = dummyboard->score;
-	    
-	    undo_move(finalboardsArray[I], &nextlevelMovelist[i].movements[M]);
-
-
-	    if (nextlevelMovelist[i].movements[M].score > movelistSCORE
-		||BufferBoard==NULL) {
-	      
-	      BufferBoard = dummyboard;
-	      dummyboard = NULL;
-	      movelistSCORE = nextlevelMovelist[i].movements[M].score;
-	      moves->movements[I].score = movelistSCORE;
-   
-	    }
-	    else
-	      DUMP(dummyboard);
-	  }
-       
-	  if (BufferBoard==NULL){printf("BufferBoard not found failure!\n");exit(0);}
-	  DUMP(finalboardsArray[I]);
-
-	  finalboardsArray[I] = BufferBoard;
-	  //finalboardsArray[I]->score = movelistSCORE;
-	  BufferBoard = NULL;
-	}
-	else {
-	  movelistSCORE = moves->movements[I].score;
-	  //	  if(PLAYER == Machineplays)
-	  // invert(movelistSCORE);
-
-	}
-
-	if (movelistSCORE > sessionSCORE) {
-	  satellite = satellite_evaluation(&moves->movements[I]);
-	  if (movelistSCORE + satellite > sessionSCORE) {
-	   
-	    ChosenMovementIndex = I;
-	    sessionSCORE = movelistSCORE + satellite;
-	    printf("changed the mind. %ld\n", satellite);
-	    
-	  }
-    printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
-
-	}
-	//printf("verbosing: sessionscore: %ld; movelistscore: %ld\n", sessionSCORE, movelistSCORE);
-	
-	Vb fprintf(stderr, "FNM: %i || FWP: %i\n", finalboardsArray[I]->MovementCount, finalboardsArray[I]->whoplays);
-	
-	if (Show_Info) show_moveline(finalboardsArray[I], CurrentMovementIndex, startT);
-        if(R+1<BRAIN.xDEEP)
-	  undo_lastMove(finalboardsArray[I], 2);
-      }
-
-    }
-
-    DUMP(nextlevelMovelist);
-    //closing bracket for 'if brain.xDEEP';
   }
 
+  int T = 5;
+  T = min(T, moves->k);
+  int BEST[5];
 
-  replicate_move(out, &moves->movements[ChosenMovementIndex]);
+  
+  selectBestMoves(finalboardsArray, moves->k, BEST, T);
+
+
+  if (BRAIN.xDEEP)
+    {
+      
+      int MINIMUM_ITER = 5;
+	int MAXIMUM_ITER = 16;
+	int maxdepthGone = 0;
+	
+      int Z = 0;
+      int ZI = 0;
+      while ( (MINIMUM_ITER > 0) || (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone && MAXIMUM_ITER > 0 && !finalboardsArray[BEST[0]]->gameEnd)
+	      || (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone && MAXIMUM_ITER > 0 && !finalboardsArray[BEST[1]]->gameEnd) )
+      {
+	F(Z, T)
+	  {
+	    ZI = BEST[Z];
+
+	    if (finalboardsArray[ZI]->gameEnd)
+	      {
+		continue;
+	      }
+	    undo_lastMove(finalboardsArray[BEST[Z]], 2);
+	    BufferBoard = finalboardsArray[BEST[Z]];
+
+
+
+      
+	    if (finalboardsArray[BEST[Z]]->whoplays == PL)
+	      {
+		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+						     Alpha, Beta, AllowCutoff);
+		printf("same player\n");
+
+		//invert(finalboardsArray[BEST[Z]]->score);
+
+	      }
+	      else
+	      {
+		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+						     -Beta, -Alpha, AllowCutoff);
+		//finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+		//					 Alpha, Beta, AllowCutoff);
+		printf("other player\n");
+		invert(finalboardsArray[BEST[Z]]->score);
+	      }
+	    DUMP(BufferBoard);
+	   
+	    if (Show_Info) show_moveline(finalboardsArray[BEST[Z]], CurrentMovementIndex, startT);
+	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
+
+	  }
+	selectBestMoves(finalboardsArray, moves->k, BEST, T);
+	MINIMUM_ITER--;
+	MAXIMUM_ITER--;
+	printf("bestline = %i\n", BEST[0]);
+      }
+    }
+#endif
+
+  replicate_move(out, &moves->movements[BEST[0]]);
 
   
   //printf("Dump Section:\n");
@@ -261,7 +209,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
 
 
-  return ChosenMovementIndex;
+
+  return BEST[0];
    
 }
 
@@ -316,7 +265,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
        
     else score = 0; 
        
-    _board->score = score; 
+    _board->score = score;
+    _board->gameEnd = 1;
     return _board;
          
   }

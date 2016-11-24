@@ -12,7 +12,7 @@ class Settings():
         self.TOPmachineDIR = self.machineDIR + "/top_machines"  # % machineDIR
 
         # path and arguments to run those chess engines.
-        self.engineARGS = [self.enginebin, "-MD", self.machineDIR, "--deep", "3", "--xdeep", "0"]
+        self.engineARGS = [self.enginebin, "-MD", self.machineDIR, "--deep", "4", "--xdeep", "0"]
 
         # if each movement done should be logged on stdout.
         self.VerboseMove = 0

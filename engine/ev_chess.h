@@ -102,6 +102,8 @@ struct board;
      
      int MovementCount;
      int betaCut;
+
+     int gameEnd;
      struct move movements[384];
    }; 
    
@@ -241,7 +243,7 @@ Host Device int getindex (char x, char array[],int size);
 Host Device struct board *makeparallelboard (struct board *board);
 Host Device void cloneboard (struct board *model, struct board *target);
 
-Host Device void selectBestMoves (struct move *array, int size, int target[], int quant);
+Host Device void selectBestMoves (struct board **array, int size, int target[], int quant);
 Host Device void replicate_move(struct move *target, struct move *source);
 
 Host Device int power(int base, unsigned int exp);

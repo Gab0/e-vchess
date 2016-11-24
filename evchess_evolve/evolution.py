@@ -5,7 +5,7 @@ from deap import creator, base, tools, algorithms
 import copy
 
 from evchess_evolve.core import *
-from evchess_evolve.std_parameters import *
+from evchess_evolve.current_parameters import *
 
 
 def RectifyEOL(line, pos):

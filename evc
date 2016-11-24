@@ -25,6 +25,7 @@ case  "$1" in
 
 "engine") cd ${BASEDIR}/ && ./engine/e-vchess $2 $3 $4 $5;;
 
+"position") cd ${BASEDIR}/ && python moveTrainer.py $2 $3 $4 $5;;
 *) 
 echo ""
 echo " Invalid Option."

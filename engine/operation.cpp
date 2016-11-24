@@ -272,6 +272,7 @@ Host Device struct board *makeparallelboard (struct board *model) {
     _board->MovementCount = model->MovementCount;
     _board->score = model->score;
     _board->betaCut = model->betaCut;
+    _board->gameEnd = model->gameEnd;
     
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
@@ -294,6 +295,7 @@ Host Device void cloneboard (struct board *model, struct board *target) {
   target->score = model->score;
   target->MovementCount = model->MovementCount;
   target->betaCut = model->betaCut;
+  target->gameEnd = model->gameEnd;
   
   for(i=0;i<2;i++) for(j=0;j<3;j++) target->castle[i][j] = model->castle[i][j];
 
@@ -303,11 +305,12 @@ Host Device void cloneboard (struct board *model, struct board *target) {
   
 }
 
-Host Device void selectBestMoves (struct move *array, int size, int target[], int quant) {
+Host Device void selectBestMoves (struct board **array, int size, int target[], int quant) {
     int i = 0;
     int qu=0;
     int win[16][2]={0};
-    char forbid[16]={};
+    char forbid[16];
+    F(i,16) forbid[i] = -1;
     int f_index=0;
     
     if (quant < 0) {
@@ -319,8 +322,8 @@ Host Device void selectBestMoves (struct move *array, int size, int target[], in
 	for (i=0;i<size;i++) {
 	  if (!is_in(i,forbid,f_index+1)) {
 
-	    if (array[i].score < win[qu][1]){ 
-	      win[qu][1] = array[i].score;
+	    if (array[i]->score < win[qu][1]){ 
+	      win[qu][1] = array[i]->score;
 	      win[qu][0] = i;
 	      forbid[f_index] = i;  
             
@@ -337,29 +340,34 @@ Host Device void selectBestMoves (struct move *array, int size, int target[], in
       }
     }
 
-    else {
-      for (qu=0;qu<quant;qu++) {
-        win[qu][1] = -16700;
-	win[qu][0] = 0;
-
-	for (i=0;i<size;i++) {
-	  if (!is_in(i, forbid, f_index+1)) {
+    else
+      {
+	for (qu=0;qu<quant;qu++)
+	  {
+	    win[qu][1] = -16700;
+	    win[qu][0] = 0;
 	    
-	    if (array[i].score >= win[qu][1]){ 
-	      win[qu][1] = array[i].score;
-	      win[qu][0] = i;
-	      forbid[f_index] = i;  
-	    }       
+	    for (i=0;i<size;i++)
+	      {
+		if (!is_in(i, forbid, f_index+1))
+		  {
+		    
+		    if (array[i]->score >= win[qu][1])
+		      { 
+			win[qu][1] = array[i]->score;
+			win[qu][0] = i;
+			forbid[f_index] = i;  
+		      }       
+		  }
+	      }
+	    f_index++;
 	  }
+	
+	for (i=0;i<quant;i++) {
+	  target[i] = win[i][0];
+	  //target[i][1] = win[i][1];
 	}
-        f_index++;
       }
-
-      for (i=0;i<quant;i++) {
-        target[i] = win[i][0];
-        //target[i][1] = win[i][1];
-      }
-    }
 }
 
 Host Device void replicate_move(struct move *target, struct move *source) {
