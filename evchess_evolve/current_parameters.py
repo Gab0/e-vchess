@@ -53,10 +53,10 @@ def STDPARAMETERS():
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
 
         parameter("param_kingPanic", 0, 14, 0,
-                  LIM=0.3, bLIM=0.0, INCR=0.1, promoter='P'),
+                  LIM=0.5, bLIM=0.1, INCR=0.1, promoter='P'),
 
         parameter("param_pawnIssue", 0, 15, 0,
-                  LIM=0.31, bLIM=0.0, INCR=0.1, promoter='W')
+                  LIM=0.5, bLIM=0.1, INCR=0.1, promoter='W')
     ]
 
 def ScoreParameters():
@@ -85,5 +85,7 @@ Evaluation mechanics fixed. AVG real ELO 1100. @ 8/nov
 EndgameWeight added. Applies to pawn rank and king position. @ 8/nov
 
 Modified Evaluation Mechanism. AVG ELO 990 @ 16/nov
+
+Recreating Evaluation mechanism from scratch. Eval only taking material value into account: AVG ELO 880 @ 25/nov
 
 """

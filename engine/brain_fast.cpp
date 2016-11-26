@@ -1,4 +1,4 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 
 
@@ -180,12 +180,12 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
   }
      
   else {
-
-    machine_score = evaluate(_board, &moves, PLAYER, PLAYER);
-    enemy_score = evaluate(_board, &moves, 1-PLAYER, PLAYER) * ( 1+BRAIN.presumeOPPaggro);
+    int defenderMatrix[2][8][8];
+    machine_score = evaluate(_board, &moves, defenderMatrix,PLAYER, PLAYER, 0);
+    enemy_score = evaluate(_board, &moves, defenderMatrix, 1-PLAYER, PLAYER, 0) * ( 1+BRAIN.presumeOPPaggro);
 
     score = machine_score - enemy_score;
-    //if (PLAYER != Machineplays) invert(score);
+
 
     return score;
   }

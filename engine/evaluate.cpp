@@ -1,13 +1,15 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 
-Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int Attacker) {
+Device int evaluate(struct board *evalboard, struct movelist *moves,
+		    int defenderMatrix[2][8][8], int P, int Attacker, int Verbose)
+{
   //int Index = blockIdx.x;
   //printf("E %i\n", Index);
   
   int score = 0;
     
-  int i=0, j=0;
+  int i=0, j=0, z=0;
     
   int PieceIndex=0, AttackerIndex=0, DefenderIndex=0, Z=0, PieceMaterialValue=0;
 
@@ -17,7 +19,8 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 
   if (BRAIN.randomness) chaos = rand() % (int)(BRAIN.randomness);
 
-  //attackers_defenders(evalboard->squares, *moves, Attacker);
+
+  attackers_defenders(moves);
 
     
   int parallelAttackers = 0;
@@ -37,8 +40,8 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
   if (PieceCount < 5) endgameModeOn = 1;
 
 
-  if ((P && ownKingPos[0]) == 0 || (!P && ownKingPos[0] == 7))
-    score += 150 * BRAIN.kingPanic;
+  //if ((P && ownKingPos[0]) == 0 || (!P && ownKingPos[0] == 7))
+  //  score += 150 * BRAIN.kingPanic;
   
   forsquares
     {
@@ -61,8 +64,9 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     PieceMaterialValue = BRAIN.pvalues[PieceIndex];
 
 
-    // pawn feature calculations;
-    if (PieceIndex == 0)
+
+    // evaluate pawns;
+      if (PieceIndex == 0)
       {
 	if (P)
 	  {
@@ -81,12 +85,55 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 	      PieceMaterialValue += PieceMaterialValue/5 * BRAIN.pawnIssue;
 	  }
 	
-	pawnEffectiveHeight = pow(pawnEffectiveHeight, 2);
+	pawnEffectiveHeight = pow(pawnEffectiveHeight, 1.2);
 	PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
 	if (endgameModeOn)
 	  PieceMaterialValue += pawnEffectiveHeight * sqrt(currentMovementCount) * BRAIN.endgameWeight;
       }
+
+
+
+
+
+
+
+
+
+
     
+    score += PieceMaterialValue;
+    if (PieceIndex != 5)
+	     score += sqrt(PieceMaterialValue) * pow(defenderMatrix[P][i][j], 0.9) * BRAIN.MODbackup;
+
+    else
+      {
+	xrayAttackers = ifsquare_attacked(evalboard->squares, i, j, 1-P, 1, 0);
+	score -= 100 * xrayAttackers * BRAIN.kingPanic;
+
+
+
+
+      }
+    
+    }
+
+
+  if (Verbose) printf("per square score of player %i is %i.\n\n", P, score);
+  F(Z, moves->kad)
+    {
+      DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6);
+      if (DefenderIndex == 5) continue;
+	
+      score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
+      score -= sqrt(moves->attackers[Z][0])/10 *
+	defenderMatrix[1-P][moves->defenders[Z][1]][moves->defenders[Z][2]] *
+	BRAIN.balanceoffense;
+
+      }
+    
+  if (Verbose) printf("adding attackers/defenders [kad=%i], score of player %i is %i.\n\n",
+		      moves->kad, P, score);
+      /*
     if (P != Machineplays)
       PieceMaterialValue *= ( 1 + BRAIN.opponentAddMaterialValue );
  
@@ -97,17 +144,22 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     	//old method: ((-power(j,2)+7*j-5) + (-power(i,2)+7*i-5)) 
 
     if (PieceIndex == 5 && endgameModeOn)
-      PieceMaterialValue += sqrt(BRAIN.pvalues[5])/5  *
+      {
+      PieceMaterialValue += 100  *
 	piecePositionalValue * BRAIN.seekmiddle *
 	currentMovementCount * BRAIN.endgameWeight;
-    else if (PieceIndex == 5)
-      PieceMaterialValue -= sqrt(BRAIN.pvalues[5])/5 *
-	piecePositionalValue * BRAIN.seekmiddle;
-
+      }
     else
-      PieceMaterialValue += sqrt(BRAIN.pvalues[PieceIndex])/4  *
-	piecePositionalValue * BRAIN.seekmiddle;
+      {
+	if (PieceIndex == 5)
+	  PieceMaterialValue -= 1000 *
+	    piecePositionalValue * BRAIN.seekmiddle;
 
+	else
+	  PieceMaterialValue += sqrt(BRAIN.pvalues[PieceIndex])/8  *
+	    piecePositionalValue * BRAIN.seekmiddle;
+      }
+    
     score += PieceMaterialValue * BRAIN.seekpieces;
     
     parallelAttackers = ifsquare_attacked(evalboard->squares, i, j, 1-P, 0, 0);
@@ -116,7 +168,8 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
     deltaAttackersDefenders = parallelAttackers - parallelDefenders;
       
       //KING'S xray attackers
-      if (PieceIndex == 5) {
+      if (PieceIndex == 5)
+	{
 	xrayAttackers = ifsquare_attacked(evalboard->squares, i, j, 1-P, 1, 0) - parallelAttackers;
 	//if (P == Attacker) xrayAttackers -= 1;
 	if (xrayAttackers > 0)
@@ -127,15 +180,30 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
       
       else
 	if (isInKingSafespace)
+	  {
 	  if (deltaAttackersDefenders > 0)
-	    score -= 7 * BRAIN.kingPanic * pow(deltaAttackersDefenders, 2);
+	    score -= 7 * BRAIN.kingPanic * pow(deltaAttackersDefenders, 1.2);
+
+	  score += sqrt(PieceMaterialValue) /2 * BRAIN.kingPanic;
+	  }
+      if (PieceIndex == 5)
+	{
+	  if (parallelAttackers) score -= 100;
+	  continue;
+	}
+
+
+
+
       
-      if (PieceIndex == 5) continue;
-      if (parallelAttackers > 0)
+      /* if (parallelAttackers > 0)
 	{
 
 	  //AttackedScoreLoss = (sqrt(deltaAttackersDefenders)-0.3) * sqrt(PieceMaterialValue) * BRAIN.seekatk;
-	  AttackedScoreLoss = parallelAttackers * sqrt(PieceMaterialValue) * BRAIN.seekatk;
+
+
+
+	  AttackedScoreLoss = parallelAttackers * PieceMaterialValue * BRAIN.seekatk;
 
 	  score -= AttackedScoreLoss;
 	  
@@ -143,16 +211,26 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
 	    DefenderNegatedAttackBuffer = AttackedScoreLoss;
 	  //if (parallelAttackers > parallelDefenders && Attacker == P)
 	  //	score += sqrt(BRAIN.pvalues[PieceIndex])
-	}
-      
+
+	  }
       if (parallelDefenders > 0)
 	{
 	  //invert(deltaAttackersDefenders);
 	  //score += (sqrt(deltaAttackersDefenders)-0.3) * sqrt(PieceMaterialValue) * BRAIN.seekatk;
-	  score += parallelDefenders * sqrt(PieceMaterialValue) * BRAIN.MODbackup;
+	  score += parallelDefenders * sqrt(PieceMaterialValue)/2 * BRAIN.MODbackup;
 	}
-  }
   
+    }
+
+
+        if (P == Attacker)
+	{
+	  F(Z,moves->kad)
+	    {
+	      DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-Attacker], 6);
+	      score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
+	    }
+	}
   //if (P == Attacker) score += DefenderNegatedAttackBuffer;
 
   
@@ -201,9 +279,35 @@ Device int evaluate(struct board *evalboard, struct movelist *moves, int P, int 
              
     }
 }*/
-  score += chaos;       
-  score += moves->k * BRAIN.MODmobility;
-    
+  // score += chaos;       
+  //score += moves->k * BRAIN.MODmobility;
+
+
+
+  
+  
   return score;
     
+}
+
+
+Host void GenerateDefenderMatrix(char squares[8][8], int DefenderMatrix[2][8][8])
+{
+  int P=0, i=0,j=0;
+
+  F(P,2)
+    forsquares
+    {
+      if (is_in(squares[i][j], Pieces[P], 6))
+	{
+	  DefenderMatrix[P][i][j] = ifsquare_attacked(squares, i, j, P, 0, 0);
+
+	  //if (DefenderMatrix[P][i][j] > 3)
+	  //  {
+	  //    printf("invalid defender matrix [%i].\n", DefenderMatrix[P][i][j]);
+	      //exit(0);
+	  //  }
+	}
+    }
+  
 }

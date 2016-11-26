@@ -5,7 +5,7 @@ class Settings():
         self.COLOR = {0: 'WHITE', 1: 'BLACK'}
 
         # path to e-vchess executable.
-        self.enginebin = "engine/e-vchess"
+        self.enginebin = "engine/lampreia"
 
         # paths to the directories where machines are stored.
         self.machineDIR = "machines"

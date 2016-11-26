@@ -1,4 +1,4 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 const char *Version = "v0.803";
 struct board board;
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
    
     asprintf(&machinepath, "../machines");
     
-    printf("e-vchess engine %s\n", Version);
+    printf("lampreia chess engine %s\n", Version);
     printf("author afrogabs\n\n");
     
     char *inp;
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
     for (i=0;i<128;i++) printf("%c",inp[i]);
     for (i=0;i<128;i++) inp[i]='0';
     printf("\n");
-      */  
+     */  
     //board.MovementCount=0;
     if (strstr(inp, "isready") != NULL) {printf("readyok\n"); fflush(stdout);}
    
@@ -208,6 +208,8 @@ int main(int argc, char** argv) {
     if (strstr(inp, "remove") != NULL) history_rollback(2);
     
     if (strstr(inp, "dump") != NULL) dump_history();
+
+    if (strstr(inp, "count") != NULL) printf("%i pieces.\n", countPieces(board.squares, 0));
     
     if (strstr(inp, "go") != NULL) {
       machineplays = board.whoplays;
@@ -227,6 +229,27 @@ int main(int argc, char** argv) {
       int w = ifsquare_attacked(board.squares, vI, vJ, machineplays, 1 , 0);
       printf("%i %i is attacked by %i\n", vI, vJ, w);
     }
+
+    if (strstr(inp, "eval") != NULL)
+      {
+
+	int defenderMatrix[2][8][8];
+	GenerateDefenderMatrix(board.squares, defenderMatrix);
+
+	int eP = board.whoplays;
+	legal_moves(&board, &moves, eP, 0);
+	printf("KAD = %i\n", moves.kad);
+	int Ps = evaluate(&board, &moves, defenderMatrix, eP, eP, 1);
+	legal_moves(&board, &moves, 1-eP, 0);
+	int Es = evaluate(&board, &moves, defenderMatrix, 1-eP, eP, 1);	
+	printf("A=%i; s=%i;   Attacker score = %i    Defender score = %i.\n",
+	       eP, 0, Ps,Es, board.score);
+	       
+      }
+
+    
+
+    
     if (strstr(inp, "history") != NULL) {
         printf("move history: %i moves.\n", hindex);
         for (i=0; i < hindex; i++) {
@@ -258,12 +281,12 @@ int main(int argc, char** argv) {
     }*/
 
     if (strstr(inp, "list") !=NULL)  {
-        legal_moves(&board, &moves,0,0);
+        legal_moves(&board, &moves, 0, 0);
 
     }   
              
     if (strstr(inp, "lis1") !=NULL)  {
-        legal_moves(&board,&moves,1,0);
+        legal_moves(&board,&moves, 1, 0);
 
     }   
 

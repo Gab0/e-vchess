@@ -1,4 +1,4 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 #define max(a,b)	       \
    ({ __typeof__ (a) _a = (a); \
@@ -80,7 +80,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   // non cuda move evaluating mehthod.        
 #else
   
-  if(canNullMove(DEEP, _board, moves->k, PLAYER)) {
+  if (canNullMove(DEEP, _board, moves->k, PLAYER)) {
     flip(_board->whoplays);
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
     flip(_board->whoplays);
@@ -178,12 +178,16 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 		printf("other player\n");
 		invert(finalboardsArray[BEST[Z]]->score);
 	      }
-	    DUMP(BufferBoard);
-	   
-	    if (Show_Info) show_moveline(finalboardsArray[BEST[Z]], CurrentMovementIndex, startT);
-	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
 
+
+	    
+	    
+	    if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
+	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
+	    if ( abs(finalboardsArray[ZI]->score-BufferBoard->score) > 500 && finalboardsArray[ZI]->MovementCount == maxdepthGone) MAXIMUM_ITER++;
+	    DUMP(BufferBoard);
 	  }
+	
 	selectBestMoves(finalboardsArray, moves->k, BEST, T);
 	MINIMUM_ITER--;
 	MAXIMUM_ITER--;
@@ -191,6 +195,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       }
     }
 #endif
+
+
 
   replicate_move(out, &moves->movements[BEST[0]]);
 
@@ -347,9 +353,12 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
   }
      
   else {
+    int defenderMatrix[2][8][8];
+    GenerateDefenderMatrix(_board->squares, defenderMatrix);
+    machine_score = evaluate(_board, &moves, defenderMatrix, PLAYER, PLAYER, 0);
 
-    machine_score = evaluate(_board, &moves, PLAYER, PLAYER);
-    enemy_score = evaluate(_board, &moves, 1-PLAYER, PLAYER);
+    legal_moves(_board, &moves, 1-PLAYER, 0);
+    enemy_score = evaluate(_board, &moves, defenderMatrix, 1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);
 
     _board->score = machine_score - enemy_score;

@@ -1,4 +1,4 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 unsigned long long rndseed() {
     unsigned int lo,hi;

@@ -25,4 +25,4 @@ fi
 #${LINKTOOL} -o e-vchess main.o board.o operation.o evolution.o interface.o brain.o
 
 
-${TOOL} -o e-vchess main.cpp board.cpp operation.cpp evolution.cpp interface.cpp brain.cpp brain_fast.cpp evaluate.cpp
+${TOOL} -o lampreia main.cpp board.cpp operation.cpp evolution.cpp interface.cpp brain.cpp brain_fast.cpp evaluate.cpp -lm

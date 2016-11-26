@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#include "ev_chess.h"
+#include "lampreia.h"
 int fehn2board (char str[]) {
     char *fstring;
     int z=0;

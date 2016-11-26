@@ -1,4 +1,4 @@
-#include "ev_chess.h"
+#include "lampreia.h"
 
 void cord2pos (char out[]) {
     char keymap[8] = {'a','b','c','d','e','f','g','h'};
@@ -37,6 +37,8 @@ Host Device bool is_in(char val, char arr[], int size){
 
 Device int append_move(struct board *board, struct movelist *moves,
 		       int i,int j, int mod_i, int mod_j, int P) {
+
+  moves->movements[moves->k].piece = board->squares[i][j];
     
   moves->movements[moves->k].passant=0;
   moves->movements[moves->k].passantJ[0]=board->passantJ;
@@ -371,6 +373,7 @@ Host Device void selectBestMoves (struct board **array, int size, int target[], 
 }
 
 Host Device void replicate_move(struct move *target, struct move *source) {
+  target->piece = source->piece;
     target->from[0] = source->from[0];
     target->from[1] = source->from[1];
 

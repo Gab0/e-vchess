@@ -7,9 +7,9 @@
 
 
 
-#include "ev_chess.h"
+#include "lampreia.h"
 
-using namespace std;
+//using namespace std;
 
 
 void setup_board (int setup) {
@@ -355,31 +355,32 @@ Host Device void undo_lastMove(struct board *board, int Number) {
 
 }
     
-Device void attackers_defenders (char squares[8][8], struct movelist moves, int P) {
-    int i = 0;
-    moves.kad = 0;
-    char Attacker = 0;
+Device void attackers_defenders (struct movelist *moves) {
+  int M = 0;
+  moves->kad = 0;
+  char Attacker = 0;
     
     
-    for (i=0;i<moves.k;i++) {
+  F(M, moves->k)
+    {
 
-        if (moves.movements[i].casualty != 'x') {
+      if (moves->movements[M].casualty != 'x')
+	{
 
-        /*print_movement(k);*/
-        Attacker = 
-        squares[moves.movements[i].from[0]][moves.movements[i].from[1]];
-        moves.attackers[moves.k][0] = Attacker;
-        moves.attackers[moves.k][1] = moves.movements[i].from[0];
-        moves.attackers[moves.k][2] = moves.movements[i].from[1];
+	  /*print_movement(k);*/
+
+	  moves->attackers[moves->kad][0] = moves->movements[M].piece;
+	  moves->attackers[moves->kad][1] = moves->movements[M].from[0];
+	  moves->attackers[moves->kad][2] = moves->movements[M].from[1];
     
-        moves.defenders[moves.k][0] = moves.movements[i].casualty;
-        moves.defenders[moves.k][1] = moves.movements[i].to[0];
-        moves.defenders[moves.k][2] = moves.movements[i].to[1];
+	  moves->defenders[moves->kad][0] = moves->movements[M].casualty;
+	  moves->defenders[moves->kad][1] = moves->movements[M].to[0];
+	  moves->defenders[moves->kad][2] = moves->movements[M].to[1];
         
-        //char buf[2] = {defenders[kad][1], defenders[kad][2]};
-        //cord2pos(buf);
-        /*printf("defender: %c at %c%c.\n",defenders[kad][0],buf[0],buf[1]);*/
-        moves.kad++;
+	  //char buf[2] = {defenders[kad][1], defenders[kad][2]};
+	  //cord2pos(buf);
+	  /*printf("defender: %c at %c%c.\n",defenders[kad][0],buf[0],buf[1]);*/
+	  moves->kad++;
         }
     } 
     
