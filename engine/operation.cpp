@@ -372,25 +372,26 @@ Host Device void selectBestMoves (struct board **array, int size, int target[], 
       }
 }
 
-Host Device void replicate_move(struct move *target, struct move *source) {
+Host Device void replicate_move(struct move *target, struct move *source)
+{
   target->piece = source->piece;
-    target->from[0] = source->from[0];
-    target->from[1] = source->from[1];
-
-    target->to[0] = source->to[0];
-    target->to[1] = source->to[1];
-
-    target->casualty = source->casualty;
-    target->promoteto = source->promoteto;
-    
-    target->iscastle = source->iscastle;
-    target->lostcastle = source->lostcastle;
-    
-    target->passant = source->passant;
-    target->passantJ[0] = source->passantJ[0];
-    target->passantJ[1] = source->passantJ[1];
-    
-    target->score = source->score;
+  target->from[0] = source->from[0];
+  target->from[1] = source->from[1];
+  
+  target->to[0] = source->to[0];
+  target->to[1] = source->to[1];
+  
+  target->casualty = source->casualty;
+  target->promoteto = source->promoteto;
+  
+  target->iscastle = source->iscastle;
+  target->lostcastle = source->lostcastle;
+  
+  target->passant = source->passant;
+  target->passantJ[0] = source->passantJ[0];
+  target->passantJ[1] = source->passantJ[1];
+  
+  target->score = source->score;
 }
 
 Host Device int power(int base, unsigned int exp) {

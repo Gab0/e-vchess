@@ -91,10 +91,6 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
     
     moves->k=0;
     moves->kad=0;
-
-    //NullMove.
-    //append_move(board, moves,9,6,6,6,PL);
-
     
     int EP = 1-PL;
        
@@ -358,9 +354,9 @@ Host Device void undo_lastMove(struct board *board, int Number) {
 Device void attackers_defenders (struct movelist *moves) {
   int M = 0;
   moves->kad = 0;
-  char Attacker = 0;
+
     
-    
+
   F(M, moves->k)
     {
 
@@ -372,7 +368,7 @@ Device void attackers_defenders (struct movelist *moves) {
 	  moves->attackers[moves->kad][0] = moves->movements[M].piece;
 	  moves->attackers[moves->kad][1] = moves->movements[M].from[0];
 	  moves->attackers[moves->kad][2] = moves->movements[M].from[1];
-    
+	  
 	  moves->defenders[moves->kad][0] = moves->movements[M].casualty;
 	  moves->defenders[moves->kad][1] = moves->movements[M].to[0];
 	  moves->defenders[moves->kad][2] = moves->movements[M].to[1];
@@ -383,7 +379,7 @@ Device void attackers_defenders (struct movelist *moves) {
 	  moves->kad++;
         }
     } 
-    
+  //printf("K %i     kad %i.\n", moves->k, moves->kad);    
 }
 
 //WIP

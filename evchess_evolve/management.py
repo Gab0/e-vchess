@@ -12,7 +12,7 @@ def PurgeMachines(population, machine_dir):
             remove("%s/%s" % (machine_dir, file))
     remove("%s/machines.list" % machine_dir)
 
-    population = populate([], 1, 0)
+    #population = populate([], 1, 0)
     setmachines(population)
     return population
 

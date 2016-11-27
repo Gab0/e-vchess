@@ -54,15 +54,20 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 		       
   }
   
-  reorder_movelist(moves);
+
 
   if (check_fivemove_repetition()) FivemoveRepetitionRisk = 1;
+  
   if (moves->k == 0) {
     DUMP(_board);
     DUMP(moves);
+
     return -1;
-  }
     
+  }
+  
+  reorder_movelist(moves);
+  
   struct board **finalboardsArray =
     (struct board**) calloc(moves->k, 8);
     
@@ -130,7 +135,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   T = min(T, moves->k);
   int BEST[5];
 
-  
+
   selectBestMoves(finalboardsArray, moves->k, BEST, T);
 
 
@@ -201,8 +206,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   replicate_move(out, &moves->movements[BEST[0]]);
 
   
-  //printf("Dump Section:\n");
-  for (i=0;i<moves->k-1;i++)
+   //printf("Dump Section:\n");
+  for (i=0;i<moves->k;i++)
     DUMP(finalboardsArray[i]);
   //printf("Dumped each finalboard array.\n");
   DUMP(moves);
@@ -214,7 +219,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   DUMP(finalboardsArray);
 
 
-
+  
 
   return BEST[0];
    
@@ -343,9 +348,13 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
        
     }
 
-    //score = moves.movements[r].score;
-
+    
+    
+    //CRASH AT THIS POINT!
+    //printf("HAAAAAAAAA\n");
     DUMP(_board);
+
+    
     //PersistentBuffer->score=score
     if (PersistentBuffer == NULL) exit(0);
     return PersistentBuffer;

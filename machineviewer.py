@@ -455,7 +455,7 @@ class Application(Frame):
         self.machines[self.N].randomize()
 
     def TOpurge(self):
-        self.machines = PurgeMachines(self.machines)
+        self.machines = PurgeMachines(self.machines, self.DIR)
 
     def TOLaunchMachine(self):
 

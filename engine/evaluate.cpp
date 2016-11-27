@@ -121,15 +121,19 @@ Device int evaluate(struct board *evalboard, struct movelist *moves,
   if (Verbose) printf("per square score of player %i is %i.\n\n", P, score);
   F(Z, moves->kad)
     {
+      //      printf("%c .%i...%i.........\n", moves->defenders[Z][0], moves->defenders[Z][1], moves->defenders[Z][2]);
       DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6);
-      if (DefenderIndex == 5) continue;
-	
+      if (DefenderIndex == 5||DefenderIndex == -1)
+	{
+
+	  continue;
+	}
       score += sqrt(BRAIN.pvalues[DefenderIndex]) * BRAIN.seekatk;
-      score -= sqrt(moves->attackers[Z][0])/10 *
+      score -= sqrt(BRAIN.pvalues[getindex(moves->attackers[Z][0], Pieces[P], 6)])/10 *
 	defenderMatrix[1-P][moves->defenders[Z][1]][moves->defenders[Z][2]] *
 	BRAIN.balanceoffense;
 
-      }
+	}
     
   if (Verbose) printf("adding attackers/defenders [kad=%i], score of player %i is %i.\n\n",
 		      moves->kad, P, score);

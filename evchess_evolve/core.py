@@ -107,71 +107,6 @@ def mutatemachines(Aggro, population):
 
     return population
 
-
-def setTIMEweight(value):
-    standards = []
-    currentVAL = []
-
-    standards.append([0.9, 0.85, 0.9, 0.85, 0.9, 0.85, 0.9, 0.85, 0.9, 0.85])
-    standards.append([0.9, 0.85, 0.8, 0.75, 0.68,
-                      0.68, 0.75, 0.65, 0.58, 0.55])
-    standards.append([0.9, 0.85, 0.85, 0.8, 0.8, 0.75, 0.75, 0.7, 0.7, 0.65])
-    standards.append([0.9, 0.85, 0.9, 0.85, 0.81,
-                      0.765, 0.825, 0.789, 0.844, 0.85])
-
-    if random.randrange(0, 100) < 66:
-        currentVAL = value
-    else:
-        currentVAL = standards[random.randrange(0, len(standards) - 1)]
-
-    Ximpact = random.randrange(0, 10)
-    Yimpact = random.randrange(-3, 3)
-
-    currentVAL[Ximpact] *= 1 + (Yimpact / 10)
-
-    Kdist = 0
-    for forward in range(Ximpact + 1, 9):
-        currentVAL[forward] *= 1 + (Yimpact / (10 + 2 * Kdist))
-        Kdist += 1
-
-    Kdist = 0
-    for backward in range(Ximpact - 1, 0):
-        currentVAL[backward] *= 1 + (Yimpact / (10 + 2 * Kdist))
-        Kdist += 1
-
-    print("TIMEweight worked on.")
-
-    for Y in range(len(currentVAL)):
-        currentVAL[Y] = round(currentVAL[Y], 3)
-
-    return currentVAL
-
-
-def dump_all_paramstat(individual):
-
-    individual.dump_parameter_stat()
-
-
-def read_param_dump(parameter):
-    if not os.path.exists(machine_dir + "/paramstats.xml"):
-        return ["stats dump not found."]
-
-    DUMP = ["reading " + parameter + ":  W D L G"]
-    tree = ET.parse(machine_dir + "/paramstats.xml")
-    root = tree.getoot()
-
-    for child in root:
-        # print(child.tag)
-        if child.tag == parameter:
-
-            for stat in range(len(child)):
-                DUMP.append([child[stat].tag])
-                for score in child[stat]:
-                    DUMP[stat + 1].append(score.text)
-
-    return DUMP
-
-
 def setmachines(population, DIR=machine_dir):
     for i in range(len(population)):
         population[i].write()
@@ -186,6 +121,7 @@ def setmachines(population, DIR=machine_dir):
 
 
 def deltheworst_clonethebest(population, action, MODlimit, ID=None):
+    INFINITE = 6669990001
     POP_SCORETABLE = []
     MEDIUMSCORE = 0
     VALIDPOP = 0
@@ -207,7 +143,7 @@ def deltheworst_clonethebest(population, action, MODlimit, ID=None):
             action = -action
 
             for D in range(action):
-                CURRENT_SCORE = [0, 66666]
+                CURRENT_SCORE = [0, INFINITE]
                 for k in range(len(population)):
                     if population[k] != 0:
                         if (population[k].ELO > -1):
