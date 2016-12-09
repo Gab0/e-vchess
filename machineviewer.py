@@ -146,12 +146,12 @@ class Application(Frame):
         Fo.write(self.blackboard.get('1.0', END))
         Fo.close
 
-    def show_attr_dump(self, attribute):
+    '''def show_attr_dump(self, attribute):
 
         self.blackboard.grid_forget()
         self.renew_VIEWDUMP_canvas(1)
 
-        DUMP = read_param_dump(attribute)
+        #DUMP = read_param_dump(attribute)
         #print (DUMP)
         Label(text=DUMP[0]).grid(in_=self.VIEWDUMP, column=0, row=0)
 
@@ -166,7 +166,7 @@ class Application(Frame):
                                                       * 100, 3)) + "%", fg="red").grid(in_=self.VIEWDUMP, column=3, row=L)
             Label(text=DUMP[L][4]).grid(in_=self.VIEWDUMP, column=4, row=L)
             Label(text=DUMP[L][5], fg="brown").grid(
-                in_=self.VIEWDUMP, column=5, row=L)
+                in_=self.VIEWDUMP, column=5, row=L)'''
 
     def createWidgets(self):
         self.Larrow = Button(self)
@@ -366,8 +366,7 @@ class Application(Frame):
             self.paramNAMES.append(S.PARAMETERS[i].name)
 
             self.paramVIEWER[i][0]["text"] = self.paramNAMES[i]
-            self.paramVIEWER[i][1][
-                'command'] = self.show_attr_dump(self.paramNAMES[i])
+            #self.paramVIEWER[i][1]['command'] = self.show_attr_dump(self.paramNAMES[i])
 
             self.paramVIEWER[i][0].grid(column=3, row=i)
             self.paramVIEWER[i][1].grid(column=4, row=i)

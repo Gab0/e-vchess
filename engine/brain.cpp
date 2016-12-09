@@ -1,14 +1,5 @@
 #include "lampreia.h"
 
-#define max(a,b)	       \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-
-#define min(a,b)	       \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
 
 #define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 
@@ -148,8 +139,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	
       int Z = 0;
       int ZI = 0;
-      while ( (MINIMUM_ITER > 0) || (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone && MAXIMUM_ITER > 0 && !finalboardsArray[BEST[0]]->gameEnd)
-	      || (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone && MAXIMUM_ITER > 0 && !finalboardsArray[BEST[1]]->gameEnd) )
+      int Thinking = 1;
+      while ( Thinking )
       {
 	F(Z, T)
 	  {
@@ -169,7 +160,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	      {
 		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
 						     Alpha, Beta, AllowCutoff);
-		printf("same player\n");
+		//	printf("same player\n");
 
 		//invert(finalboardsArray[BEST[Z]]->score);
 
@@ -180,7 +171,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 						     -Beta, -Alpha, AllowCutoff);
 		//finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
 		//					 Alpha, Beta, AllowCutoff);
-		printf("other player\n");
+		//	printf("other player\n");
 		invert(finalboardsArray[BEST[Z]]->score);
 	      }
 
@@ -189,14 +180,34 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	    
 	    if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
 	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
-	    if ( abs(finalboardsArray[ZI]->score-BufferBoard->score) > 500 && finalboardsArray[ZI]->MovementCount == maxdepthGone) MAXIMUM_ITER++;
+	    
+	    if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > 700)
+	      if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
+		MAXIMUM_ITER++;
+	    
 	    DUMP(BufferBoard);
 	  }
 	
 	selectBestMoves(finalboardsArray, moves->k, BEST, T);
 	MINIMUM_ITER--;
 	MAXIMUM_ITER--;
-	printf("bestline = %i\n", BEST[0]);
+	//	printf("bestline = %i\n", BEST[0]);
+
+	if (MINIMUM_ITER > 0)
+	  continue;
+
+	if(MAXIMUM_ITER > 0)
+	  {
+	    if (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone)
+	      if (!finalboardsArray[BEST[0]]->gameEnd)
+		continue;
+	    
+	    if (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone)
+	      if (!finalboardsArray[BEST[1]]->gameEnd)
+		continue;
+	  }	
+
+	Thinking = 0;	
       }
     }
 #endif
@@ -348,10 +359,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
        
     }
 
-    
-    
-    //CRASH AT THIS POINT!
-    //printf("HAAAAAAAAA\n");
     DUMP(_board);
 
     
@@ -362,12 +369,13 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
   }
      
   else {
-    int defenderMatrix[2][8][8];
-    GenerateDefenderMatrix(_board->squares, defenderMatrix);
-    machine_score = evaluate(_board, &moves, defenderMatrix, PLAYER, PLAYER, 0);
+    int AttackerDefenderMatrix[2][8][8];
+
+    GenerateAttackerDefenderMatrix(_board->squares, AttackerDefenderMatrix);
+    machine_score = evaluate(_board, &moves, AttackerDefenderMatrix, PLAYER, PLAYER, 0);
 
     legal_moves(_board, &moves, 1-PLAYER, 0);
-    enemy_score = evaluate(_board, &moves, defenderMatrix, 1-PLAYER, PLAYER, 0);
+    enemy_score = evaluate(_board, &moves, AttackerDefenderMatrix, 1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);
 
     _board->score = machine_score - enemy_score;

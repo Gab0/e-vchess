@@ -117,9 +117,11 @@ class parameter():
                     * AggroModifier * self.INCR
 
         else:
-            self.value += self.mutateDecideIfProceed\
-                (self.chanceMutate, MutateProbabilityDamper)\
-                * AggroModifier * self.INCR
+            Direction = self.mutateDecideIfProceed\
+                (self.chanceMutate, MutateProbabilityDamper)
+            ValueDrift = (1+AggroModifier) * self.INCR
+            self.value += Direction * ValueDrift
+            print("%i   ----   %i" %(Direction,ValueDrift))
 
         self.putonlimits()
 
@@ -134,11 +136,10 @@ class parameter():
 
         x = 1 if self.value >= 0 else 0
 
-        if MutateProbabilityDamper < 0:
-            x = 1 - x
-
-        #print("mutated %c" % GRAPHIC[x])
-        return VALUE[x]
+        if x:
+            x = random.choice(VALUE)
+        print("mutated %c" % GRAPHIC[VALUE.index(x)])
+        return x
 
     def randomize(self):
         if self.locked:

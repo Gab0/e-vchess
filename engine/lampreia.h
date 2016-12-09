@@ -27,7 +27,18 @@
 #define expand_play(p) p.from[0],p.from[1],p.to[0],p.to[1]
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
-#define invert(x) x = -x;
+#define invert(x) x = -x
+
+#define max(a,b)	       \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define min(a,b)	       \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 
 #define F(v,x) for (v=0;v<x;v++)
 
@@ -268,6 +279,7 @@ void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
 
 void show_movelist(struct movelist *moves);
 
+void show_board_matrix (int Matrix[8][8]);
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 
@@ -291,8 +303,10 @@ Device int check_fivemove_repetition (void);
 
 //functions from evaluate.cpp;###################################################
 Device int evaluate(struct board *evalboard, struct movelist *moves,
-		    int defenderMatrix[2][8][8], int P, int Attacker, int Verbose);
-Host void GenerateDefenderMatrix(char squares[8][8], int DefenderMatrix[2][8][8]);
+		    int AttackerDefenderMatrix[2][8][8],
+		    int P, int Attacker, int Verbose);
+
+Host void GenerateAttackerDefenderMatrix(char squares[8][8], int AttackerDefenderMatrix[2][8][8]);
 
 //functions from brain_fast.cpp;#################################################
 int think_fast(struct move *out, int PL, int DEEP, int verbose);

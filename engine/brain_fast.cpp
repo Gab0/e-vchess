@@ -180,9 +180,10 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
   }
      
   else {
-    int defenderMatrix[2][8][8];
-    machine_score = evaluate(_board, &moves, defenderMatrix,PLAYER, PLAYER, 0);
-    enemy_score = evaluate(_board, &moves, defenderMatrix, 1-PLAYER, PLAYER, 0) * ( 1+BRAIN.presumeOPPaggro);
+    int AttackerDefenderMatrix[2][8][8];
+
+    machine_score = evaluate(_board, &moves, AttackerDefenderMatrix,PLAYER, PLAYER, 0);
+    enemy_score = evaluate(_board, &moves, AttackerDefenderMatrix, 1-PLAYER, PLAYER, 0) * ( 1+BRAIN.presumeOPPaggro);
 
     score = machine_score - enemy_score;
 

@@ -200,10 +200,10 @@ int main(int argc, char** argv) {
     if (strstr(inp, "test") != NULL) fehn2board(testfehn);
     
     if (/*strstr(inp, "black") != NULL*/strstr(inp, "white") != NULL) 
-        machineplays = 0;
+        Machineplays = 0;
     
     if (strstr(inp, "white") == NULL && strstr(inp, "black") != NULL)
-        machineplays = 1; 
+        Machineplays = 1; 
     
     if (strstr(inp, "remove") != NULL) history_rollback(2);
     
@@ -212,7 +212,7 @@ int main(int argc, char** argv) {
     if (strstr(inp, "count") != NULL) printf("%i pieces.\n", countPieces(board.squares, 0));
     
     if (strstr(inp, "go") != NULL) {
-      machineplays = board.whoplays;
+      Machineplays = board.whoplays;
       computer(thinkVerbose);
     }
 
@@ -232,16 +232,19 @@ int main(int argc, char** argv) {
 
     if (strstr(inp, "eval") != NULL)
       {
+	int AttackerDefenderMatrix[2][8][8];
 
-	int defenderMatrix[2][8][8];
-	GenerateDefenderMatrix(board.squares, defenderMatrix);
+	GenerateAttackerDefenderMatrix(board.squares, AttackerDefenderMatrix);
 
+	show_board_matrix(AttackerDefenderMatrix[0]);
+	show_board_matrix(AttackerDefenderMatrix[1]);
+	
 	int eP = board.whoplays;
 	legal_moves(&board, &moves, eP, 0);
 	printf("KAD = %i\n", moves.kad);
-	int Ps = evaluate(&board, &moves, defenderMatrix, eP, eP, 1);
+	int Ps = evaluate(&board, &moves, AttackerDefenderMatrix, eP, eP, 1);
 	legal_moves(&board, &moves, 1-eP, 0);
-	int Es = evaluate(&board, &moves, defenderMatrix, 1-eP, eP, 1);	
+	int Es = evaluate(&board, &moves, AttackerDefenderMatrix, 1-eP, eP, 1);	
 	printf("A=%i; s=%i;   Attacker score = %i    Defender score = %i.\n",
 	       eP, 0, Ps,Es, board.score);
 	       
@@ -314,7 +317,7 @@ int main(int argc, char** argv) {
 }
 
 void computer(int verbose) {
-    int P = machineplays;
+    int P = Machineplays;
     Vb printf("thinking for %i\n",P); fflush(stdout);
     
 

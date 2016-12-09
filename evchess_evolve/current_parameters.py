@@ -24,11 +24,12 @@ def STDPARAMETERS():
         parameter("param_pawnrankMOD", 0, 20, 0,
                   LIM=15, bLIM=3, promoter='p'),
 
-        parameter("param_parallelAttacks", 0, 12, 0,
-                  LIM=0.6, bLIM=0, INCR=0.3, promoter='c'),
+
+        #parameter("param_parallelAttacks", 0, 12, 0,
+        #          LIM=0.6, bLIM=0, INCR=0.3, promoter='c'),
 
         parameter("param_balanceoffense", 0, 6, 0,
-                  LIM=0.8, bLIM=0.2, INCR=0.2, promoter='o'),
+                  LIM=0.8, bLIM=0.0, INCR=0.2, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0,
                   LIM=1, bLIM=0.2, INCR=0.2, promoter='B'),
@@ -53,7 +54,7 @@ def STDPARAMETERS():
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
 
         parameter("param_kingPanic", 0, 14, 0,
-                  LIM=0.5, bLIM=0.1, INCR=0.1, promoter='P'),
+                  LIM=0.3, bLIM=0.1, INCR=0.1, promoter='P'),
 
         parameter("param_pawnIssue", 0, 15, 0,
                   LIM=0.5, bLIM=0.1, INCR=0.1, promoter='W')

@@ -262,3 +262,33 @@ void show_movelist(struct movelist *moves) {
         printf("attacker? %c.\n", moves->movements[i].casualty);}
 
 }
+
+void show_board_matrix (int Matrix[8][8])
+{
+  int i=0, j=0, X=0;
+
+  char *MatrixDrawLine = (char *) calloc(1, sizeof(char) * 26);      
+    fprintf(stderr, "\n");
+    for(i=0;i<8;i++)
+      {
+	sprintf(MatrixDrawLine, "");
+	for(j=0;j<8;j++)
+	  {
+	    //printf("%i\n", Matrix[i][j]);
+	    sprintf(MatrixDrawLine, "%s %i", MatrixDrawLine, Matrix[i][j]);
+	    
+	    if (j!=7)
+	      {
+		sprintf(MatrixDrawLine, "%s ", MatrixDrawLine);
+	      }
+	  }
+	
+	fprintf(stderr, "%s\n", MatrixDrawLine);
+	X=0;
+	
+	
+      }
+    
+    
+    // DUMP(MatrixDrawLine);
+}

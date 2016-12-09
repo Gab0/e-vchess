@@ -55,7 +55,10 @@ class Engine():
                 print(">%s" % line)
             if moveKeyword in line and not line.startswith("param"):
                 line = line.replace('\n', '').strip().split(" ")
-                return line[line.index(moveKeyword)+1]
+                try:
+                    return line[line.index(moveKeyword)+1]
+                except:
+                    print("Failed to get Move from line %s" % line)
 
     
         return None
