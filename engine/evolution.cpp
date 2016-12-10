@@ -125,6 +125,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_opponentAddMaterialValue", &BRAIN.opponentAddMaterialValue);
 	   readparam(line, V, "param_kingPanic", &BRAIN.kingPanic);
 	   readparam(line, V, "param_pawnIssue", &BRAIN.pawnIssue);
+	   readparam(line, V, "param_seekInvasion", &BRAIN.seekInvasion);
 
        }
 	 printf("\n");

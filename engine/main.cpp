@@ -12,6 +12,7 @@ char pieces[2][6] = {{'P','R','N','B','Q','K'},
 Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
                                {'p','r','n','b','q','k'}};
 const float BoardMiddleScoreWeight[8] = {0, 0.33, 0.66, 1, 1, 0.66, 0.33, 0};
+const float BoardInvaderScoreWeight[8] = {0, 0, 0, 0, 0.16, 0.27, 0.35, 0.43};
 bool computer_turn = false;
 
 char *output = (char *)malloc(364 * sizeof(char));
@@ -217,11 +218,13 @@ int main(int argc, char** argv) {
     }
 
     if (strstr(inp, "isatk") != NULL) {
-      int vI = inp[6] - '0';
-      int vJ = inp[8] - '0';
-      int w = ifsquare_attacked(board.squares, vI, vJ, machineplays, 0 , 0);
-      printf("%i %i is attacked by %i\n", vI, vJ, w);
-
+      int vI = inp[8] - '0';
+      int vJ = inp[10] - '0';
+      int eP = inp[6] - '0';
+      if (-1 < eP < 2){
+	int w = ifsquare_attacked(board.squares, vI, vJ, eP, 0 , 0);
+	printf("%i %i is attacked by %i\n", vI, vJ, w);
+      }
     }
     if (strstr(inp, "isxray") != NULL) {
       int vI = inp[7] - '0';
@@ -416,5 +419,6 @@ Global void setBrainStandardValues(void) {
 
   Brain.kingPanic = 0;
   Brain.pawnIssue = 0;
+  Brain.seekInvasion = 0;
 }
 

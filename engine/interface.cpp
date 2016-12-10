@@ -71,8 +71,8 @@ int fehn2board (char str[]) {
     board.MovementCount *= 2;
     board.MovementCount += board.whoplays;
     
-    
-    
+    hindex = 0;
+    //board.MovementCount = 0;
     
     return PL;
 }

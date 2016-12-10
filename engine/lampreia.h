@@ -149,6 +149,7 @@ struct param {
   float opponentAddMaterialValue;
   float kingPanic;
   float pawnIssue;
+  float seekInvasion;
 };
 
 extern struct move movehistory[512];
@@ -173,7 +174,7 @@ extern bool loadedmachine;
 
 extern bool selectTOPmachines;
 extern const float BoardMiddleScoreWeight[8];
-
+extern const float BoardInvaderScoreWeight[8];
 
 extern char *infoMOVE;
 
