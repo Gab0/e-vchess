@@ -8,7 +8,7 @@ from evchess_evolve.core import populate, setmachines
 for ARG in sys.argv:
     if ARG == "populate":
         try:
-            Q = int(sys.argv[ARG+1])
+            Q = int(sys.argv[sys.argv.index(ARG)+1])
         except:
             Q = 16
         if "quadra" in sys.argv:
@@ -25,5 +25,7 @@ for ARG in sys.argv:
                 os.mkdir("%s/top_machines" % MD)
                 
             machines = populate([], Q, 1)
+            for M in machines:
+                M.DIR = MD
             print("creating %i machines under dir %s." % (len(machines), MD))
             setmachines(machines, MD)
