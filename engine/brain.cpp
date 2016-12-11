@@ -249,7 +249,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
   int i=0, r=0, PersistentBufferOnline=0;
     
-  int enemy_score=0, machine_score=0;
+  int enemy_score=0, player_score=0;
 
   struct board *_board = makeparallelboard(feed);
 
@@ -370,15 +370,32 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
      
   else {
     int AttackerDefenderMatrix[2][8][8];
-
+    int BoardMaterialValue[8][8];
+    
     GenerateAttackerDefenderMatrix(_board->squares, AttackerDefenderMatrix);
-    machine_score = evaluate(_board, &moves, AttackerDefenderMatrix, PLAYER, PLAYER, 0);
+    
+    player_score = evaluateMaterial(_board,
+				    BoardMaterialValue, AttackerDefenderMatrix,
+				    PLAYER, PLAYER, 0);
 
+    enemy_score = evaluateMaterial(_board,
+				   BoardMaterialValue, AttackerDefenderMatrix,
+				   1-PLAYER, PLAYER, 0);
+
+    
+    player_score += evaluateAttack(&moves,
+				     BoardMaterialValue, AttackerDefenderMatrix,
+				     PLAYER, PLAYER, 0);
+    
     legal_moves(_board, &moves, 1-PLAYER, 0);
-    enemy_score = evaluate(_board, &moves, AttackerDefenderMatrix, 1-PLAYER, PLAYER, 0);
+    
+
+    enemy_score += evaluateAttack(&moves,
+				    BoardMaterialValue, AttackerDefenderMatrix,
+				  1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);
 
-    _board->score = machine_score - enemy_score;
+    _board->score = player_score - enemy_score;
     return _board;
   }
 

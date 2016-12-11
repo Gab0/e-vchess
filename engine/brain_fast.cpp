@@ -179,7 +179,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     
   }
      
-  else {
+  else {/*
     int AttackerDefenderMatrix[2][8][8];
 
     machine_score = evaluate(_board, &moves, AttackerDefenderMatrix,PLAYER, PLAYER, 0);
@@ -187,8 +187,8 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 
     score = machine_score - enemy_score;
 
-
-    return score;
+	*/
+    return 1;
   }
 
 }

@@ -303,9 +303,16 @@ Device int check_fivemove_repetition (void);
 
 
 //functions from evaluate.cpp;###################################################
-Device int evaluate(struct board *evalboard, struct movelist *moves,
-		    int AttackerDefenderMatrix[2][8][8],
-		    int P, int Attacker, int Verbose);
+
+Device int evaluateMaterial(struct board *evalboard,
+			    int BoardMaterialValue[8][8],  int AttackerDefenderMatrix[2][8][8], 
+			    int P, int Attacker, int Verbose);
+
+Device int evaluateAttack(//struct board *evalboard,
+			  struct movelist *moves,
+			  int BoardMaterialValue[8][8],
+			  int AttackerDefenderMatrix[2][8][8],
+			  int P, int Attacker, int Verbose);
 
 Host void GenerateAttackerDefenderMatrix(char squares[8][8], int AttackerDefenderMatrix[2][8][8]);
 

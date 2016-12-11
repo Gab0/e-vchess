@@ -214,7 +214,7 @@ if (board->squares[i][j] == Pieces[PL][5]){
 
          
         //board->mobility[PL] = board->k;
-
+	attackers_defenders(moves);
         return 0;
         }
 

@@ -236,7 +236,8 @@ int main(int argc, char** argv) {
     if (strstr(inp, "eval") != NULL)
       {
 	int AttackerDefenderMatrix[2][8][8];
-
+	int BoardMaterialValue[8][8];
+	
 	GenerateAttackerDefenderMatrix(board.squares, AttackerDefenderMatrix);
 
 	show_board_matrix(AttackerDefenderMatrix[0]);
@@ -245,12 +246,27 @@ int main(int argc, char** argv) {
 	int eP = board.whoplays;
 	legal_moves(&board, &moves, eP, 0);
 	printf("KAD = %i\n", moves.kad);
-	int Ps = evaluate(&board, &moves, AttackerDefenderMatrix, eP, eP, 1);
+	
+	int Ps = evaluateMaterial(&board,
+				  BoardMaterialValue, AttackerDefenderMatrix,
+				  eP, eP, 0);
+	int Es = evaluateMaterial(&board,
+				  BoardMaterialValue, AttackerDefenderMatrix,
+				  1-eP, eP, 0);
+
+
+	Ps += evaluateAttack(&moves,
+			       BoardMaterialValue, AttackerDefenderMatrix,
+			       eP, eP, 0);
+	
 	legal_moves(&board, &moves, 1-eP, 0);
-	int Es = evaluate(&board, &moves, AttackerDefenderMatrix, 1-eP, eP, 1);	
+
+	Es += evaluateAttack(&moves,
+			     BoardMaterialValue, AttackerDefenderMatrix,
+			     1-eP, eP, 0);
 	printf("A=%i; s=%i;   Attacker score = %i    Defender score = %i.\n",
 	       eP, 0, Ps,Es, board.score);
-	       
+	show_board_matrix(BoardMaterialValue);
       }
 
     
