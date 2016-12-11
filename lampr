@@ -1,0 +1,33 @@
+#!/bin/bash
+
+BASEDIR="$(dirname "$(readlink -f "$0")")"
+
+case  "$1" in 
+"view") python ${BASEDIR}/machineviewer.py;;
+
+"play") python ${BASEDIR}/BoardLauncher.py;;
+
+"arena") python ${BASEDIR}/chess_arena.py --go;;
+
+"tournament") python ${BASEDIR}/launch_tournament.py;;
+
+"longtournament") if [ -z ${2} ];
+		  then wN=1;
+		  else wN=$2;
+		  fi
+		  for i in `seq 1 ${wN}`;
+		  do python ${BASEDIR}/launch_tournament.py -t
+		  done;;
+
+"make") cd ${BASEDIR}/engine && ./make.sh;;
+
+"memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
+
+"engine") cd ${BASEDIR}/engine && ./lampreia $2 $3 $4 $5;;
+
+"position") cd ${BASEDIR}/ && python moveTrainer.py $2 $3 $4 $5;;
+*) 
+echo ""
+echo " Invalid Option."
+echo "";;
+esac
