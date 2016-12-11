@@ -34,7 +34,7 @@ class trainingDataFeeder():
             if not self.TrialPositions:
                 return
         
-        self.MachineDIR = A_machineDIR if A_machineDIR else settings.machineDIR
+        self.machineDIR = A_machineDIR if A_machineDIR else settings.machineDIR
         
         self.TotalTests = 0
         self.PassedTests = 0
