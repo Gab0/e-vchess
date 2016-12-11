@@ -13,17 +13,25 @@ import json
 import random
 
 if '--full' in sys.argv:
-    engineargs= ['--xdeep', '1']
+    engineargs = ['--xdeep', '1']
 else:
-    engineargs = ['--deep 1', '4']
+    engineargs = ['--deep', '4']
+    
+if '--alternative-folder' in sys.argv:
+    A_machineDIR = sys.argv[sys.argv.index['--alternative-folder'] + 1]
+    engineargs += [ A_machineDIR ]
+else:
+    A_machineDIR = None
+    
+
 if "create" in sys.argv:
     x = trainingDataCreator('moveTraining/database2015.pgn')
-if "createsimple" in sys.argv:
+elif "createsimple" in sys.argv:
     x = trainingDataCreator(SimpleDatabase = "newdatabase")
 else:
     posLOG = open("pos_log", 'a')
     for N in range(3):
-        SESSION = trainingDataFeeder('manualdb', engineargs)
+        SESSION = trainingDataFeeder('manualdb', engineargs, A_machineDIR)
         result = SESSION.Result
         FullTestLen = len(SESSION.TrialPositions.keys())
         print("Total test lenght: %i" % FullTestLen)

@@ -20,7 +20,7 @@ settings = Settings()
 
 class trainingDataFeeder():
 
-    def __init__(self, database_file, engineargs):
+    def __init__(self, database_file, engineargs, A_machineDIR=None):
         self.DatabaseFile = database_file
         if '.pgn' in database_file:
             if not self.loadPGNData(database_file):
@@ -33,7 +33,9 @@ class trainingDataFeeder():
                 self.TrialPositions = self.loadRawSimpleDatabase()
             if not self.TrialPositions:
                 return
-
+        
+        self.MachineDIR = A_machineDIR if A_machineDIR else settings.machineDIR
+        
         self.TotalTests = 0
         self.PassedTests = 0
 
@@ -289,7 +291,7 @@ class trainingDataFeeder():
 
     def rollThruMachines(self):
         Approved = {}
-        machinelist = open(settings.machineDIR + '/machines.list').readlines()
+        machinelist = open(self.machineDIR + '/machines.list').readlines()
         for machine in machinelist:
             machine = machine.replace('\n', '')
             print(".%s." % machine)
