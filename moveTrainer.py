@@ -18,7 +18,7 @@ else:
     engineargs = ['--deep', '4']
     
 if '--alternative-folder' in sys.argv:
-    A_machineDIR = sys.argv[sys.argv.index['--alternative-folder'] + 1]
+    A_machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
     engineargs += [ A_machineDIR ]
 else:
     A_machineDIR = None
