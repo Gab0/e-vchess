@@ -29,6 +29,7 @@ class trainingDataFeeder():
             try:
                 self.TrialPositions = self.loadScoredDatabase()
             except:
+                raise
                 self.TrialPositions = self.loadRawSimpleDatabase()
             if not self.TrialPositions:
                 return

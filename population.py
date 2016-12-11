@@ -10,7 +10,7 @@ if not os.path.isdir("machines"):
 
 
 
-if for ARG in sys.argv:
+for ARG in sys.argv:
     if ARG == "populate":
         try:
             Q = int(sys.argv[ARG+1])
