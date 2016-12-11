@@ -35,7 +35,8 @@ class trainingDataFeeder():
                 return
         
         self.machineDIR = A_machineDIR if A_machineDIR else settings.machineDIR
-        
+        if self.machineDIR:
+            engineargs += [ '-MD', self.machineDIR ]
         self.TotalTests = 0
         self.PassedTests = 0
 
