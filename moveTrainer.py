@@ -40,7 +40,7 @@ else:
         ApprovedMachines = list(result.keys())
         posLOG.write("\nPassed Tests: %i @ %s, run #%i.\n" % ( SESSION.PassedTests, A_machineDIR, N))
         posLOG.write('\n'.join(["%s: %i" % (W, result[W]) for W in ApprovedMachines if result[W] > 0 ]))
-        pop = core.loadmachines(DIR=A_machinesDIR)
+        pop = core.loadmachines(DIR=A_machineDIR)
         if result:
             for scoreNumber in range(1, round(max([result[x] for x in result]))):
                 for MAC in ApprovedMachines:
