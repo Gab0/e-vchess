@@ -35,9 +35,11 @@ else:
         FullTestLen = len(SESSION.TrialPositions.keys())
         print("Total test lenght: %i" % FullTestLen)
         print(result)
-        posLOG.write("\nPassed Tests: %i.\n" % SESSION.PassedTests)
-        posLOG.write(json.dumps(result, indent=2)+"\n")
+        
+        #posLOG.write(json.dumps(result, indent=2)+"\n")
         ApprovedMachines = list(result.keys())
+        posLOG.write("\nPassed Tests: %i.\n" % SESSION.PassedTests)
+        posLOG.write('\n'.join(["%s: %i" % (W, result[W] for W in ApprovedMachines if result[W] > 0 ]]))
         pop = core.loadmachines()
         if result:
             for scoreNumber in range(1, round(max([result[x] for x in result]))):
