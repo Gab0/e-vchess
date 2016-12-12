@@ -39,7 +39,7 @@ else:
         #posLOG.write(json.dumps(result, indent=2)+"\n")
         ApprovedMachines = list(result.keys())
         posLOG.write("\nPassed Tests: %i @ %s, run #%i.\n" % ( SESSION.PassedTests, A_machineDIR, N))
-        posLOG.write('\n'.join(["%s: %i" % (W, result[W] for W in ApprovedMachines if result[W] > 0 ]]))
+        posLOG.write('\n'.join(["%s: %i" % (W, result[W]) for W in ApprovedMachines if result[W] > 0 ]))
         pop = core.loadmachines()
         if result:
             for scoreNumber in range(1, round(max([result[x] for x in result]))):
