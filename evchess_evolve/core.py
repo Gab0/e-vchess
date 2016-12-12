@@ -43,7 +43,7 @@ def loadmachines(DIR=machine_dir):
         file = file.strip("\n")
 
         if file.endswith(".mac"):
-            population.append(machine(file,DIR=DIR))
+            population.append(machine(file, DIR=DIR))
             population[-1].Load()
 
     return population
@@ -109,6 +109,9 @@ def mutatemachines(Aggro, population):
 
 def setmachines(population, DIR=machine_dir):
     for i in range(len(population)):
+        if population[i].DIR != DIR:
+            print("overriding %s directory." % population[i].filename)
+            population[i].DIR = DIR
         population[i].write()
 
     if os.path.isfile("%s/machines.list" % DIR):
