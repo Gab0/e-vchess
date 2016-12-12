@@ -257,13 +257,13 @@ int main(int argc, char** argv) {
 
 	Ps += evaluateAttack(&moves,
 			       BoardMaterialValue, AttackerDefenderMatrix,
-			       eP, eP, 0);
+			       eP, eP, 1);
 	
 	legal_moves(&board, &moves, 1-eP, 0);
 
 	Es += evaluateAttack(&moves,
 			     BoardMaterialValue, AttackerDefenderMatrix,
-			     1-eP, eP, 0);
+			     1-eP, eP, 1);
 	printf("A=%i; s=%i;   Attacker score = %i    Defender score = %i.\n",
 	       eP, 0, Ps,Es, board.score);
 	show_board_matrix(BoardMaterialValue);

@@ -188,6 +188,18 @@ Device int evaluateAttack(//struct board *evalboard,
 	{
 	  AttackerDefenderBalanceValue = max( sqrt(BoardMaterialValue AT)
 					      * pow(AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT, 0.9) * BRAIN.seekatk, 0);
+	  if (P == Attacker)
+	    	{
+		  if (!AttackerDefenderMatrix[1-P]AT)
+		    {
+		      if (FreePiece < BoardMaterialValue AT * BRAIN.balanceoffense)
+			FreePiece = BoardMaterialValue AT * BRAIN.balanceoffense;
+		    }
+		  else if
+		       (FreePiece < (BoardMaterialValue AT - BoardMaterialValue AO) * BRAIN.balanceoffense)
+		    FreePiece = (BoardMaterialValue AT - BoardMaterialValue AO) * BRAIN.balanceoffense;
+		  
+		}
 
 	//AttackerDefenderBalanceValue -= sqrt(BoardMaterialValue AO)/2 * AttackerDefenderMatrix[1-P]AT * BRAIN.balanceoffense;
 	}
@@ -206,17 +218,12 @@ Device int evaluateAttack(//struct board *evalboard,
 
       if (P != Attacker)
 	AttackerDefenderBalanceValue *= BRAIN.balanceoffense;
-      else
-	{
-	  if (BoardMaterialValue AT > BoardMaterialValue AO)
-	    if (FreePiece < BoardMaterialValue AT - BoardMaterialValue AO)
-	      FreePiece = BoardMaterialValue AT - BoardMaterialValue AO;
 
-	}
       score += AttackerDefenderBalanceValue;
       
     }
-
+  if (Verbose)
+    printf("FreePiece bonus = %i\n", FreePiece);
   score += FreePiece;
   return score;
     
