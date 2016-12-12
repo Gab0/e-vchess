@@ -348,9 +348,9 @@ def Triangulate_value(values):
 
 def sendtoHallOfFame(MACHINE):
 
-    copyfile(machine_dir + '/' + MACHINE.filename,
-             machine_dir + '/top_machines/' + MACHINE.filename)
-    Fo = open(machine_dir + '/top_machines/machines.list', 'a+')
+    copyfile(MACHINE.DIR + '/' + MACHINE.filename,
+             MACHINE.DIR + '/top_machines/' + MACHINE.filename)
+    Fo = open(MACHINE.DIR + '/top_machines/machines.list', 'a+')
     Fo.write(MACHINE.filename + '\n')
     print('machine %s sent to top.' % MACHINE.filename)
     MACHINE.onTOP = 1

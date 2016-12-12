@@ -29,7 +29,7 @@ elif "createsimple" in sys.argv:
     x = trainingDataCreator(SimpleDatabase = "newdatabase")
 else:
     posLOG = open("pos_log", 'a')
-    for N in range(3):
+    for N in range(12):
         SESSION = trainingDataFeeder('manualdb', engineargs, A_machineDIR)
         result = SESSION.Result
         FullTestLen = len(SESSION.TrialPositions.keys())
