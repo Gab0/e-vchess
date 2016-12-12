@@ -20,7 +20,7 @@ else:
 if '--alternative-folder' in sys.argv:
     A_machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
 else:
-    A_machineDIR = None
+    A_machineDIR = settings.machineDIR
     
 
 if "create" in sys.argv:
@@ -29,7 +29,7 @@ elif "createsimple" in sys.argv:
     x = trainingDataCreator(SimpleDatabase = "newdatabase")
 else:
     posLOG = open("pos_log", 'a')
-    for N in range(12):
+    for N in range(26):
         SESSION = trainingDataFeeder('manualdb', engineargs, A_machineDIR)
         result = SESSION.Result
         FullTestLen = len(SESSION.TrialPositions.keys())
@@ -40,7 +40,7 @@ else:
         ApprovedMachines = list(result.keys())
         posLOG.write("\nPassed Tests: %i @ %s, run #%i.\n" % ( SESSION.PassedTests, A_machineDIR, N))
         posLOG.write('\n'.join(["%s: %i" % (W, result[W]) for W in ApprovedMachines if result[W] > 0 ]))
-        pop = core.loadmachines()
+        pop = core.loadmachines(DIR=A_machinesDIR)
         if result:
             for scoreNumber in range(1, round(max([result[x] for x in result]))):
                 for MAC in ApprovedMachines:
@@ -65,13 +65,13 @@ else:
                         core.Mate([IND, random.choice(pop)], 2, ID="POS")
                     
         stock_popsize=16
-        while len(pop) < stock_popsize/2:
+        while len(pop) < stock_popsize/2 and pop:
             pop += core.Mate(pop,2,ID="pos")
 
         pop = core.populate(pop, stock_popsize-len(pop), 1)
             
         core.mutatemachines(2,pop)
 
-        core.setmachines(pop)
+        core.setmachines(pop, DIR=A_machineDIR)
 
             
