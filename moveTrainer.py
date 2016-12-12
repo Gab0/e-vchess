@@ -20,7 +20,7 @@ else:
 if '--alternative-folder' in sys.argv:
     A_machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
 else:
-    A_machineDIR = settings.machineDIR
+    A_machineDIR = Settings.machineDIR
     
 
 if "create" in sys.argv:
