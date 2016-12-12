@@ -172,6 +172,7 @@ Device int evaluateAttack(//struct board *evalboard,
   int score=0;
   int Z=0;
 
+  int FreePiece=0;
   F(Z, moves->kad)
     {
      
@@ -205,11 +206,18 @@ Device int evaluateAttack(//struct board *evalboard,
 
       if (P != Attacker)
 	AttackerDefenderBalanceValue *= BRAIN.balanceoffense;
+      else
+	{
+	  if (BoardMaterialValue AT > BoardMaterialValue AO)
+	    if (FreePiece < BoardMaterialValue AT - BoardMaterialValue AO)
+	      FreePiece = BoardMaterialValue AT - BoardMaterialValue AO;
+
+	}
       score += AttackerDefenderBalanceValue;
       
     }
-  
-  
+
+  score += FreePiece;
   return score;
     
 }
