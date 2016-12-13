@@ -28,8 +28,8 @@ if "create" in sys.argv:
 elif "createsimple" in sys.argv:
     x = trainingDataCreator(SimpleDatabase = "newdatabase")
 else:
-    posLOG = open("pos_log", 'a')
-    for N in range(26):
+    posLOG = open("pos_log", 'a', 1)
+    for N in range(64):
         SESSION = trainingDataFeeder('manualdb', engineargs, A_machineDIR)
         result = SESSION.Result
         FullTestLen = len(SESSION.TrialPositions.keys())
@@ -53,7 +53,7 @@ else:
             for IND in range(len(pop)):
                 NAME = pop[IND].filename
                 if NAME not in ApprovedMachines or result[NAME] < 0:
-                    management.bareDeleteMachine(Settings.machineDIR, NAME)
+                    management.bareDeleteMachine(A_machineDIR, NAME)
                     pop[IND] = None
             pop = [ x for x in pop if x ]
             
