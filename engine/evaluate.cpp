@@ -123,12 +123,15 @@ Device int evaluateMaterial(struct board *evalboard,
       // evaluate safe position of piece;
       if (PieceIndex != 5)
 	{
-	if (AttackerDefenderMatrix[P][i][j] > AttackerDefenderMatrix[1-P][i][j])
-	  BruteDefenseValue += sqrt(PieceMaterialValue) * pow((AttackerDefenderMatrix[P][i][j] - AttackerDefenderMatrix[1-P][i][j]), BRAIN.MODbackup);// * BRAIN.MODbackup;
-
       // evaluate piece placement;
 	PieceMaterialValue += sqrt(PieceMaterialValue) * (BoardMiddleScoreWeight[abs(7*(1-P)-i)] + BoardMiddleScoreWeight[j]) * BRAIN.seekmiddle ;
 	PieceMaterialValue += sqrt(PieceMaterialValue) * BoardInvaderScoreWeight[abs(7*(1-P)-i)] * BRAIN.seekInvasion;
+
+	
+	if (AttackerDefenderMatrix[P][i][j] > AttackerDefenderMatrix[1-P][i][j])
+	  BruteDefenseValue += log(PieceMaterialValue) * pow((AttackerDefenderMatrix[P][i][j] - AttackerDefenderMatrix[1-P][i][j]), BRAIN.MODbackup);// * BRAIN.MODbackup;
+
+
 	  
 
 	}
@@ -188,8 +191,8 @@ Device int evaluateAttack(//struct board *evalboard,
 
       if (AttackerDefenderMatrix[P]AT > AttackerDefenderMatrix[1-P]AT || BoardMaterialValue AT > BoardMaterialValue AO)
 	{
-	  AttackerDefenderBalanceValue = max( sqrt(BoardMaterialValue AT)
-					      * pow(AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT, 0.9) * BRAIN.seekatk, 0);
+	  AttackerDefenderBalanceValue = max( log(BoardMaterialValue AT)
+					      * pow(AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT, BRAIN.seekatk), 0);
 	  if (P == Attacker)
 	    	{
 		  if (!AttackerDefenderMatrix[1-P]AT)
