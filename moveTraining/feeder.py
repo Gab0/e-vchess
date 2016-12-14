@@ -15,7 +15,7 @@ from time import sleep
 from chessArena.enginewrapper import Engine
 
 from chessArena.settings import Settings
-settings = Settings()
+Settings = Settings()
 
 
 class trainingDataFeeder():
@@ -40,7 +40,7 @@ class trainingDataFeeder():
         self.TotalTests = 0
         self.PassedTests = 0
 
-        self.subject = Engine(['--showinfo'] + engineargs)
+        self.subject = Engine([Settings.enginebin, '--showinfo'] + engineargs)
         sleep(3)
         #self.launchTest()
         self.rollThruMachines()
