@@ -199,12 +199,14 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	if(MAXIMUM_ITER > 0)
 	  {
 	    if (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[0]]->gameEnd)
-		continue;
+	      if (!finalboardsArray[BEST[0]]->gameEnd){
+		continue;}
+	      else break;
 	    
 	    if (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[1]]->gameEnd)
-		continue;
+	      if (!finalboardsArray[BEST[1]]->gameEnd){
+		continue;}
+	      else break;
 	  }	
 
 	Thinking = 0;	

@@ -58,7 +58,7 @@ else:
             pop = [ x for x in pop if x ]
             
             for IND in pop:
-                if FullTestLen - result[IND.filename] < 3:
+                if FullTestLen * 10 - result[IND.filename] < 20:
                     core.sendtoHallOfFame(IND)
                 if result[IND.filename] == BestScoreOnGroup:
                     if NumberOfBestScorers < len(pop)/6:

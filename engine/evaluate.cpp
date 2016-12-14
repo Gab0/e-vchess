@@ -74,6 +74,7 @@ Device int evaluateMaterial(struct board *evalboard,
     }
     PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
     if (PieceIndex < 0) continue;
+    
     PieceMaterialValue = BRAIN.pvalues[PieceIndex];
 
 
@@ -90,7 +91,7 @@ Device int evaluateMaterial(struct board *evalboard,
 	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
 	    if ( (j>1 && evalboard->squares[i-1][j-1] == 'p') ||
 		 (j<7 && evalboard->squares[i-1][j+1] == 'p') )
-	      PieceMaterialValue += PieceMaterialValue / 10 * BRAIN.pawnIssue;
+	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	  }
 	else
 	  {
@@ -99,12 +100,13 @@ Device int evaluateMaterial(struct board *evalboard,
 	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
 	    if ( (j>1 && evalboard->squares[i+1][j-1] == 'P') ||
 		 (j<7 && evalboard->squares[i+1][j+1] == 'P') )
-	      PieceMaterialValue += PieceMaterialValue / 10 * BRAIN.pawnIssue;
+	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	  }
 	
 	pawnEffectiveHeight = pow(pawnEffectiveHeight, 1.2);
-	if (AttackerDefenderMatrix[P][i][j])
+	if (AttackerDefenderMatrix[P][i][j] > AttackerDefenderMatrix[1-P][i][j])
 	  pawnEffectiveHeight *= 3;
+	  
 	PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
 	if (endgameModeOn)
 	  PieceMaterialValue += pawnEffectiveHeight * sqrt(currentMovementCount) * BRAIN.endgameWeight;
@@ -216,8 +218,8 @@ Device int evaluateAttack(//struct board *evalboard,
 	  printf("%c -----atks-----> %c %i\n", moves->attackers[Z][0], moves->defenders[Z][0], AttackerDefenderBalanceValue);
 	}
 
-      if (P != Attacker)
-	AttackerDefenderBalanceValue *= BRAIN.balanceoffense;
+      //if (P != Attacker)
+	//AttackerDefenderBalanceValue *= BRAIN.balanceoffense;
 
       score += AttackerDefenderBalanceValue;
       
