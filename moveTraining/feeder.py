@@ -40,7 +40,7 @@ class trainingDataFeeder():
         self.TotalTests = 0
         self.PassedTests = 0
 
-        self.subject = Engine(settings.engineARGS + ['--showinfo'] + engineargs)
+        self.subject = Engine(['--showinfo'] + engineargs)
         sleep(3)
         #self.launchTest()
         self.rollThruMachines()

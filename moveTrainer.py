@@ -13,7 +13,7 @@ import json
 import random
 
 if '--full' in sys.argv:
-    engineargs = ['--xdeep', '1']
+    engineargs = ['--xdeep', '1', '--deep', '4']
 else:
     engineargs = ['--deep', '4']
     
