@@ -9,6 +9,8 @@ case  "$1" in
 
 "arena") python ${BASEDIR}/chess_arena.py --go;;
 
+"noxarena") python ${BASEDIR}/chess_arena.py --nogui;;
+
 "tournament") python ${BASEDIR}/launch_tournament.py;;
 
 "longtournament") if [ -z ${2} ];
