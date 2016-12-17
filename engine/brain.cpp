@@ -134,7 +134,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     {
       
       int MINIMUM_ITER = 5;
-	int MAXIMUM_ITER = 16;
+      int CURRENT_ITER=0;
+	int MAXIMUM_ITER = 12;
 	int maxdepthGone = 0;
 	
       int Z = 0;
@@ -181,33 +182,38 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	    if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
 	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
 	    
-	    if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > 700)
+	    if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > BRAIN.scoreFlutuabilityContinuator * 1000)
 	      if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
-		MAXIMUM_ITER++;
+		MINIMUM_ITER++;
 	    
 	    DUMP(BufferBoard);
 	  }
 	
 	selectBestMoves(finalboardsArray, moves->k, BEST, T);
 	MINIMUM_ITER--;
-	MAXIMUM_ITER--;
+	CURRENT_ITER++;
+	//	MAXIMUM_ITER--;
 	//	printf("bestline = %i\n", BEST[0]);
 
 	if (MINIMUM_ITER > 0)
 	  continue;
 
-	if(MAXIMUM_ITER > 0)
+	if(CURRENT_ITER < MAXIMUM_ITER)
 	  {
 	    if (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone)
 	      if (!finalboardsArray[BEST[0]]->gameEnd){
-		continue;}
-	      else break;
+		continue;
+	      }
+
 	    
 	    if (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[1]]->gameEnd){
-		continue;}
-	      else break;
-	  }	
+	      if (!finalboardsArray[BEST[1]]->gameEnd)
+		{
+		continue;
+		}
+
+	  }
+
 
 	Thinking = 0;	
       }

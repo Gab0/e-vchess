@@ -436,5 +436,7 @@ Global void setBrainStandardValues(void) {
   Brain.kingPanic = 0;
   Brain.pawnIssue = 0;
   Brain.seekInvasion = 0;
+
+  Brain.scoreFlutuabilityContinuator = 0.7;
 }
 

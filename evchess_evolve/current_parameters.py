@@ -13,29 +13,29 @@ def STDPARAMETERS():
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 12, 0.4,
-                  bLIM=0.3, INCR=0.1, LIM=1.2, promoter='A'),
+        parameter("param_seekatk", 0, 12, 0.3,
+                  bLIM=0.1, INCR=0.1, LIM=1.2, promoter='A'),
 
-        parameter("param_seekmiddle", 0, 23, 0,
-                  bLIM= 2, LIM=10, promoter='m'),
+        parameter("param_seekmiddle", 0, 23, 2,
+                  bLIM= 1, LIM=10, promoter='m'),
 
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
-        parameter("param_pawnrankMOD", 0, 20, 0,
+        parameter("param_pawnrankMOD", 0, 20, 5,
                   LIM=15, bLIM=3, promoter='p'),
 
 
         #parameter("param_parallelAttacks", 0, 12, 0,
         #          LIM=0.6, bLIM=0, INCR=0.3, promoter='c'),
 
-        parameter("param_balanceoffense", 0, 6, 0,
+        parameter("param_balanceoffense", 0, 6, 0.8,
                   LIM=1, bLIM=0.0, INCR=0.2, promoter='o'),
 
-        parameter("param_MODbackup", 0, 20, 0,
-                  LIM=1.6, bLIM=0.8, INCR=0.2, promoter='B'),
+        parameter("param_MODbackup", 0, 20, 0.8,
+                  LIM=1.6, bLIM=0, INCR=0.2, promoter='B'),
 
-        parameter("param_MODmobility", 0, 15, 0,
-                  LIM=2, bLIM=0.6, INCR=0.2, promoter='M'),
+        parameter("param_MODmobility", 0, 15, 0.6,
+                  LIM=2, bLIM=0.2, INCR=0.2, promoter='M'),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
 
@@ -53,13 +53,13 @@ def STDPARAMETERS():
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
 
-        parameter("param_kingPanic", 0, 14, 0,
-                  LIM=0.3, bLIM=0.1, INCR=0.1, promoter='P'),
+        parameter("param_kingPanic", 0, 14, 0.2,
+                  LIM=0.3, bLIM=0, INCR=0.1, promoter='P'),
 
-        parameter("param_pawnIssue", 0, 15, 0,
-                  LIM=0.5, bLIM=0.1, INCR=0.1, promoter='W'),
-        parameter("param_seekinvasion", 0, 15, 0,
-                  LIM=1, bLIM=0.1, INCR=0.1, promoter='I')
+        parameter("param_pawnIssue", 0, 15, 0.3,
+                  LIM=0.5, bLIM=0, INCR=0.1, promoter='W'),
+        parameter("param_seekinvasion", 0, 15, 0.5,
+                  LIM=1, bLIM=0, INCR=0.1, promoter='I')
     ]
 
 def ScoreParameters():
