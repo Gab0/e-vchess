@@ -151,68 +151,66 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	      {
 		continue;
 	      }
+	    
 	    undo_lastMove(finalboardsArray[BEST[Z]], 2);
 	    BufferBoard = finalboardsArray[BEST[Z]];
 
 
 
       
-	    if (finalboardsArray[BEST[Z]]->whoplays == PL)
-	      {
-		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
-						     Alpha, Beta, AllowCutoff);
+	   if (finalboardsArray[BEST[Z]]->whoplays == PL)
+	   {
+	    finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+	    				     Alpha, Beta, AllowCutoff);
 		//	printf("same player\n");
 
 		//invert(finalboardsArray[BEST[Z]]->score);
 
-	      }
-	      else
-	      {
+		}
+		else
+		{
 		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
 						     -Beta, -Alpha, AllowCutoff);
 		//finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
 		//					 Alpha, Beta, AllowCutoff);
 		//	printf("other player\n");
 		invert(finalboardsArray[BEST[Z]]->score);
-	      }
+		 }
 
 
-	    
+		
 	    
 	    if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
+	    
 	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
 	    
 	    if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > BRAIN.scoreFlutuabilityContinuator * 1000)
 	      if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
-		MINIMUM_ITER++;
+		MINIMUM_ITER = max(MINIMUM_ITER++, MAXIMUM_ITER);
 	    
 	    DUMP(BufferBoard);
 	  }
 	
 	selectBestMoves(finalboardsArray, moves->k, BEST, T);
-	MINIMUM_ITER--;
+
 	CURRENT_ITER++;
 	//	MAXIMUM_ITER--;
 	//	printf("bestline = %i\n", BEST[0]);
 
-	if (MINIMUM_ITER > 0)
+	if (CURRENT_ITER < MINIMUM_ITER)
 	  continue;
 
 	if(CURRENT_ITER < MAXIMUM_ITER)
-	  {
-	    if (finalboardsArray[BEST[0]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[0]]->gameEnd){
-		continue;
-	      }
-
-	    
-	    if (finalboardsArray[BEST[1]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[1]]->gameEnd)
+	  F(Z, T-3)
+	    {
+	    if (finalboardsArray[BEST[Z]]->MovementCount < maxdepthGone)
+	      if (!finalboardsArray[BEST[Z]]->gameEnd)
 		{
-		continue;
+		  continue;
 		}
 
-	  }
+	  }	    
+	   
 
 
 	Thinking = 0;	
@@ -290,7 +288,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 			  findking(_board->squares, 'Y', PLAYER), 
 			  findking(_board->squares, 'X', PLAYER),
 			  1-PLAYER, 0, 0)) {
-      score = -13000 + 50*(BRAIN.DEEP-DEEP); 
+      score = -13000 + 50 * (BRAIN.DEEP-DEEP); 
     }
        
     else score = 0; 

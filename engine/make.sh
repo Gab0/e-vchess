@@ -14,7 +14,7 @@ EXTENSION=".cpp"
 #cp $F.cpp $F.cu
 #done
 else
-TOOL="gcc -Ofast -g -DDEBUG"
+TOOL="gcc -Ofast"
 LINKTOOL="gcc -Ofast"
 EXTENSION=".cpp"
 fi
