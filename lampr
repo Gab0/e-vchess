@@ -18,7 +18,9 @@ case  "$1" in
 		  else wN=$2;
 		  fi
 		  for i in `seq 1 ${wN}`;
-		  do python ${BASEDIR}/launch_tournament.py -t
+		  do
+		      echo -ne "\033]0; Long Tournament ${i}/${wN}\007" 
+		      python ${BASEDIR}/launch_tournament.py -t
 		  done;;
 
 "make") cd ${BASEDIR}/engine && ./make.sh;;

@@ -13,7 +13,7 @@ def STDPARAMETERS():
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 12, 1.0,
+        parameter("param_seekatk", 0, 12, 0.5,
                   bLIM=0.1, INCR=0.1, LIM=1.2, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 1,
@@ -21,7 +21,7 @@ def STDPARAMETERS():
 
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
-        parameter("param_pawnrankMOD", 0, 20, 4,
+        parameter("param_pawnrankMOD", 0, 20, 3,
                   LIM=15, bLIM=3, promoter='p'),
 
 
@@ -31,7 +31,7 @@ def STDPARAMETERS():
         parameter("param_balanceoffense", 0, 6, 0.8,
                   LIM=1, bLIM=0.0, INCR=0.2, promoter='o'),
 
-        parameter("param_MODbackup", 0, 20, 0.1,
+        parameter("param_MODbackup", 0, 20, 0.4,
                   LIM=1.6, bLIM=0, INCR=0.2, promoter='B'),
 
         parameter("param_MODmobility", 0, 15, 2.0,
@@ -47,7 +47,7 @@ def STDPARAMETERS():
         #parameter("param_boardcontrol", 0, 12, 0,
         #          LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
-        parameter("param_endgameWeight", 0, 12, 0,
+        parameter("param_endgameWeight", 0, 12, 0.2,
                   LIM=3, bLIM=0.0, INCR=0.2, promoter="E"),
 
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
@@ -56,8 +56,9 @@ def STDPARAMETERS():
         parameter("param_kingPanic", 0, 14, 0.0,
                   LIM=0.3, bLIM=0, INCR=0.1, promoter='P'),
 
-        parameter("param_pawnIssue", 0, 15, 0.0,
+        parameter("param_pawnIssue", 0, 15, 0.5,
                   LIM=0.5, bLIM=0, INCR=0.1, promoter='W'),
+        
         parameter("param_seekinvasion", 0, 15, 0.2,
                   LIM=1, bLIM=0, INCR=0.1, promoter='I')
     ]
@@ -92,5 +93,7 @@ Modified Evaluation Mechanism. AVG ELO 990 @ 16/nov
 Recreating Evaluation mechanism from scratch. Eval only taking material value into account: AVG ELO 880 @ 25/nov
 
 Evaluation mechanism recreated, now done in two steps. after extensive training (100k rounds and corresponding tournaments) AVG ELO 1125 @ 20/dez
+
+AVG ELO 1205 21/dez
 
 """
