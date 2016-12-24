@@ -67,7 +67,7 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
 
   for (i=0;i<moves->k;i++) {
 
-    move_pc(_board, &moves->movements[i]);    
+    move_piece(_board, &moves->movements[i], 1);    
     moves->movements[i].score = -thinkiterate_fast(_board, DEEP-1, verbose,
 			       -Beta, -Alpha, AllowCutoff);      
 
@@ -80,7 +80,7 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
     if (moves->movements[i].score > Alpha)
       Alpha = moves->movements[i].score;
 
-    undo_move(_board, &moves->movements[i]);
+    move_piece(_board, &moves->movements[i], -1);
   }     
              
   replicate_move(out, &moves->movements[ChosenMovementIndex]);
@@ -156,7 +156,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     // Movelist iteration.
     for(i=0;i<moves.k;i++) {
        
-      move_pc(_board, &moves.movements[i]);  
+      move_piece(_board, &moves.movements[i],1);  
 
       moves.movements[i].score = -thinkiterate_fast(_board, DEEP-1, verbose,
 						    -Beta, -Alpha, AllowCutoff);
@@ -168,7 +168,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 	if (moves.movements[i].score > Alpha) 
 	  Alpha = moves.movements[i].score;
       
-      undo_move(_board, &moves.movements[i]);
+	move_piece(_board, &moves.movements[i], -1);
       
 	if (Beta<=Alpha && AllowCutoff) 
 	  break;       

@@ -30,7 +30,7 @@ char *infoAUX = (char *)malloc(256 * sizeof(char));
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
 
 struct move movehistory[512];
-char movehistoryboard[512][8][8];
+char movehistoryboard[512][64];
 int hindex; 
 //variable params for intelligent evolution (standards initialized);
 
@@ -235,8 +235,8 @@ int main(int argc, char** argv) {
 
     if (strstr(inp, "eval") != NULL)
       {
-	int AttackerDefenderMatrix[2][8][8];
-	int BoardMaterialValue[8][8];
+	int AttackerDefenderMatrix[2][64];
+	int BoardMaterialValue[64];
 	
 	GenerateAttackerDefenderMatrix(board.squares, AttackerDefenderMatrix);
 
@@ -269,7 +269,12 @@ int main(int argc, char** argv) {
 	show_board_matrix(BoardMaterialValue);
       }
 
-    
+    if (strstr(inp, "tmove") != NULL)
+      {
+	int IDX = inp[6] - '0';
+	move_piece(&board, &moves.movements[IDX], 1);
+	move_piece(&board, &moves.movements[IDX], -1);
+      }
 
     
     if (strstr(inp, "history") != NULL) {
@@ -322,7 +327,7 @@ int main(int argc, char** argv) {
     }
     
     if (read_movelines(inp, 0)) {
-       computer(thinkVerbose);
+      computer(thinkVerbose);
         
 
     }
@@ -352,7 +357,7 @@ void computer(int verbose) {
     
    
 
-    move_pc(&board, &move);
+    move_piece(&board, &move, 1);
     
  
     history_append(&move);    

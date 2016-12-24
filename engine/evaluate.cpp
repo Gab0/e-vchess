@@ -2,7 +2,7 @@
 
 
 Device int evaluateMaterial(struct board *evalboard,
-			    int BoardMaterialValue[8][8],  int AttackerDefenderMatrix[2][8][8], 
+			    int BoardMaterialValue[64],  int AttackerDefenderMatrix[2][64], 
 		    int P, int Attacker, int Verbose)
 {
   //int Index = blockIdx.x;
@@ -56,7 +56,7 @@ Device int evaluateMaterial(struct board *evalboard,
       // detect if square is inside king safespace. evaluation will be resumed later;
     if ( abs(ownKingPos[0] - i) < 2 && abs(ownKingPos[1] - j) < 2 )
       {
-	if (getindex(evalboard->squares[i][j], Pieces[P], 6) < 0)
+	if (getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6) < 0)
 	  {
 	    KingSafespaceScore -= 20 * BRAIN.kingPanic;
 	    continue;
@@ -68,11 +68,11 @@ Device int evaluateMaterial(struct board *evalboard,
       isInKingSafespace = 0;
 	
     // skip empty square for efficiency;
-    if (evalboard->squares[i][j] == 'x'){
-      BoardMaterialValue[i][j] = 0;
+    if (evalboard->squares[ SQR(i, j) ] == 'x'){
+      BoardMaterialValue[ SQR(i, j) ] = 0;
       continue;
     }
-    PieceIndex = getindex(evalboard->squares[i][j], Pieces[P], 6);
+    PieceIndex = getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6);
     if (PieceIndex < 0) continue;
     
     PieceMaterialValue = BRAIN.pvalues[PieceIndex];
@@ -87,24 +87,24 @@ Device int evaluateMaterial(struct board *evalboard,
 	  if (P)
 	    {
 	    pawnEffectiveHeight = i-1;
-	    if (evalboard->squares[i-1][j] == 'p')
+	    if (evalboard->squares[ SQR((i-1), j) ] == 'p')
 	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
-	    if ( (j>1 && evalboard->squares[i-1][j-1] == 'p') ||
-		 (j<7 && evalboard->squares[i-1][j+1] == 'p') )
+	    if ( (j>1 && evalboard->squares[ SQR((i-1), (j-1)) ] == 'p') ||
+		 (j<7 && evalboard->squares[ SQR((i-1), (j+1)) ] == 'p') )
 	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	  }
 	else
 	  {
 	    pawnEffectiveHeight = 6-i;
-	    if (evalboard->squares[i+1][j] == 'P')
+	    if (evalboard->squares[ SQR(i+1, j) ] == 'P')
 	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
-	    if ( (j>1 && evalboard->squares[i+1][j-1] == 'P') ||
-		 (j<7 && evalboard->squares[i+1][j+1] == 'P') )
+	    if ( (j>1 && evalboard->squares[ SQR((i+1), (j-1)) ] == 'P') ||
+		 (j<7 && evalboard->squares[ SQR((i+1), (j+1)) ] == 'P') )
 	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	  }
 	
 	pawnEffectiveHeight = pow(pawnEffectiveHeight, 1.2);
-	if (AttackerDefenderMatrix[P][i][j] > AttackerDefenderMatrix[1-P][i][j])
+	if (AttackerDefenderMatrix[P][SQR(i, j)] > AttackerDefenderMatrix[1-P][SQR(i, j)])
 	  pawnEffectiveHeight *= 3;
 	  
 	PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
@@ -128,8 +128,8 @@ Device int evaluateMaterial(struct board *evalboard,
 	PieceMaterialValue += sqrt(PieceMaterialValue) * BoardInvaderScoreWeight[abs(7*(1-P)-i)] * BRAIN.seekInvasion;
 
 	
-	if (AttackerDefenderMatrix[P][i][j] > AttackerDefenderMatrix[1-P][i][j])
-	  BruteDefenseValue += log(PieceMaterialValue) * pow((AttackerDefenderMatrix[P][i][j] - AttackerDefenderMatrix[1-P][i][j]), BRAIN.MODbackup);// * BRAIN.MODbackup;
+	if (AttackerDefenderMatrix[P][SQR(i, j)] > AttackerDefenderMatrix[1-P][SQR(i, j)])
+	  BruteDefenseValue += log(PieceMaterialValue) * pow((AttackerDefenderMatrix[P][SQR(i, j)] - AttackerDefenderMatrix[1-P][SQR(i, j)]), BRAIN.MODbackup);// * BRAIN.MODbackup;
 
 
 	  
@@ -142,7 +142,7 @@ Device int evaluateMaterial(struct board *evalboard,
       }
       
       score += PieceMaterialValue;
-	BoardMaterialValue[i][j] = PieceMaterialValue;    
+	BoardMaterialValue[SQR(i, j)] = PieceMaterialValue;    
     }
   
 
@@ -163,14 +163,13 @@ Device int evaluateMaterial(struct board *evalboard,
 }
 Device int evaluateAttack(//struct board *evalboard,
 			  struct movelist *moves,
-			  int BoardMaterialValue[8][8],
-			  int AttackerDefenderMatrix[2][8][8],
+			  int BoardMaterialValue[64],
+			  int AttackerDefenderMatrix[2][64],
 			  int P, int Attacker, int Verbose)
 {
-#define AO0 moves->attackers[Z][1]
-#define AO1 moves->attackers[Z][2]
-#define AO [moves->attackers[Z][1]][moves->attackers[Z][2]]
-#define AT [moves->defenders[Z][1]][moves->defenders[Z][2]]
+#define AO [ SQR(moves->attackers[Z][1], moves->attackers[Z][2]) ]
+#define AT [ SQR(moves->defenders[Z][1], moves->defenders[Z][2]) ]
+
   
   int DefenderIndex = 0;
   int AttackerDefenderBalanceValue = 0;
@@ -235,21 +234,21 @@ Device int evaluateAttack(//struct board *evalboard,
 }
 
 
-Host void GenerateAttackerDefenderMatrix(char squares[8][8], int AttackerDefenderMatrix[2][8][8])
+Host void GenerateAttackerDefenderMatrix(char squares[64], int AttackerDefenderMatrix[2][64])
 {
   int P=0, i=0,j=0;
 
   F(P,2)
     forsquares
     {
-      if (squares[i][j] != 'x')
+      if (squares[SQR(i, j)] != 'x')
 	{
-	  AttackerDefenderMatrix[P][i][j] = ifsquare_attacked(squares, i, j, P, 0, 0);
-	  //printf("%i\n", AttackerDefenderMatrix[P][i][j]);
+	  AttackerDefenderMatrix[P][SQR(i, j)] = ifsquare_attacked(squares, i, j, P, 0, 0);
+	  //printf("%i\n", AttackerDefenderMatrix[P][SQR(i, j)]);
 
 	}
       else
-	AttackerDefenderMatrix[P][i][j] = 0;
+	AttackerDefenderMatrix[P][SQR(i, j)] = 0;
     }
   
 }

@@ -26,27 +26,28 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     
   int PLAYER = Machineplays;
   legal_moves(_board, moves, PLAYER, 0);
-  
-  if (board.MovementCount == 0) { //primitive opening book:
-    int moveBook[4] = {9, //e2e4
-		       7, //d2d4
-		       19, //g1f3
-		       5,}; //c2c4
+
+  if (board.MovementCount == 0)
+    { //primitive opening book:
+      int moveBook[4] = {9, //e2e4
+			 7, //d2d4
+			 19, //g1f3
+			 5,}; //c2c4
       
-       srand ( rndseed() );
-       ChosenMovementIndex = moveBook[rand() % 4];
-
-
+      srand ( rndseed() );
+      ChosenMovementIndex = moveBook[rand() % 4];
+      
+      
       replicate_move(out, &moves->movements[ChosenMovementIndex]);
       
-    DUMP(moves);
-    DUMP(_board);
-    return ChosenMovementIndex;
-		       
-  }
+      DUMP(moves);
+      DUMP(_board);
+      return ChosenMovementIndex;
+      
+    }
   
-
-
+  
+  
   if (check_fivemove_repetition()) FivemoveRepetitionRisk = 1;
   
   if (moves->k == 0) {
@@ -89,7 +90,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
   for (i=0;i<moves->k;i++) {
 
-    move_pc(_board, &moves->movements[i]);    
+    move_piece(_board, &moves->movements[i], 1);    
     finalboardsArray[i] = thinkiterate(_board, Brain.DEEP-1, verbose,
 			       -Beta, -Alpha, AllowCutoff);      
     invert(finalboardsArray[i]->score);
@@ -119,7 +120,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 
      
     //finalboardsArray[i]->score = -finalboardsArray[i]->score;
-    undo_move(_board, &moves->movements[i]);
+    move_piece(_board, &moves->movements[i], -1);
   }
 
   int T = 5;
@@ -331,7 +332,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     
     for(i=0;i<moves.k;i++) {
        
-      move_pc(_board, &moves.movements[i]);  
+      move_piece(_board, &moves.movements[i], 1);  
 
       DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
 
@@ -359,7 +360,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	  
     
 
-      undo_move(_board, &moves.movements[i]);
+      move_piece(_board, &moves.movements[i], -1);
        
       DUMP(DisposableBuffer);  
        
@@ -375,8 +376,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
   }
      
   else {
-    int AttackerDefenderMatrix[2][8][8];
-    int BoardMaterialValue[8][8];
+    int AttackerDefenderMatrix[2][64];
+    int BoardMaterialValue[64];
     
     GenerateAttackerDefenderMatrix(_board->squares, AttackerDefenderMatrix);
     
@@ -441,10 +442,10 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
   int i=0,j=0,NullMove=0;
   if (DEEP>BRAIN.DEEP-2&&K>5) 
     forsquares {
-      if (board->squares[i][j]!='x'&& 
-	  board->squares[i][j]!=Pieces[P][0]&&
-	  !is_in(board->squares[i][j],Pieces[1-P],6)) NullMove = 1;
-      if (board->squares[i][j]==Pieces[P][5])
+      if (board->squares[SQR(i, j)]!='x'&& 
+	  board->squares[SQR(i, j)]!=Pieces[P][0]&&
+	  !is_in(board->squares[SQR(i, j)],Pieces[1-P], 6)) NullMove = 1;
+      if (board->squares[SQR(i, j)]==Pieces[P][5])
 	if (ifsquare_attacked (board->squares, i, j, 1-P, 0, 0)) return 0;
     }
   //OFF!!!

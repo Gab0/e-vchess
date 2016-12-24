@@ -22,10 +22,11 @@ int fehn2board (char str[]) {
     for (z=0;z<strlen(fstring);z++) {
     
      number = fstring[z]-'0';
-        if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6)) {
-            board.squares[i][j] = fstring[z];
+        if (is_in(fstring[z],pieces[0],6)||is_in(fstring[z],pieces[1],6))
+	  {
+            board.squares[ SQR(i, j) ] = fstring[z];
             j++;
-        }
+	  }
         if (fstring[z]=='/') {
             i++;
             j=0;        
@@ -38,7 +39,7 @@ int fehn2board (char str[]) {
     //read active player section.
     
     if (fstring[0] == 'b')
-      board.whoplays=1;
+      board.whoplays = 1;
     if (fstring[0] == 'w')
       board.whoplays = 0;
     
@@ -87,9 +88,9 @@ int read_movelines (char txt[128], int verbose) {
 
             if (parse_move(&move, movement, 1-machineplays)) {
                 Vb printf("moving from input: %i%i %i%i\n",move.from[0],move.from[1],move.to[0],move.to[1]);
-                move.casualty = board.squares[move.to[0]][move.to[1]]; 
-                
-                move_pc(&board, &move);
+                move.casualty = board.squares[ SQR(move.to[0], move.to[1]) ]; 
+                move.piece = board.squares[ SQR(move.from[0], move.from[1]) ]; 
+                move_piece(&board, &move, 1);
 
                 history_append(&move);
                 x++;
@@ -111,15 +112,17 @@ void print_movement (struct move *move, int full) {
     cord2pos(play[1]);
     
     print_play(play);
-    
-    if (full) {
-        printf("iscastle = %i.\n", move->iscastle);
-        printf("lostcastle = %i.\n", move->lostcastle);
-        printf("passant = %i.\n", move->passant);
-        printf("passantJ = %i %i.\n", move->passantJ[0], move->passantJ[1]);
-        if (!move->promoteto) printf("promoteto = 0\n");
-        else printf("promoteto = %c.\n", move->promoteto);
-        printf("casualty = %c.\n", move->casualty);
+
+    if (full)
+      {
+      printf("piece= %c.\n", move->piece);
+      printf("iscastle = %i.\n", move->iscastle);
+      printf("lostcastle = %i.\n", move->lostcastle);
+      printf("passant = %i.\n", move->passant);
+      printf("passantJ = %i %i.\n", move->passantJ[0], move->passantJ[1]);
+      if (!move->promoteto) printf("promoteto = 0\n");
+      else printf("promoteto = %c.\n", move->promoteto);
+      printf("casualty = %c.\n", move->casualty);
     }
     
     
@@ -146,7 +149,7 @@ int parse_move (struct move *target, char *s, int P) {
         pos2cord(target->from);
         pos2cord(target->to);           
         //printf("%i%i %i%i\n", target->from[0],target->from[1],target->to[0],target->to[1]);
-
+	target->piece = board.squares[ SQR(target->from[0], target->from[1]) ];
         
         if(s[4]=='q') {
             if (s[1]<s[3])target->promoteto='Q';
@@ -160,9 +163,10 @@ int parse_move (struct move *target, char *s, int P) {
         if (target->from[1] == 4){
             if (target->from[0] == 0 || target->from[0] == 7)
                 if (target->to[1] == 6 || target->to[1] == 2)
-                if (board.squares[target->from[0]][target->from[1]]==pieces[P][5]) {target->iscastle=1; //printf("castle.\n");
-                
-                }
+		  if (board.squares[ SQR(target->from[0], target->from[1]) ] == pieces[P][5])
+		    {
+		      target->iscastle=1; //printf("castle.\n");
+		    }
         
         }
         
@@ -172,14 +176,14 @@ int parse_move (struct move *target, char *s, int P) {
         target->passantJ[0] = board.passantJ;
         target->passantJ[1] = -1;
         //set possibility, on double pawn movement.
-        if (board.squares[target->from[0]][target->from[1]]==pieces[1-machineplays][0])
+        if (board.squares[ SQR(target->from[0], target->from[1]) ]==pieces[1-machineplays][0])
             if (target->from[0]==1||target->from[0]==6)
                 if (target->to[0]==3||target->to[0]==4)
                     target->passantJ[1] = target->from[1];
         //read EP capture.
         if (target->to[1] == board.passantJ)
-            if (board.squares[target->from[0]][target->to[1]]==pieces[machineplays][0])
-                if (board.squares[target->from[0]][target->from[1]] == pieces[1-machineplays][0])
+	  if (board.squares[ SQR(target->from[0], target->to[1]) ]==pieces[machineplays][0])
+	    if (board.squares[ SQR(target->from[0], target->from[1]) ] == pieces[1-machineplays][0])
                     if ((target->from[0]==3&&machineplays)||(target->from[0]==4&&!machineplays))
                             target->passant=1;
                 
@@ -263,7 +267,7 @@ void show_movelist(struct movelist *moves) {
 
 }
 
-void show_board_matrix (int Matrix[8][8])
+void show_board_matrix (int Matrix[64])
 {
   int i=0, j=0, X=0;
 
@@ -274,8 +278,8 @@ void show_board_matrix (int Matrix[8][8])
 	sprintf(MatrixDrawLine, "");
 	for(j=0;j<8;j++)
 	  {
-	    //printf("%i\n", Matrix[i][j]);
-	    sprintf(MatrixDrawLine, "%s %i", MatrixDrawLine, Matrix[i][j]);
+	    //printf("%i\n", Matrix[ SQR(i, j) ]);
+	    sprintf(MatrixDrawLine, "%s %i", MatrixDrawLine, Matrix[ SQR(i, j) ]);
 	    
 	    if (j!=7)
 	      {

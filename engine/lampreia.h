@@ -29,6 +29,9 @@
 #define flip(x) x = 1 - x
 #define invert(x) x = -x
 
+
+#define SQR(i, j) ((j) + (i*8)) 
+
 #define max(a,b)	       \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -104,7 +107,7 @@ struct movelist {
 
 struct board;
    struct board {
-     char squares[8][8];
+     char squares[64];
       
      int castle[2][3];
       
@@ -154,12 +157,12 @@ struct param {
 };
 
 extern struct move movehistory[512];
-extern char movehistoryboard[512][8][8];
+extern char movehistoryboard[512][64];
 extern int hindex;   
 
 using namespace std;
 
-//extern char squares[8][8];
+
 extern Device char GPUpieces[2][6];
 extern char pieces[2][6];
 
@@ -219,18 +222,18 @@ Global void setBrainStandardValues(void);
 
 //functions from board.cpp;######################################################
 void setup_board(int setup);
-void show_board(char squares[8][8]);
+void show_board(char squares[64]);
 Host Device int legal_moves 
 (struct board *board, struct movelist *moves, int PL, int verbose);
-Host Device int mpc (char squares[8][8], int i, int j, int player);
-Host Device void move_pc(struct board *tg_board, struct move *movement);
+Host Device int mpc (char squares[64], int i, int j, int player);
+Host Device void move_piece(struct board *tg_board, struct move *movement, int MoveUnmove);
 Host Device void undo_move(struct board *tg_board, struct move *movement);
 Device void attackers_defenders (struct movelist *moves);
 void h_move_pc (struct board *board,char movement[][2]);
 int history_append(struct move *move);
 int history_rollback(int times);
 //void castle (struct board *board, int doundo, int PL, int side);
-Host Device int findking (char board[8][8], char YorX, int player);
+Host Device int findking (char board[64], char YorX, int player);
 Host Device int cancastle 
     (struct board *board, int P, int direction);
 Host Device void movement_generator
@@ -238,7 +241,7 @@ Host Device void movement_generator
             int limit, char direction, int i, int j, int P);
 Host Device void undo_lastMove(struct board *board, int Number);
 
-int countPieces (char squares[8][8], int CountPawns);
+int countPieces (char squares[64], int CountPawns);
 
 //functions from operation.cpp;##################################################
 void cord2pos (char out[]); 
@@ -250,7 +253,7 @@ Host Device int append_move
     (struct board *board, struct movelist *moves, 
         int i,int j, int mod_i, int mod_j, int P);
 
-Host Device int ifsquare_attacked (char squares[8][8],
+Host Device int ifsquare_attacked (char squares[64],
 				   int TGi, int TGj, int AttackingPlayer, int xray, int verbose); 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P);
 Host Device int getindex (char x, char array[],int size);
@@ -281,7 +284,7 @@ void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
 
 void show_movelist(struct movelist *moves);
 
-void show_board_matrix (int Matrix[8][8]);
+void show_board_matrix (int Matrix[64]);
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 
@@ -306,16 +309,16 @@ Device int check_fivemove_repetition (void);
 //functions from evaluate.cpp;###################################################
 
 Device int evaluateMaterial(struct board *evalboard,
-			    int BoardMaterialValue[8][8],  int AttackerDefenderMatrix[2][8][8], 
+			    int BoardMaterialValue[64],  int AttackerDefenderMatrix[2][64], 
 			    int P, int Attacker, int Verbose);
 
 Device int evaluateAttack(//struct board *evalboard,
 			  struct movelist *moves,
-			  int BoardMaterialValue[8][8],
-			  int AttackerDefenderMatrix[2][8][8],
+			  int BoardMaterialValue[64],
+			  int AttackerDefenderMatrix[2][64],
 			  int P, int Attacker, int Verbose);
 
-Host void GenerateAttackerDefenderMatrix(char squares[8][8], int AttackerDefenderMatrix[2][8][8]);
+Host void GenerateAttackerDefenderMatrix(char squares[64], int AttackerDefenderMatrix[2][64]);
 
 //functions from brain_fast.cpp;#################################################
 int think_fast(struct move *out, int PL, int DEEP, int verbose);
