@@ -23,14 +23,17 @@
 #define onboard(i,j) i >=0 && i < 8 && j >= 0 && j <8
 #define comp_arr(a,b) (a[0] == b[0] && a[1] == b[1])
 #define print_play(p) printf("from %c%c to %c%c\n", p[0][0],p[0][1],p[1][0],p[1][1])
-#define print_play_cord(p) printf("from %c%c to %c%c\n", p.from[0],p.from[1],p.to[0],p.to[1])
-#define expand_play(p) p.from[0],p.from[1],p.to[0],p.to[1]
+#define print_play_cord(p) printf("from %c%c to %c%c\n", SQR_I(p.from), SQR_J(p.from), SQR_I(p.to), SQR_J(p.to))
+#define expand_play(p) SQR_I(p.from), SQR_J(p.from), SQR_I(p.to), SQR_J(p.to)
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
 #define flip(x) x = 1 - x
 #define invert(x) x = -x
 
 
 #define SQR(i, j) ((j) + (i*8)) 
+#define SQR_I(x) (x % 8)
+#define SQR_J(x) (x / 8)
+
 
 #define max(a,b)	       \
    ({ __typeof__ (a) _a = (a); \
@@ -77,8 +80,8 @@ struct move;
 struct move {
   char piece;
   
-  char from[2];
-  char to[2];
+  int from;
+  int to;
     
   int iscastle;
   int lostcastle;
@@ -170,6 +173,9 @@ extern bool computer_turn;
 
 extern struct board board;
 
+extern const int MovementDiagonalLinear[2][4][2];
+
+
 extern struct param Brain;
 IFGPU(extern __device__ struct param GBrain;)
 
@@ -251,7 +257,7 @@ Host Device bool is_in(char val, char arr[], int size);
 bool is_legal(struct move *play, int P);
 Host Device int append_move
     (struct board *board, struct movelist *moves, 
-        int i,int j, int mod_i, int mod_j, int P);
+     int from, int to, int special, int P);
 
 Host Device int ifsquare_attacked (char squares[64],
 				   int TGi, int TGj, int AttackingPlayer, int xray, int verbose); 

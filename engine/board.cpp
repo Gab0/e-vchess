@@ -74,51 +74,52 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
     pawn_vector += 2*PL;
     
     
-    int promote=0;
-    if (PL==1) promote=1;
+    int promote = PL;
+
     
 
     forsquares
       {
+	promote = 0;
 	if (!is_in(board->squares[ SQR(i, j) ], Pieces[PL], 6)) continue;
 
 	if (board->squares[SQR(i, j)] == Pieces[PL][0])
 	  {
 	  
 	  if ( (i==6&&PL==1) || (i==1&&PL==0) )
-	    promote += 2;
+	    promote = 4;
 	  
           
 	  if (board->passantJ==j+1||board->passantJ==j-1)
                     if (board->passantJ>-1)
 		      if ( (i==3&&!PL) || (i==4&&PL) ) 
 			if (board->squares[ SQR(i, board->passantJ) ] == Pieces[1-PL][0]) 
-			  append_move(board, moves, i*11,j,pawn_vector,board->passantJ-j,PL);
+			  append_move(board, moves, SQR(i,j), SQR( (i + pawn_vector), board->passantJ ), 1, PL);
 	  
           
 	  if ((is_in(board->squares[ SQR((i+pawn_vector), (j+1)) ], Pieces[EP], 6)) && onboard((i+pawn_vector), (j+1)))
 	    {
 	      //printf(">%i>%i=%i    %c  %i= <%i<%i\n", i, j, SQR(i,j), board->squares[ SQR(i+pawn_vector, j+1)], SQR((i+pawn_vector), (j+1)), i+pawn_vector, j+1);
 	      //show_board(board->squares);
-	      append_move(board, moves, i, j, pawn_vector, 1, promote);
+	      append_move(board, moves, SQR(i, j), SQR( (i+pawn_vector), (j+1) ), promote, PL);
 	    }
           
 	  if ((is_in(board->squares[ SQR((i+pawn_vector), (j-1)) ], Pieces[EP], 6)) && onboard((i+pawn_vector), j-1))
-	    append_move(board, moves, i, j, pawn_vector, -1, promote);
+	    append_move(board, moves, SQR(i, j), SQR( (i+pawn_vector), (j-1)), promote, PL);
                                        
 	  
           
-	  if (board->squares[ SQR((i+pawn_vector), j) ] == 'x' && onboard((i+pawn_vector),j)) 
-                    append_move(board, moves, i, j, pawn_vector, 0, promote);
+	  if (board->squares[ SQR((i+pawn_vector), j) ] == 'x' && onboard((i+pawn_vector),j) )
+	    append_move(board, moves, SQR(i, j), SQR( (i+pawn_vector), j), promote, PL);
 		
-                
-                if (promote > 1) promote -= 2;
+
+
 
 		if (i == 6-5*PL) // PL == 1 -> i == 1; PL == 0 -> i == 6
 		  if (board->squares[ SQR((i+ 2*pawn_vector), j) ] == 'x')//  && onboard(i + (2*pawn_vector), j))
 		    if (board->squares[ SQR((i+pawn_vector), j) ] == 'x')
 		      {
-		      append_move(board, moves, i*11, j, 4*PL-2, 0, PL);
+			append_move(board, moves, SQR(i, j), SQR( (i+4*PL-2), j), 2, PL);
 		      }
 	} 
 	
@@ -141,140 +142,141 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
 	   {
              
 	     k_atk = mpc(board->squares, i+HT[zeta][0],j+HT[zeta][1], PL);       
-	     if (k_atk) append_move(board,moves,i,j,HT[zeta][0],HT[zeta][1], PL);
+	     if (k_atk) append_move(board,moves, SQR(i, j),SQR( (i+HT[zeta][0]),(j+HT[zeta][1]) ), 0, PL);
      
      
 	     k_atk = mpc(board->squares, i+HT[zeta][1],j+HT[zeta][0], PL);
-	     if (k_atk) append_move(board,moves,i,j,HT[zeta][1],HT[zeta][0], PL);
+	     if (k_atk) append_move(board,moves, SQR(i, j) ,SQR( (i+HT[zeta][1]), (j+HT[zeta][0]) ), 0, PL);
      
          }
      }
      
      //bishop movements
-     if(board->squares[SQR(i, j)] == Pieces[PL][3]){
- 
-       
-       movement_generator(board,moves,0, 'X', i, j, PL);
-       
-       
-     }
-     if (board->squares[SQR(i, j)] == Pieces[PL][4]) {
-
-       
-       movement_generator(board,moves,0, '+', i, j, PL);
-       movement_generator(board,moves,0, 'X', i, j, PL);
-       
-     }
-  	
-     if (board->squares[SQR(i, j)] == Pieces[PL][5]){
-       
-       
-       movement_generator(board,moves,1, '+', i, j, PL);
-       movement_generator(board,moves,1, 'X', i, j, PL);
-
-       if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, 1-PL, 0, 0)) 
+     if(board->squares[SQR(i, j)] == Pieces[PL][3])
        {
-	 
-       if (cancastle(board, PL, -1))
-       append_move(board, moves, 16, 2, 0, 0, PL);
-       
-       if (cancastle(board, PL, 1))
-       append_move(board, moves, 16, 6, 0, 0, PL);
-       
+	 movement_generator(board,moves,0, 'X', i, j, PL);
        }
-       	
+     
+     //queen movements
+     if (board->squares[SQR(i, j)] == Pieces[PL][4])
+       {
+       	 movement_generator(board,moves,0, '+', i, j, PL);
+	 movement_generator(board,moves,0, 'X', i, j, PL);
+       }
+     
+     //king movements
+     if (board->squares[SQR(i, j)] == Pieces[PL][5])
+       {
+             
+	 movement_generator(board,moves,1, '+', i, j, PL);
+	 movement_generator(board,moves,1, 'X', i, j, PL);
+	 
+	 if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, 1-PL, 0, 0)) 
+	   {
+	     
+	     if (cancastle(board, PL, -1))
+	       {
+		 append_move(board, moves, SQR(i,j), SQR(i, 1), 3, PL);
+		 append_move(board, moves, SQR(i,j), SQR(i, 2), 3, PL);
+	       }
+	     if (cancastle(board, PL, 1))
+	       append_move(board, moves, SQR(i, j), SQR(i, 6), 3, PL);
+	     
+	   }
+	 
        }	
       }
     
+
     
     attackers_defenders(moves);
-
+    
     return 0;
 }
 
 Host Device int mpc(char squares[64], int i, int j, int player) {
   
   int enemy = flip(player);
-
-    
-    if (onboard(i, j))
-      {
-	if (squares[ SQR(i, j) ] == 'x') {/*printf("mpc granted %i%i\n", i,j); */return 2;}
-	
-	if (is_in(squares[ SQR(i, j) ], Pieces[enemy], 6))
-	  return 1;
-	
-	else return 0;
-	
-      }
-    else return 0;
+  
+  
+  if (onboard(i, j))
+    {
+      if (squares[ SQR(i, j) ] == 'x') return 2;
+      
+      if (is_in(squares[ SQR(i, j) ], Pieces[enemy], 6))
+	return 1;
+      
+      else return 0;
+      
+    }
+  else return 0;
 }
 
 Host Device void move_piece(struct board *tg_board, struct move *movement, int MoveUnmove) {
-    
+  
   if (movement->casualty==0)
     movement->casualty='x';
   
-  char from[2];
-  char to[2];
+  int from;
+  int to;
   if (MoveUnmove > 0)
     {
-      from[0] = movement->from[0];
-      from[1] = movement->from[1];
-      to[0] = movement->to[0];
-      to[1] = movement->to[1];
-      tg_board->squares[ SQR(from[0], from[1]) ] = 'x';
+      from = movement->from;
+      to = movement->to;
+
+      tg_board->squares[ from ] = 'x';
     }
   else
     {
-      to[0] = movement->from[0];
-      to[1] = movement->from[1];
-      from[0] = movement->to[0];
-      from[1] = movement->to[1];
-      tg_board->squares[ SQR(from[0], from[1]) ] = movement->casualty;
+      to = movement->from;
+      from = movement->to;
+
+      tg_board->squares[ from ] = movement->casualty;
     }
 
+    tg_board->squares[ to ] = movement->piece;
+
+    if (movement->promoteto!=0 && MoveUnmove > 0)
+      tg_board->squares[ to ] = movement->promoteto;
 
 
-    tg_board->squares[ SQR(to[0], to[1]) ] = movement->piece;
 
     
-    if(movement->promoteto!=0)
-      tg_board->squares[ SQR(to[0], to[1]) ] = movement->promoteto;
+
     
     if(movement->iscastle)
       {
 	if (MoveUnmove > 0)
 	  {
-	    if (movement->to[1] < 4)
+	    if (SQR_J(movement->to) < 4)
 	      {
-		tg_board->squares[ SQR(to[0], (to[1]+1)) ] =
-		  tg_board->squares[ SQR(to[0], 0) ];
-		tg_board->squares[ SQR(to[0], 0) ] = 'x';
+		tg_board->squares[ to + 1 ] =
+		  tg_board->squares[ SQR( SQR_I(to), 0) ];
+		tg_board->squares[ SQR( SQR_I(to), 0) ] = 'x';
 	      }
         
-	    if (movement->to[1] > 4)
+	    if (SQR_J(movement->to) > 4)
 	      {
-		tg_board->squares[ SQR(to[0], (to[1]-1)) ] =
-		  tg_board->squares[ SQR(to[0], 7) ];
-		tg_board->squares[ SQR(to[0], 7) ] = 'x';
+		tg_board->squares[ to - 1 ] =
+		  tg_board->squares[ SQR( SQR_I(to), 7) ];
+		tg_board->squares[ SQR( SQR_I(to), 7) ] = 'x';
 	      }
 
 	  }
 	else
-	  {
-	    if (movement->from[1] < 4)
+	  {// ATTENTION;
+	    if (SQR_J(movement->from) < 4)
 	      {
-		tg_board->squares[ SQR(from[0], 0) ] =
-		  tg_board->squares[ SQR(to[0], (from[1]+1)) ];
-				     tg_board->squares[ SQR(from[0], (from[1]+1)) ] = 'x';
+		tg_board->squares[ SQR(SQR_I(from), 0) ] =
+		  tg_board->squares[ SQR(SQR_I(to), (SQR_J(from)+1)) ];
+				     tg_board->squares[ from + 1 ] = 'x';
 	      }
         
-	    if (movement->from[1] > 4)
+	    if (SQR_J(movement->from) > 4)
 	      {
-		tg_board->squares[ SQR(from[0], 7) ] =
-		  tg_board->squares[ SQR(to[0], (from[1]-1)) ];
-		tg_board->squares[ SQR(from[0], (from[1]-1)) ] = 'x';
+		tg_board->squares[ SQR(SQR_I(from), 7) ] =
+		  tg_board->squares[ SQR(SQR_I(to), (SQR_J(from)-1)) ];
+		tg_board->squares[ from - 1 ] = 'x';
 	      } 
 
 	  }
@@ -285,11 +287,11 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
     if(movement->passant)
       {
 	if (MoveUnmove > 0)
-	  tg_board->squares[ SQR(from[0], to[1]) ] = 'x';
+	  tg_board->squares[ SQR(SQR_I(from), SQR_J(to)) ] = 'x';
 	else
 	  {
-	    tg_board->squares[ SQR(to[0], from[1]) ] = movement->casualty;
-	    tg_board->squares[ SQR(from[0], from[1]) ] = 'x';
+	    tg_board->squares[ SQR( SQR_I(to), SQR_J(from) ) ] = movement->casualty;
+	    tg_board->squares[ from ] = 'x';
 	  }
       }
     int cP =-1;
@@ -297,15 +299,15 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
     if (MoveUnmove > 0)
 	{
 
-	  if(from[0]==7) cP = 0;
-	  if(from[0]==0) cP = 1;
+	  if(SQR_I(from)==7) cP = 0;
+	  if(SQR_I(from)==0) cP = 1;
 	}
     
     else
       {
 	ResetCastling = 1;
-	if(to[0]==7) cP = 0;
-	if(to[0]==0) cP = 1;
+	if(SQR_I(to) == 7) cP = 0;
+	if(SQR_I(to) == 0) cP = 1;
       }
     if (cP > -1)
       {
@@ -323,8 +325,8 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
     tg_board->MovementCount += MoveUnmove;
     
 }
-
-Host Device void undo_move(struct board *tg_board, struct move *movement) {
+    // LEGACY FUNCTION;
+    /*Host Device void undo_move(struct board *tg_board, struct move *movement) {
     
     
     char to[2] = {movement->from[0], movement->from[1]};
@@ -384,7 +386,7 @@ Host Device void undo_move(struct board *tg_board, struct move *movement) {
     tg_board->MovementCount--;
 
     
-}
+    }*/
 
 Host Device void undo_lastMove(struct board *board, int Number) {
   int N=0;
@@ -409,12 +411,12 @@ Device void attackers_defenders (struct movelist *moves)
 	  //print_movement(&moves->movements[M], 1);
 	  
 	  moves->attackers[moves->kad][0] = moves->movements[M].piece;
-	  moves->attackers[moves->kad][1] = moves->movements[M].from[0];
-	  moves->attackers[moves->kad][2] = moves->movements[M].from[1];
+	  moves->attackers[moves->kad][1] = moves->movements[M].from;
+	  
 	  
 	  moves->defenders[moves->kad][0] = moves->movements[M].casualty;
-	  moves->defenders[moves->kad][1] = moves->movements[M].to[0];
-	  moves->defenders[moves->kad][2] = moves->movements[M].to[1];
+	  moves->defenders[moves->kad][1] = moves->movements[M].to;
+
         
 	  moves->kad++;
         }
@@ -514,10 +516,11 @@ Host Device void movement_generator(struct board *board, struct movelist *moves,
     int X=0, q=0;
     int Ti=0, Tj=0;
     
-    int matrix[4][2];
+    int M=0;
 
-    if (direction=='X')
-      {
+
+    if (direction=='+') M = 1;
+	/*{
         matrix[0][0] = 1;
         matrix[0][1] = -1;
         matrix[1][0] = -1;
@@ -538,32 +541,32 @@ Host Device void movement_generator(struct board *board, struct movelist *moves,
         matrix[2][1] = 1;
         matrix[3][0] = 0;
         matrix[3][1] = -1;
-      }       
+	}       */
 
        for (X=0;X<4;X++)
 	 {
            q=1;
            while (q>0) {
-	     Ti = i+matrix[X][0]*q;
-	     Tj = j+matrix[X][1]*q;
+	     Ti = i + MovementDiagonalLinear[M][X][0] *q;
+	     Tj = j + MovementDiagonalLinear[M][X][1] *q;
 	     
 	     
 	     
 	     if (onboard(Ti,Tj))
 	       {
 		 //printf(">>>%i %i%i      %i   %c\n", SQR(Ti,Tj), Ti, Tj,q,board->squares[ SQR(Ti, Tj) ]);
-		 if (board->squares[ SQR(Ti, Tj) ]=='x')
+		 if (board->squares[ SQR(Ti, Tj) ] == 'x')
 		   {
-		   append_move(board, moves, i, j, Ti-i, Tj-j, P);
-		   q++;
-		   if (limit) q=0;
+		     append_move(board, moves, SQR(i, j), SQR(Ti, Tj), 0, P);
+		     q++;
+		     if (limit) q=0;
 		   
 		   }
 
 
-		   if (is_in(board->squares[ SQR(Ti, Tj) ], Pieces[1-P],6))
+		 if (is_in(board->squares[ SQR(Ti, Tj) ], Pieces[1-P],6))
 		   {
-		     append_move(board, moves, i, j, Ti-i, Tj-j, P);
+		     append_move(board, moves, SQR(i, j), SQR(Ti, Tj), 0, P);
 		     q=0;
 
 		   
@@ -572,11 +575,11 @@ Host Device void movement_generator(struct board *board, struct movelist *moves,
 		 
 
 
-		   }
-		   else
-		    
-		       q=0;
-		       
+	       }
+	     else
+	       
+	       q=0;
+	     
 		    
 	       }
 	 }

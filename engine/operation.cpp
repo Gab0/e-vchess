@@ -37,7 +37,7 @@ Host Device bool is_in(char val, char arr[], int size){
 
 
 Device int append_move(struct board *board, struct movelist *moves,
-		       int i,int j, int mod_i, int mod_j, int P) {
+		       int from, int to, int special, int P) {
 
 
 
@@ -48,93 +48,83 @@ Device int append_move(struct board *board, struct movelist *moves,
   moves->movements[moves->k].iscastle = 0;
 
   //special movement position considerations (when i>7)
-  if (i>7)
-    {
-    //i=16 denotes a castling movement.
-    if (i==16) {
+
+  
+
+    //printf(">>%i     %i %i\n", SQR(i,j),i,j);
+    moves->movements[moves->k].piece = board->squares[ from ];
+    //printf(">>%c\n", moves->movements[moves->k].piece);
+    moves->movements[moves->k].from = from;
+    moves->movements[moves->k].to = to;
+
+    
+    moves->movements[moves->k].casualty = board->squares[ to ];
+    moves->movements[moves->k].promoteto = 0;
+    moves->movements[moves->k].iscastle = 0;
+    moves->movements[moves->k].lostcastle = 0;
+    
+    // rook movement loses castling rights.
+    if (moves->movements[moves->k].piece == pieces[P][1])
+      if ((SQR_I(from)==0 && P==1)||(SQR_I(from)==7 && P==0))
+      {
+	if(SQR_J(from)==0 && board->castle[P][0]==1)
+	  moves->movements[moves->k].lostcastle = 1;
+	
+	if(SQR_J(from)==4 && board->castle[P][1]==1)
+	  moves->movements[moves->k].lostcastle = 2;
+	
+	if(SQR_J(from)==7 && board->castle[P][2]==1)
+	  moves->movements[moves->k].lostcastle = 3;
+      }
         
-      int I = 7 * (1-P);
+    
+  if (special)
+    {
+    //special == 3 denotes a castling movement.
+    if (special == 3)
+      {
+        
+     
+      //moves->movements[moves->k].from[0] = I;
+      //moves->movements[moves->k].from[1] = 4;
       
-      moves->movements[moves->k].from[0] = I;
-      moves->movements[moves->k].from[1] = 4;
-      
-      moves->movements[moves->k].to[0] = I;
-      moves->movements[moves->k].to[1] = j;
+      //moves->movements[moves->k].to[0] = I;
+      // moves->movements[moves->k].to[1] = j;
       
       moves->movements[moves->k].promoteto = 0;
       moves->movements[moves->k].casualty = 'x';
       
       moves->movements[moves->k].iscastle = 1;
       moves->movements[moves->k].lostcastle = 2;
-      moves->movements[moves->k].piece = pieces[P][5];
+      //moves->movements[moves->k].piece = pieces[P][5];
     }
 
         
-    //i=33 or 44 denotes an en passant capture.
-    if(i==33||i==44)
+    //special == 1 denotes an en passant capture.
+    if(special == 1)
       {
 	moves->movements[moves->k].passant = 1;
-	i = i/11;
+	moves->movements[moves->k].casualty = Pieces[1-P][0];
       }
     
-    //i=11 or 66 denotes a double-step pawn movement.
-    if(i==11||i==66)
+    //special == 2 denotes a double-step pawn movement.
+    if(special == 2 )
       { 
-	moves->movements[moves->k].passantJ[1]=j;
-	i=i/11;
+	moves->movements[moves->k].passantJ[1]= SQR_J(from);
       }
-  }
-  
-  if (i<8) {
-    //printf(">>%i     %i %i\n", SQR(i,j),i,j);
-    moves->movements[moves->k].piece = board->squares[ SQR(i, j) ];
-    //printf(">>%c\n", moves->movements[moves->k].piece);
-    moves->movements[moves->k].from[0] = i;
-    moves->movements[moves->k].from[1] = j;
+
     
-    moves->movements[moves->k].to[0] = (i + mod_i);
-    moves->movements[moves->k].to[1] = (j + mod_j);
-    
-    moves->movements[moves->k].casualty = board->squares[ SQR((i+mod_i), (j+mod_j)) ];
-    //printf("casualty>>%c\n", moves->movements[moves->k].casualty);
-    moves->movements[moves->k].promoteto = 0;
-    moves->movements[moves->k].iscastle = 0;
-    moves->movements[moves->k].lostcastle = 0;
-    
-    if (moves->movements[moves->k].passant) 
-      moves->movements[moves->k].casualty = Pieces[1-P][0];
-    
-    if ((i==0 && P==1)||(i==7 && P==0))
+    if (special == 4)
       {
-	if(j==0 && board->castle[P][0]==1)
-	  moves->movements[moves->k].lostcastle = 1;
-	
-	if(j==4 && board->castle[P][1]==1)
-	  moves->movements[moves->k].lostcastle = 2;
-	
-	if(j==7 && board->castle[P][2]==1)
-	  moves->movements[moves->k].lostcastle = 3;
+	moves->movements[moves->k].promoteto = pieces[P][4];
+
       }
-        
+  }    
+
     
-    if (P>3)
-      printf("Promotion Warning.\n");
-    
-    if (P==3)
-      {
-	moves->movements[moves->k].promoteto = 'q';
-	P=1;
-      }
-    if (P==2)
-      {
-	moves->movements[moves->k].promoteto = 'Q';
-	P=0;
-      }
-    
-    if (check_move_check(board, &moves->movements[moves->k], P)) return 0;      
-    
-  }
+
   //print_movement(&moves->movements[moves->k], 1);
+      if (check_move_check(board, &moves->movements[moves->k], P)) return 0;      
   moves->k++;
   return 1;
 }
@@ -233,36 +223,40 @@ Host Device int ifsquare_attacked (char squares[64], int TGi, int TGj,
 
 Host Device int check_move_check (struct board *tg_board, struct move *move, int P) {
 
-    int kpos[2];
-
     int check=-1;
-    
     int i=0, j=0;
+    int KI=0, KJ=0;
     
     int verbose = 0;
     //if (movement[1][0] == 5 && movement[1][1]==7) verbose = 1;
     
     move_piece(tg_board, move, 1);
     
-    forsquares         
+    forsquares
       if (tg_board->squares[ SQR(i, j) ] == Pieces[P][5])
 	{
-	  kpos[0]=i;
-	  kpos[1]=j;
+	  //printf("king found %i%i\n", i,j);
 	  check++;
+	  KI=i;
+	  KJ=j;
+	  break;
 	}
     
-    //printf("checking check kpos= %i%i\n", kpos[0],kpos[1]);
-    
+
+    //printf("check detected??? %i%i    p=%i.\n", KI, KJ, P);
+    //print_movement(move,1);
     if (check == -1)
       {
-        //printf("er-r [king not found].\n"); show_board(tg_board->squares);
+	//printf("er-r [king not found].\n"); show_board(tg_board->squares);
         move_piece(tg_board, move, -1);
 	return 0;
       }
-    
-    if (ifsquare_attacked(tg_board->squares, kpos[0],kpos[1], 1-P, 0, verbose)>0)
-     check=1;
+    //show_board(tg_board->squares);
+    if (ifsquare_attacked(tg_board->squares, KI, KJ, flip(P), 0, verbose)>0)
+      {
+	//printf("check detected %i%i.\n", KI, KJ);
+	check=1;
+      }
 
     move_piece(tg_board, move, -1);
     return check;
@@ -392,11 +386,9 @@ Host Device void selectBestMoves (struct board **array, int size, int target[], 
 Host Device void replicate_move(struct move *target, struct move *source)
 {
   target->piece = source->piece;
-  target->from[0] = source->from[0];
-  target->from[1] = source->from[1];
   
-  target->to[0] = source->to[0];
-  target->to[1] = source->to[1];
+  target->from = source->from;
+  target->to = source->to;
   
   target->casualty = source->casualty;
   target->promoteto = source->promoteto;
@@ -445,17 +437,18 @@ Host Device void reorder_movelist(struct movelist *movelist) {
 
 Host Device void movement_to_string(struct move *move, char *target) {
 
-  struct move movement_buffer;
-  
-  replicate_move(&movement_buffer, move);
-  
-  cord2pos(movement_buffer.from);
-  cord2pos(movement_buffer.to);
 
-  target[0] = movement_buffer.from[0];
-  target[1] = movement_buffer.from[1];
-  target[2] = movement_buffer.to[0];
-  target[3] = movement_buffer.to[1];
+  char FROM[2] = {SQR_I(move->from), SQR_J(move->from)};
+  char TO[2] = {SQR_I(move->to), SQR_J(move->to)};
+
+  
+  cord2pos(FROM);
+  cord2pos(TO);
+
+  target[0] = FROM[0];
+  target[1] = FROM[1];
+  target[2] = TO[0];
+  target[3] = TO[1];
 }
 
 Host Device int variableComparation(long A, long B, int startPlayer, int endPlayer) {

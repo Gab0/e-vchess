@@ -483,9 +483,8 @@ Device int check_fivemove_repetition (void) {
 Device int compare_movements (struct move *move_A, struct move *move_B) {
   int i=0;
   
-  F(i,2) {
-    if (move_A->from[i] != move_B->from[i]) return 0;
-    if (move_A->to[i] != move_B->to[i]) return 0;
-    }
+    if (move_A->from != move_B->from) return 0;
+    if (move_A->to != move_B->to) return 0;
+    
   return 1;
 }

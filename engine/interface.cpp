@@ -87,9 +87,9 @@ int read_movelines (char txt[128], int verbose) {
         while ( movement != NULL) {
 
             if (parse_move(&move, movement, 1-machineplays)) {
-                Vb printf("moving from input: %i%i %i%i\n",move.from[0],move.from[1],move.to[0],move.to[1]);
-                move.casualty = board.squares[ SQR(move.to[0], move.to[1]) ]; 
-                move.piece = board.squares[ SQR(move.from[0], move.from[1]) ]; 
+	      Vb printf("moving from input: %i%i %i%i\n", expand_play(move));
+                move.casualty = board.squares[ move.to ]; 
+                move.piece = board.squares[ move.from ]; 
                 move_piece(&board, &move, 1);
 
                 history_append(&move);
@@ -105,8 +105,8 @@ int read_movelines (char txt[128], int verbose) {
     return x;
 }
 void print_movement (struct move *move, int full) {
-    char play[2][2] = {{move->from[0], move->from[1]},
-                        {move->to[0], move->to[1]}};
+  char play[2][2] = {{SQR_I(move->from), SQR_J(move->from)},
+		     {SQR_I(move->to), SQR_J(move->to)}};
     
     cord2pos(play[0]);
     cord2pos(play[1]);
@@ -138,18 +138,17 @@ int parse_move (struct move *target, char *s, int P) {
     if (s[1] < '1' || s[1] > '8' || s[3] < '1' || s[3] > '8') return 0;
     
     
-        target->from[0] = s[0];
-        target->from[1] = s[1];
-        target->to[0] = s[2];
-        target->to[1] = s[3];
-
+    char FROM[2] = { s[0], s[1] };
+    char TO[2] = { s[2], s[3] };
         target->iscastle=0;
         target->lostcastle=0;
         //printf("%c%c %c%c\n", s[0],s[1],s[2],s[3]);
-        pos2cord(target->from);
-        pos2cord(target->to);           
+        pos2cord(FROM);
+        pos2cord(TO);
+	target->from = SQR(FROM[0],FROM[1]);
+	target->to = SQR(TO[0], TO [1]);
         //printf("%i%i %i%i\n", target->from[0],target->from[1],target->to[0],target->to[1]);
-	target->piece = board.squares[ SQR(target->from[0], target->from[1]) ];
+	target->piece = board.squares[ target->from ];
         
         if(s[4]=='q') {
             if (s[1]<s[3])target->promoteto='Q';
@@ -160,10 +159,10 @@ int parse_move (struct move *target, char *s, int P) {
         else target->promoteto=0;
         
         //compute castling features of move.
-        if (target->from[1] == 4){
-            if (target->from[0] == 0 || target->from[0] == 7)
-                if (target->to[1] == 6 || target->to[1] == 2)
-		  if (board.squares[ SQR(target->from[0], target->from[1]) ] == pieces[P][5])
+        if (FROM[1] == 4){
+            if (FROM[0] == 0 || FROM[0] == 7)
+                if (TO[1] == 6 || TO[1] == 2)
+		  if (board.squares[ SQR(FROM[0], FROM[1]) ] == pieces[P][5])
 		    {
 		      target->iscastle=1; //printf("castle.\n");
 		    }
@@ -176,15 +175,15 @@ int parse_move (struct move *target, char *s, int P) {
         target->passantJ[0] = board.passantJ;
         target->passantJ[1] = -1;
         //set possibility, on double pawn movement.
-        if (board.squares[ SQR(target->from[0], target->from[1]) ]==pieces[1-machineplays][0])
-            if (target->from[0]==1||target->from[0]==6)
-                if (target->to[0]==3||target->to[0]==4)
-                    target->passantJ[1] = target->from[1];
+        if (board.squares[ target->from ]==pieces[1-machineplays][0])
+            if (FROM[0]==1||FROM[0]==6)
+                if (TO[0]==3||TO[0]==4)
+                    target->passantJ[1] = FROM[1];
         //read EP capture.
-        if (target->to[1] == board.passantJ)
-	  if (board.squares[ SQR(target->from[0], target->to[1]) ]==pieces[machineplays][0])
-	    if (board.squares[ SQR(target->from[0], target->from[1]) ] == pieces[1-machineplays][0])
-                    if ((target->from[0]==3&&machineplays)||(target->from[0]==4&&!machineplays))
+        if (TO[1] == board.passantJ)
+	  if (board.squares[ SQR(FROM[0], TO[1]) ]==pieces[machineplays][0])
+	    if (board.squares[ target->from ] == pieces[1-machineplays][0])
+                    if ((FROM[0]==3&&machineplays)||(FROM[0]==4&&!machineplays))
                             target->passant=1;
                 
         

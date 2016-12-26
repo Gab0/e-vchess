@@ -6,7 +6,12 @@ struct param Brain;
 struct movelist moves;
 
 Device struct param GBrain;
-        
+
+
+const int MovementDiagonalLinear[2][4][2] = 
+  { {	{1, -1}, {-1, 1}, {1, 1}, {-1, -1} },       
+    {   {1, 0},  {-1, 0}, {0, 1}, {0, -1}  } };
+
 char pieces[2][6] = {{'P','R','N','B','Q','K'},
                      {'p','r','n','b','q','k'}};
 Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
@@ -153,7 +158,7 @@ int main(int argc, char** argv) {
     #endif
 
     
-    char testfehn[128] = "fen r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
+    char testfehn[128] = "fen 5bkr/pp4p1/2p1Q3/3p3p/1P1P1P2/8/R1KBP1PP/5B1R w KQkq - 1 1";
 
     printf("DEEP=%i   xDEEP=%i   yDEEP=%i\n\n", Brain.DEEP, Brain.xDEEP, BRAIN.yDEEP);
  
@@ -272,6 +277,7 @@ int main(int argc, char** argv) {
     if (strstr(inp, "tmove") != NULL)
       {
 	int IDX = inp[6] - '0';
+	print_movement(&moves.movements[IDX], 1);
 	move_piece(&board, &moves.movements[IDX], 1);
 	move_piece(&board, &moves.movements[IDX], -1);
       }
@@ -308,14 +314,11 @@ int main(int argc, char** argv) {
     }*/
 
     if (strstr(inp, "list") !=NULL)  {
-        legal_moves(&board, &moves, 0, 0);
-
+      int pList = inp[5] - '0';
+      legal_moves(&board, &moves, pList, 0);
+      show_movelist(&moves);
     }   
              
-    if (strstr(inp, "lis1") !=NULL)  {
-        legal_moves(&board,&moves, 1, 0);
-
-    }   
 
     if (strstr(inp, "showlist") !=NULL) {
       show_movelist(&moves);
@@ -361,17 +364,20 @@ void computer(int verbose) {
     
  
     history_append(&move);    
-    cord2pos(move.from);
-    cord2pos(move.to);
+    char moveFROM[2] = {SQR_I(move.from), SQR_J(move.from)};
+    char moveTO[2] = {SQR_I(move.to), SQR_J(move.to)};
+
+    cord2pos(moveFROM);		     
+    cord2pos(moveTO);
     
     //Vb show_board(board.squares);
     
           
      if (move.promoteto != 0)  
          snprintf(output, 32 ,"move %c%c%c%cq\n",
-                 move.from[0],move.from[1],move.to[0],move.to[1]);
+                 moveFROM[0],moveFROM[1],moveTO[0],moveTO[1]);
      else snprintf(output, 32 ,"move %c%c%c%c \n", 
-                 move.from[0],move.from[1],move.to[0],move.to[1]);
+                 moveFROM[0],moveFROM[1],moveTO[0],moveTO[1]);
      
     //sleep(1);
     write(1, output, strlen(output));fflush(stdout);
