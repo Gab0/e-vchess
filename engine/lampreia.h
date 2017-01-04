@@ -31,8 +31,8 @@
 
 
 #define SQR(i, j) ((j) + (i*8)) 
-#define SQR_I(x) (x % 8)
-#define SQR_J(x) (x / 8)
+#define SQR_I(x) (x / 8)
+#define SQR_J(x) (x % 8)
 
 
 #define max(a,b)	       \

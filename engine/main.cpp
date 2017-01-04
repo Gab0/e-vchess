@@ -364,8 +364,8 @@ void computer(int verbose) {
     
  
     history_append(&move);    
-    char moveFROM[2] = {SQR_I(move.from), SQR_J(move.from)};
-    char moveTO[2] = {SQR_I(move.to), SQR_J(move.to)};
+    char moveFROM[2] = { SQR_I(move.from), SQR_J(move.from) };
+    char moveTO[2] = { SQR_I(move.to), SQR_J(move.to) };
 
     cord2pos(moveFROM);		     
     cord2pos(moveTO);

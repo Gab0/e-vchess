@@ -167,8 +167,8 @@ Device int evaluateAttack(//struct board *evalboard,
 			  int AttackerDefenderMatrix[2][64],
 			  int P, int Attacker, int Verbose)
 {
-#define AO [ SQR(moves->attackers[Z][1], moves->attackers[Z][2]) ]
-#define AT [ SQR(moves->defenders[Z][1], moves->defenders[Z][2]) ]
+#define AO [ moves->attackers[Z][1] ]
+#define AT [ moves->defenders[Z][1] ]
 
   
   int DefenderIndex = 0;
@@ -229,6 +229,8 @@ Device int evaluateAttack(//struct board *evalboard,
   if (Verbose)
     printf("FreePiece bonus = %i\n", FreePiece);
   score += FreePiece;
+
+
   return score;
     
 }

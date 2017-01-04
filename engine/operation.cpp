@@ -1,7 +1,8 @@
 #include "lampreia.h"
 
 
-void cord2pos (char out[]) {
+void cord2pos (char out[])
+{
     char keymap[8] = {'a','b','c','d','e','f','g','h'};
     int i = out[0];
     int j = out[1];
@@ -9,7 +10,9 @@ void cord2pos (char out[]) {
     out[0] = keymap[j];
     out[1] = 8 - i + '0';
 }
-void pos2cord (char out[]) {
+
+void pos2cord (char out[])
+{
     char keymap[8] = {'a','b','c','d','e','f','g','h'};
    
     char let = out[0];
@@ -26,7 +29,8 @@ void pos2cord (char out[]) {
 
 
 
-Host Device bool is_in(char val, char arr[], int size){
+Host Device bool is_in(char val, char arr[], int size)
+{
     int i = 0;
     for (i=0; i < size; i++) 
       if (arr[i] == val)

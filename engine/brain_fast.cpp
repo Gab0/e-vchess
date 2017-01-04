@@ -179,16 +179,36 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     
   }
      
-  else {/*
-    int AttackerDefenderMatrix[2][8][8];
+  else {
+    int AttackerDefenderMatrix[2][64];
+    int BoardMaterialValue[64];
+    
+    GenerateAttackerDefenderMatrix(_board->squares, AttackerDefenderMatrix);
+    
+    int player_score = evaluateMaterial(_board,
+				    BoardMaterialValue, AttackerDefenderMatrix,
+				    PLAYER, PLAYER, 0);
 
-    machine_score = evaluate(_board, &moves, AttackerDefenderMatrix,PLAYER, PLAYER, 0);
-    enemy_score = evaluate(_board, &moves, AttackerDefenderMatrix, 1-PLAYER, PLAYER, 0) * ( 1+BRAIN.presumeOPPaggro);
+    int enemy_score = evaluateMaterial(_board,
+				   BoardMaterialValue, AttackerDefenderMatrix,
+				   1-PLAYER, PLAYER, 0);
 
-    score = machine_score - enemy_score;
+    
+    player_score += evaluateAttack(&moves,
+				     BoardMaterialValue, AttackerDefenderMatrix,
+				     PLAYER, PLAYER, 0);
+    
+    legal_moves(_board, &moves, 1-PLAYER, 0);
+    
 
-	*/
-    return 1;
+    enemy_score += evaluateAttack(&moves,
+				    BoardMaterialValue, AttackerDefenderMatrix,
+				  1-PLAYER, PLAYER, 0);
+    //show_board(_board->squares);
+
+    _board->score = player_score - enemy_score;
+    return _board->score;
+
   }
 
 }

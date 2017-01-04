@@ -116,6 +116,9 @@ void print_movement (struct move *move, int full) {
     if (full)
       {
       printf("piece= %c.\n", move->piece);
+      printf("from = %i.\n", move->from);
+      printf("to = %i.\n", move->to);
+      
       printf("iscastle = %i.\n", move->iscastle);
       printf("lostcastle = %i.\n", move->lostcastle);
       printf("passant = %i.\n", move->passant);
@@ -261,8 +264,11 @@ void stdoutWrite(const char * text) {
 void show_movelist(struct movelist *moves) {
   int i=0;
         printf("list [%i]:\n", moves->k);
-        for (i=0; i < moves->k; i++) { print_movement(&moves->movements[i], 0);
-        printf("attacker? %c.\n", moves->movements[i].casualty);}
+        for (i=0; i < moves->k; i++)
+	  {
+	    print_movement(&moves->movements[i], 1);
+        printf("attacker? %c.\n", moves->movements[i].casualty);
+	  }
 
 }
 

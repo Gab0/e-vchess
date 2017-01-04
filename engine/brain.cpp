@@ -403,6 +403,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     //show_board(_board->squares);
 
     _board->score = player_score - enemy_score;
+    if (_board->score > 10000) printf("%i %i.\n",player_score, enemy_score);
     return _board;
   }
 
