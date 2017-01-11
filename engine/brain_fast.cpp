@@ -55,9 +55,9 @@ int think_fast(struct move *out, int PL, int DEEP, int verbose) {
  
   
   /* if(canNullMove(DEEP, _board, moves->k, PLAYER)) {
-    flip(_board->whoplays);
+    FLIP(_board->whoplays);
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
-    flip(_board->whoplays);
+    FLIP(_board->whoplays);
     invert(BufferBoard->score);
     if (BufferBoard->score > Alpha) Alpha = BufferBoard->score;
 
@@ -120,7 +120,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 			  findking(_board->squares, 'X', PLAYER),
 			  1-PLAYER, 0, 0)) {
       score = -13000 + 50*(BRAIN.DEEP-DEEP);
-      //if (PLAYER != Machineplays) flip(score);
+      //if (PLAYER != Machineplays) FLIP(score);
     }
        
     else score = 0; 
@@ -140,11 +140,11 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
     //and its not K+P endgame.
     //if(DEEP > BRAIN.DEEP - 2) 
       /*      if(canNullMove(DEEP, _board, moves.k, PLAYER)) {
-	flip(_board->whoplays);
+	FLIP(_board->whoplays);
 	DisposableBuffer = thinkiterate(_board, DEEP-1, verbose,
 					-Beta, -Alpha, AllowCutoff);
 	invert(DisposableBuffer->score);
-	flip(_board->whoplays);
+	FLIP(_board->whoplays);
 	if (DisposableBuffer->score > Alpha)
 	  Alpha = DisposableBuffer->score;
 

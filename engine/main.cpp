@@ -48,7 +48,7 @@ char *infomoveTABLE[2048];
 bool selectTOPmachines = false;
 
 int  infomoveINDEX;
-
+bool show_time_elapsed;
 char *machinepath = (char *)malloc(sizeof(char)*128);
 
 
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
 
 	if (strstr(argv[i], "--fast") != NULL) fastmode = true;
-
+	if (strstr(argv[i], "--time") != NULL) show_time_elapsed = true;
 
         }  
     
@@ -242,13 +242,15 @@ int main(int argc, char** argv) {
       {
 	int AttackerDefenderMatrix[2][64];
 	int BoardMaterialValue[64];
-	
+
+	int eP = inp[5] - '0';
+	printf("evaluating position for player %i.\n", eP);
 	GenerateAttackerDefenderMatrix(board.squares, AttackerDefenderMatrix);
 
 	show_board_matrix(AttackerDefenderMatrix[0]);
 	show_board_matrix(AttackerDefenderMatrix[1]);
 	
-	int eP = board.whoplays;
+	//int eP = board.whoplays;
 	legal_moves(&board, &moves, eP, 0);
 	printf("KAD = %i\n", moves.kad);
 	
@@ -258,14 +260,13 @@ int main(int argc, char** argv) {
 	int Es = evaluateMaterial(&board,
 				  BoardMaterialValue, AttackerDefenderMatrix,
 				  1-eP, eP, 0);
-
-
+	
 	Ps += evaluateAttack(&moves,
-			       BoardMaterialValue, AttackerDefenderMatrix,
-			       eP, eP, 1);
+			     BoardMaterialValue, AttackerDefenderMatrix,
+			     eP, eP, 1);
 	
 	legal_moves(&board, &moves, 1-eP, 0);
-
+	
 	Es += evaluateAttack(&moves,
 			     BoardMaterialValue, AttackerDefenderMatrix,
 			     1-eP, eP, 1);
@@ -273,7 +274,7 @@ int main(int argc, char** argv) {
 	       eP, 0, Ps,Es, board.score);
 	show_board_matrix(BoardMaterialValue);
       }
-
+    
     if (strstr(inp, "tmove") != NULL)
       {
 	int IDX = inp[6] - '0';
@@ -349,6 +350,9 @@ void computer(int verbose) {
     
 
     struct move move;
+ 
+
+    time_t ThinkingTime = time(NULL);
 
     if (fastmode) {
       if (think_fast(&move, P , Brain.DEEP, verbose) < 0) {
@@ -358,7 +362,9 @@ void computer(int verbose) {
       if (think(&move, P , Brain.DEEP, verbose) < 0) {
 	printf("Checkmate.\n");return;}
     
-   
+
+    if(show_time_elapsed)
+      printf("Thinking took %ld seconds.\n", time(NULL) - ThinkingTime);
 
     move_piece(&board, &move, 1);
     

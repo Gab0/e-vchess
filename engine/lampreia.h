@@ -20,14 +20,15 @@
 
 #define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 
-#define onboard(i,j) i >=0 && i < 8 && j >= 0 && j <8
+#define onboard(i,j) (i >=0 && i < 8 && j >= 0 && j < 8)
 #define comp_arr(a,b) (a[0] == b[0] && a[1] == b[1])
 #define print_play(p) printf("from %c%c to %c%c\n", p[0][0],p[0][1],p[1][0],p[1][1])
 #define print_play_cord(p) printf("from %c%c to %c%c\n", SQR_I(p.from), SQR_J(p.from), SQR_I(p.to), SQR_J(p.to))
 #define expand_play(p) SQR_I(p.from), SQR_J(p.from), SQR_I(p.to), SQR_J(p.to)
 #define forsquares for(i=0;i<8;i++) for(j=0;j<8;j++)
-#define flip(x) x = 1 - x
-#define invert(x) x = -x
+#define flip(x) (1-x)
+#define FLIP(x) x=(1-x)
+#define invert(x) x=(-x)
 
 
 #define SQR(i, j) ((j) + (i*8)) 

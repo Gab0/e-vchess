@@ -67,8 +67,8 @@ Device int append_move(struct board *board, struct movelist *moves,
     moves->movements[moves->k].iscastle = 0;
     moves->movements[moves->k].lostcastle = 0;
     
-    // rook movement loses castling rights.
-    if (moves->movements[moves->k].piece == pieces[P][1])
+
+    //loss of castling rights
       if ((SQR_I(from)==0 && P==1)||(SQR_I(from)==7 && P==0))
       {
 	if(SQR_J(from)==0 && board->castle[P][0]==1)
@@ -280,8 +280,8 @@ Host Device struct board *makeparallelboard (struct board *model) {
 
     struct board *_board = (struct board *)malloc(sizeof (struct board));
     
-    forsquares
-            _board->squares[SQR(i, j)] = model->squares[SQR(i, j)];
+    F(i,64)
+      _board->squares[i] = model->squares[i];
             
             
     _board->passantJ = model->passantJ;
@@ -303,8 +303,8 @@ Host Device struct board *makeparallelboard (struct board *model) {
 Host Device void cloneboard (struct board *model, struct board *target) {
   int i=0, j=0;
 
-  forsquares
-    target->squares[SQR(i, j)] = model->squares[SQR(i, j)];
+  F(i,64)
+    target->squares[i] = model->squares[i];
 
 
   target->passantJ = model->passantJ;

@@ -78,9 +78,9 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 #else
   
   if (canNullMove(DEEP, _board, moves->k, PLAYER)) {
-    flip(_board->whoplays);
+    FLIP(_board->whoplays);
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
-    flip(_board->whoplays);
+    FLIP(_board->whoplays);
     invert(BufferBoard->score);
     if (BufferBoard->score > Alpha) Alpha = BufferBoard->score;
 
@@ -110,17 +110,8 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	  write(1, output, strlen(output));
 	  moves->movements[i].score = 0;
 	}
-    
-    //if (finalboardsArray[i]->score > score) {
-    //  score = moves->movements[i].score;
-    //  ChosenMovementIndex=i;
-    //}
-    //printf("%i %i\n", PLAYER, finalboardsArray[i]->whoplays);
-
-
-     
-    //finalboardsArray[i]->score = -finalboardsArray[i]->score;
     move_piece(_board, &moves->movements[i], -1);
+    
   }
 
   int T = 5;
@@ -136,93 +127,93 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       
       int MINIMUM_ITER = 5;
       int CURRENT_ITER=0;
-	int MAXIMUM_ITER = 12;
-	int maxdepthGone = 0;
-	
+      int MAXIMUM_ITER = 12;
+      int maxdepthGone = 0;
+      
       int Z = 0;
       int ZI = 0;
       int Thinking = 1;
       while ( Thinking )
-      {
-	F(Z, T)
-	  {
-	    ZI = BEST[Z];
-
-	    if (finalboardsArray[ZI]->gameEnd)
+	{
+	  F(Z, T)
+	    {
+	      ZI = BEST[Z];
+	      
+	      if (finalboardsArray[ZI]->gameEnd)
 	      {
 		continue;
 	      }
-	    
-	    undo_lastMove(finalboardsArray[BEST[Z]], 2);
-	    BufferBoard = finalboardsArray[BEST[Z]];
-
-
-
-      
-	   if (finalboardsArray[BEST[Z]]->whoplays == PL)
-	   {
-	    finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
-	    				     Alpha, Beta, AllowCutoff);
-		//	printf("same player\n");
-
-		//invert(finalboardsArray[BEST[Z]]->score);
-
-		}
-		else
+	      
+	      undo_lastMove(finalboardsArray[BEST[Z]], 2);
+	      BufferBoard = finalboardsArray[BEST[Z]];
+	      
+	      
+	      
+	      
+	      if (finalboardsArray[BEST[Z]]->whoplays == PL)
 		{
-		finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
-						     -Beta, -Alpha, AllowCutoff);
-		//finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
-		//					 Alpha, Beta, AllowCutoff);
-		//	printf("other player\n");
-		invert(finalboardsArray[BEST[Z]]->score);
-		 }
-
-
-		
-	    
-	    if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
-	    
-	    maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
-	    
-	    if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > BRAIN.scoreFlutuabilityContinuator * 1000)
-	      if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
-		MINIMUM_ITER = max(MINIMUM_ITER++, MAXIMUM_ITER);
-	    
-	    DUMP(BufferBoard);
-	  }
+		  finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+							   Alpha, Beta, AllowCutoff);
+		  //	printf("same player\n");
+		  
+		  //invert(finalboardsArray[BEST[Z]]->score);
+		  
+		}
+	      else
+		{
+		  finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+							   -Beta, -Alpha, AllowCutoff);
+		  //finalboardsArray[BEST[Z]] = thinkiterate(BufferBoard, Brain.DEEP-1, verbose,
+		  //					 Alpha, Beta, AllowCutoff);
+		  //	printf("other player\n");
+		  invert(finalboardsArray[BEST[Z]]->score);
+		}
+	      
+	      
+	      
+	      
+	      if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
+	      
+	      maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
+	      
+	      if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > BRAIN.scoreFlutuabilityContinuator * 1000)
+		if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
+		  MINIMUM_ITER = max(MINIMUM_ITER++, MAXIMUM_ITER);
+	      
+	      DUMP(BufferBoard);
+	    }
 	
-	selectBestMoves(finalboardsArray, moves->k, BEST, T);
-
-	CURRENT_ITER++;
-	//	MAXIMUM_ITER--;
-	//	printf("bestline = %i\n", BEST[0]);
-
-	if (CURRENT_ITER < MINIMUM_ITER)
-	  continue;
-
-	if(CURRENT_ITER < MAXIMUM_ITER)
-	  F(Z, T-3)
-	    {
-	    if (finalboardsArray[BEST[Z]]->MovementCount < maxdepthGone)
-	      if (!finalboardsArray[BEST[Z]]->gameEnd)
-		{
-		  continue;
-		}
-
-	  }	    
-	   
-
-
-	Thinking = 0;	
+	  selectBestMoves(finalboardsArray, moves->k, BEST, T);
+	  
+	  CURRENT_ITER++;
+	  //	MAXIMUM_ITER--;
+	  //	printf("bestline = %i\n", BEST[0]);
+	  
+	  if (CURRENT_ITER < MINIMUM_ITER)
+	    continue;
+	  
+	  if(CURRENT_ITER < MAXIMUM_ITER)
+	    F(Z, T-3)
+	      {
+		if (finalboardsArray[BEST[Z]]->MovementCount < maxdepthGone)
+		  if (!finalboardsArray[BEST[Z]]->gameEnd)
+		    {
+		      continue;
+		    }
+		
+	      }	    
+	  
+	  
+	  
+	  Thinking = 0;	
       }
     }
 #endif
-
-
-
+  
+  
+  
   replicate_move(out, &moves->movements[BEST[0]]);
-
+  
   
    //printf("Dump Section:\n");
   for (i=0;i<moves->k;i++)
@@ -235,10 +226,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   DUMP(BufferBoard);
   //printf("Dumped BufferBoard.\n");
   DUMP(finalboardsArray);
-
-
   
 
+  
+  
   return BEST[0];
    
 }
@@ -262,12 +253,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
   struct board *DisposableBuffer;
 
-
-  int ABcutoff = 0;
-
   //if (PL != feed->whoplays) printf("INCONSISTENT PLayer=%i; Deep=%i\n", PL, DEEP);
   //struct move result;
-    
     
   long score = -INFINITE;
   int HoldBuffer=0;
@@ -312,11 +299,11 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     //and its not K+P endgame.
     if(DEEP > BRAIN.DEEP - 2) 
       if(canNullMove(DEEP, _board, moves.k, PLAYER)) {
-	flip(_board->whoplays);
+	FLIP(_board->whoplays);
 	DisposableBuffer = thinkiterate(_board, DEEP-1, verbose,
 					-Beta, -Alpha, AllowCutoff);
 	invert(DisposableBuffer->score);
-	flip(_board->whoplays);
+	FLIP(_board->whoplays);
 	if (DisposableBuffer->score > Alpha)
 	  Alpha = DisposableBuffer->score;
 
@@ -353,12 +340,14 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	
       if (Beta<=Alpha) 
 	if(AllowCutoff)
-	  if (PersistentBufferOnline) {
+	  {
+	  if (PersistentBufferOnline)
+	    {
 	    DUMP(DisposableBuffer);  
-	    break;
-	  }
+	  break;
 	  
-    
+	    }
+	  }
 
       move_piece(_board, &moves.movements[i], -1);
        
@@ -401,7 +390,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				    BoardMaterialValue, AttackerDefenderMatrix,
 				  1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);
-
+    
     _board->score = player_score - enemy_score;
     if (_board->score > 10000) printf("%i %i.\n",player_score, enemy_score);
     return _board;
