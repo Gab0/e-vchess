@@ -60,7 +60,11 @@ def STDPARAMETERS():
                   LIM=0.5, bLIM=0, INCR=0.1, promoter='W'),
         
         parameter("param_seekinvasion", 0, 15, 0.2,
-                  LIM=1, bLIM=0, INCR=0.1, promoter='I')
+                  LIM=1, bLIM=0, INCR=0.1, promoter='I'),
+        parameter("param_freepiecevalue", 0, 6, 0.8,
+                  LIM=1, bLIM=0.0, INCR=0.2, promoter='F'),
+        parameter("param_offensevalue", 0, 6, 0.8,
+                  LIM=1, bLIM=0.0, INCR=0.2, promoter='O')
     ]
 
 def ScoreParameters():

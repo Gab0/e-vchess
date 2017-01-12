@@ -455,5 +455,8 @@ Global void setBrainStandardValues(void) {
   Brain.seekInvasion = 0;
 
   Brain.scoreFlutuabilityContinuator = 0.7;
+
+  Brain.freepiecevalue = 0;
+  Brain.offensevalue = 0;
 }
 

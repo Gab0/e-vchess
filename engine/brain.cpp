@@ -335,8 +335,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	PersistentBufferOnline = 1;
 	
       }
-      if (moves.movements[i].score > Alpha) 
-	Alpha = moves.movements[i].score;
+
+      Alpha = max( Alpha, moves.movements[i].score);
 	
       if (Beta<=Alpha) 
 	if(AllowCutoff)
@@ -344,7 +344,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 	  if (PersistentBufferOnline)
 	    {
 	    DUMP(DisposableBuffer);  
-	  break;
+	    break;
 	  
 	    }
 	  }
@@ -392,7 +392,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     //show_board(_board->squares);
     
     _board->score = player_score - enemy_score;
-    if (_board->score > 10000) printf("%i %i.\n",player_score, enemy_score);
     return _board;
   }
 

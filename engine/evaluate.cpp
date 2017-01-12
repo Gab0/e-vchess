@@ -3,11 +3,8 @@
 
 Device int evaluateMaterial(struct board *evalboard,
 			    int BoardMaterialValue[64],  int AttackerDefenderMatrix[2][64], 
-		    int P, int Attacker, int Verbose)
+			    int P, int Attacker, int Verbose)
 {
-  //int Index = blockIdx.x;
-  //printf("E %i\n", Index);
-  
   int score = 0;
     
   int i=0, j=0, z=0, M=0, Z=0;
@@ -32,7 +29,7 @@ Device int evaluateMaterial(struct board *evalboard,
   int DefenderNegatedAttackBuffer = 0;
   int AttackedScoreLoss = 0;
   int ownKingPos[2] = { findking(evalboard->squares, 'Y', P),
-		     findking(evalboard->squares, 'X', P) };
+			findking(evalboard->squares, 'X', P) };
   int xrayAttackers = 0;
   int isInKingSafespace = 0;
 
@@ -40,104 +37,99 @@ Device int evaluateMaterial(struct board *evalboard,
   int BruteDefenseValue = 0;
   if (PieceCount < 5) endgameModeOn = 1;
 
-
-  //if ((P && ownKingPos[0]) == 0 || (!P && ownKingPos[0] == 7))
-  //  score += 150 * BRAIN.kingPanic;
-
-
   int KingSafespaceScore = 0;
   forsquares
     {
-
-    //this slows da thinking process by a lot.
-    // score += ifsquare_attacked(evalboard->squares, i, j, P, 0, 0) * 5 *
-    // 	BRAIN.boardcontrol;
-
+      
+      //this slows da thinking process by a lot.
+      // score += ifsquare_attacked(evalboard->squares, i, j, P, 0, 0) * 5 *
+      // 	BRAIN.boardcontrol;
+      
       // detect if square is inside king safespace. evaluation will be resumed later;
-    if ( abs(ownKingPos[0] - i) < 2 && abs(ownKingPos[1] - j) < 2 )
-      {
-	if (getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6) < 0)
-	  {
-	    KingSafespaceScore -= 20 * BRAIN.kingPanic;
-	    //continue;
-	  }
-     
-	isInKingSafespace = 1;
+      if ( abs(ownKingPos[0] - i) < 2 && abs(ownKingPos[1] - j) < 2 )
+	{
+	  if (getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6) < 0)
+	    {
+	      KingSafespaceScore -= 20 * BRAIN.kingPanic;
+	      //continue;
+	    }
+	  
+	  isInKingSafespace = 1;
       }
-    else
-      isInKingSafespace = 0;
-	
-    // skip empty square for efficiency;
-    if (evalboard->squares[ SQR(i, j) ] == 'x'){
-      BoardMaterialValue[ SQR(i, j) ] = 0;
-      continue;
-    }
-    PieceIndex = getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6);
-    if (PieceIndex < 0) continue;
-    
-    PieceMaterialValue = BRAIN.pvalues[PieceIndex];
-
-
-    // evaluate pawns;
+      else
+	isInKingSafespace = 0;
+      
+      // skip empty square for efficiency;
+      if (evalboard->squares[ SQR(i, j) ] == 'x'){
+	BoardMaterialValue[ SQR(i, j) ] = 0;
+	continue;
+      }
+      PieceIndex = getindex(evalboard->squares[SQR(i, j)], Pieces[P], 6);
+      if (PieceIndex < 0) continue;
+      
+      PieceMaterialValue = BRAIN.pvalues[PieceIndex];
+      
+      
+      // evaluate pawns;
       if (PieceIndex == 0)
 	{
 	  if (isInKingSafespace)
 	    KingSafespaceScore += 50 * BRAIN.kingPanic;
 	  if (P)
 	    {
-	    pawnEffectiveHeight = i-1;
-	    if (evalboard->squares[ SQR((i-1), j) ] == 'p')
-	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
-	    if ( (j>1 && evalboard->squares[ SQR((i-1), (j-1)) ] == 'p') ||
-		 (j<7 && evalboard->squares[ SQR((i-1), (j+1)) ] == 'p') )
-	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
-	  }
-	else
-	  {
-	    pawnEffectiveHeight = 6-i;
-	    if (evalboard->squares[ SQR(i+1, j) ] == 'P')
-	      PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
-	    if ( (j>1 && evalboard->squares[ SQR((i+1), (j-1)) ] == 'P') ||
-		 (j<7 && evalboard->squares[ SQR((i+1), (j+1)) ] == 'P') )
-	      PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
-	  }
-	
-	pawnEffectiveHeight = pow(pawnEffectiveHeight, 1.2);
-	if (AttackerDefenderMatrix[P][SQR(i, j)] > AttackerDefenderMatrix[1-P][SQR(i, j)])
-	  pawnEffectiveHeight *= 3;
+	      pawnEffectiveHeight = i-1;
+	      if (evalboard->squares[ SQR((i-1), j) ] == 'p')
+		PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
+	      if ( (j>1 && evalboard->squares[ SQR((i-1), (j-1)) ] == 'p') ||
+		   (j<7 && evalboard->squares[ SQR((i-1), (j+1)) ] == 'p') )
+		PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
+	    }
+	  else
+	    {
+	      pawnEffectiveHeight = 6-i;
+	      if (evalboard->squares[ SQR(i+1, j) ] == 'P')
+		PieceMaterialValue -= PieceMaterialValue / 10 * BRAIN.pawnIssue;
+	      if ( (j>1 && evalboard->squares[ SQR((i+1), (j-1)) ] == 'P') ||
+		   (j<7 && evalboard->squares[ SQR((i+1), (j+1)) ] == 'P') )
+		PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
+	    }
 	  
-	PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
-	if (endgameModeOn)
-	  PieceMaterialValue += pawnEffectiveHeight * sqrt(currentMovementCount) * BRAIN.endgameWeight;
-      }
-
+	  pawnEffectiveHeight = pow(pawnEffectiveHeight, 1.2);
+	  if (AttackerDefenderMatrix[P][SQR(i, j)] > AttackerDefenderMatrix[1-P][SQR(i, j)])
+	    pawnEffectiveHeight *= 3;
+	  
+	  PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
+	  if (endgameModeOn)
+	    PieceMaterialValue += pawnEffectiveHeight * sqrt(currentMovementCount) * BRAIN.endgameWeight;
+	}
+      
       // evaluate movement possibilities;
       /*F(M, moves->k)
 	if (moves->movements[M].from[0] == i && moves->movements[M].from[1] == j)
-	  PieceMaterialValue += 3 * BRAIN.MODmobility;
+	PieceMaterialValue += 3 * BRAIN.MODmobility;
       */
-
-
-
+      
+      
+      
       // evaluate safe position of piece;
       if (PieceIndex != 5)
 	{
-      // evaluate piece placement;
-	PieceMaterialValue += sqrt(PieceMaterialValue) *
-	  (BoardMiddleScoreWeight[abs(7*(1-P)-i)] + BoardMiddleScoreWeight[j])
-	  * BRAIN.seekmiddle ;
-	PieceMaterialValue += sqrt(PieceMaterialValue) *
-	  BoardInvaderScoreWeight[abs(7*(1-P)-i)] * BRAIN.seekInvasion;
-
-	
+	  // evaluate piece placement;
+	  PieceMaterialValue += sqrt(PieceMaterialValue) *
+	    (BoardMiddleScoreWeight[abs(7*(1-P)-i)] + BoardMiddleScoreWeight[j])
+	    * BRAIN.seekmiddle ;
+	  PieceMaterialValue += sqrt(PieceMaterialValue) *
+	    BoardInvaderScoreWeight[abs(7*(1-P)-i)] * BRAIN.seekInvasion;
+	  
+	  
 	if (AttackerDefenderMatrix[P][SQR(i, j)] > AttackerDefenderMatrix[1-P][SQR(i, j)])
 	  BruteDefenseValue += log(PieceMaterialValue) *
 	    pow((AttackerDefenderMatrix[P][SQR(i, j)] -
 		 AttackerDefenderMatrix[1-P][SQR(i, j)]), BRAIN.MODbackup);
-
-
-	  
-
+	
+	
+	
+	
 	}
     else
       {
@@ -146,12 +138,12 @@ Device int evaluateMaterial(struct board *evalboard,
       }
       
       score += PieceMaterialValue;
-	BoardMaterialValue[SQR(i, j)] = PieceMaterialValue;    
+      BoardMaterialValue[SQR(i, j)] = PieceMaterialValue;    
     }
   
-
-
-
+  
+  
+  
   score += BruteDefenseValue;
   score += KingSafespaceScore;
   if (Verbose)
@@ -162,24 +154,24 @@ Device int evaluateMaterial(struct board *evalboard,
       printf("Brute Defense Value = %i\n", BruteDefenseValue);
     }
   
-
+  
   return score;
 }
 Device int evaluateAttack(//struct board *evalboard,
-			  struct movelist *moves,
-			  int BoardMaterialValue[64],
-			  int AttackerDefenderMatrix[2][64],
-			  int P, int Attacker, int Verbose)
+  struct movelist *moves,
+  int BoardMaterialValue[64],
+  int AttackerDefenderMatrix[2][64],
+  int P, int Attacker, int Verbose)
 {
 #define AO [ moves->attackers[Z][1] ]
 #define AT [ moves->defenders[Z][1] ]
-
+  
   
   int DefenderIndex = 0;
   int AttackerDefenderBalanceValue = 0;
   int score=0;
   int Z=0;
-
+  
   int FreePiece=0;
   F(Z, moves->kad)
     {
@@ -192,28 +184,27 @@ Device int evaluateAttack(//struct board *evalboard,
 	  continue;
 	}
 
-      if (AttackerDefenderMatrix[P]AT > AttackerDefenderMatrix[1-P]AT || BoardMaterialValue AT > BoardMaterialValue AO)
+      if (AttackerDefenderMatrix[P]AT >= AttackerDefenderMatrix[1-P]AT || BoardMaterialValue AT > BoardMaterialValue AO)
 	{
 	  AttackerDefenderBalanceValue = max( log(BoardMaterialValue AT)
 					      * pow(AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT, BRAIN.seekatk), 0);
+	  
+	  score += AttackerDefenderBalanceValue * BRAIN.offensevalue;
+	  
 	  if (P == Attacker)
 	    	{
 		  if (!AttackerDefenderMatrix[1-P]AT)
-		    {
-		      if (FreePiece < BoardMaterialValue AT)
-			FreePiece = BoardMaterialValue AT;
-		    }
-		  else
-		    if (FreePiece < (BoardMaterialValue AT - BoardMaterialValue AO))
-		    FreePiece = (BoardMaterialValue AT - BoardMaterialValue AO);
+		    FreePiece = max(FreePiece, BoardMaterialValue AT);
 		  
+		  else
+		      FreePiece = max(FreePiece, (BoardMaterialValue AT - BoardMaterialValue AO));
 		}
-
-	  //AttackerDefenderBalanceValue -= sqrt(BoardMaterialValue AO)/2 * AttackerDefenderMatrix[1-P]AT * BRAIN.balanceoffense;
+	  // the following line boosts playing strenght by 100 ELO (?)
+	  AttackerDefenderBalanceValue -= sqrt(BoardMaterialValue AO)/2 * AttackerDefenderMatrix[1-P]AT * BRAIN.balanceoffense;
 	}
       else
-
 	AttackerDefenderBalanceValue = 0;
+      
       if (Verbose && AttackerDefenderBalanceValue > 100)
 	printf("loaded attacker/defender caulculus! s=%i;\n", AttackerDefenderBalanceValue);
 
@@ -226,12 +217,12 @@ Device int evaluateAttack(//struct board *evalboard,
 
       //      if (P != Attacker)	AttackerDefenderBalanceValue *= BRAIN.balanceoffense;
 
-      score += AttackerDefenderBalanceValue;
+
       
     }
   if (Verbose)
     printf("FreePiece bonus = %i\n", FreePiece);
-  score += FreePiece * BRAIN.balanceoffense;
+  score += FreePiece * BRAIN.freepiecevalue;
 
 
   return score;

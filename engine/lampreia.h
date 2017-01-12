@@ -158,6 +158,8 @@ struct param {
   float pawnIssue;
   float seekInvasion;
   float scoreFlutuabilityContinuator;
+  float freepiecevalue;
+  float offensevalue;
 };
 
 extern struct move movehistory[512];
