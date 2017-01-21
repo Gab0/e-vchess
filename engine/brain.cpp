@@ -398,35 +398,6 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 }
 
 
-
-Host Device float scoremod (int DEEP, int method) {
-    
-  float modifier = 0;
-  float helper = 0;
-    
-  if (method>2) method = 0;
-    
-    
-  if (method == 0) modifier = 1;
-    
-  if (method == 1) modifier = 2*((DEEP+BRAIN.deviationcalc)/BRAIN.DEEP);
-    
-  if (method == 2) {
-    modifier = -power(DEEP,2)+BRAIN.DEEP*DEEP+2*BRAIN.DEEP;
-        
-
-    helper = BRAIN.DEEP/2;
-        
-    helper = -power(helper,2)+BRAIN.DEEP*helper+2*BRAIN.DEEP;
-            
-    modifier = modifier/(helper/1.1);
-  }
-    
-        
-  return modifier;
-}
-
-
 Device int canNullMove (int DEEP, struct board *board, int K, int P) {
   int i=0,j=0,NullMove=0;
   if (DEEP>BRAIN.DEEP-2&&K>5) 

@@ -13,7 +13,7 @@ machine_dir = "machines"
 from evchess_evolve.machine import machine
 from evchess_evolve.management import bareDeleteMachine
 from evchess_evolve import chromossome
-
+from os import listdir
 
 def populate(population, popsize, Randomize, ID=""):
     NEWINDS = []
@@ -31,14 +31,15 @@ def populate(population, popsize, Randomize, ID=""):
 def loadmachines(DIR=machine_dir):
     population = []
     k = 0
-    
+    '''
     machinelist = "%s/machines.list" % DIR
     if not os.path.isfile(machinelist):
         return population
     Fo = open(machinelist, 'r')
     mLIST = Fo.readlines()
-    Fo.close()
-
+    Fo.close()'''
+    
+    mLIST = listdir(DIR)
     for file in mLIST:
         file = file.strip("\n")
 
@@ -114,13 +115,13 @@ def setmachines(population, DIR=machine_dir):
             population[i].DIR = DIR
         population[i].write()
 
-    if os.path.isfile("%s/machines.list" % DIR):
+    '''if os.path.isfile("%s/machines.list" % DIR):
         os.remove("%s/machines.list" % DIR)
     Fo = open("%s/machines.list" % DIR, "w+")
     for i in range(len(population)):
         Fo.write(population[i].filename + "\n")
 
-    Fo.close
+    Fo.close'''
 
 
 def deltheworst_clonethebest(population, action, MODlimit, ID=None):
@@ -260,7 +261,8 @@ def replicate_best_inds(population, NUMBER, ID=None):
 
 
 def clone_from_template(ID=None):
-    TemplatePool = open('%s/top_machines/machines.list' % machine_dir, 'r')
+    #TemplatePool = open('%s/top_machines/machines.list' % machine_dir, 'r')
+    TemplatePool = os.listdir("%s/top_machines" % machine_dir)
     POOL = []
 
     for line in TemplatePool.readlines():
@@ -353,8 +355,8 @@ def sendtoHallOfFame(MACHINE):
 
     copyfile(MACHINE.DIR + '/' + MACHINE.filename,
              MACHINE.DIR + '/top_machines/' + MACHINE.filename)
-    Fo = open(MACHINE.DIR + '/top_machines/machines.list', 'a+')
-    Fo.write(MACHINE.filename + '\n')
+    '''Fo = open(MACHINE.DIR + '/top_machines/machines.list', 'a+')
+    Fo.write(MACHINE.filename + '\n')'''
     print('machine %s sent to top.' % MACHINE.filename)
     MACHINE.onTOP = 1
     MACHINE.write()

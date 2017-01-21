@@ -8,6 +8,7 @@ from tkinter import *
 from threading import Thread
 from subprocess import *
 import psutil
+from os import listdir
 
 from chessArena.settings import Settings
 from chessArena.table import Table
@@ -87,7 +88,7 @@ class Arena():
 
         self.setlooplimit(0)
 
-        self.EvolveRatio = 250
+        self.EvolveRatio = settings.EvolveRatio
 
         self.setcounter_illegalmove = 0
         self.setcounter_draws = 0

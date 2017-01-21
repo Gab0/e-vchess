@@ -32,7 +32,7 @@ def STDPARAMETERS():
                   LIM=1, bLIM=0.0, INCR=0.2, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0.4,
-                  LIM=1.6, bLIM=0, INCR=0.2, promoter='B'),
+                  LIM=1.6, bLIM=0.4, INCR=0.2, promoter='B'),
 
         parameter("param_MODmobility", 0, 15, 2.0,
                   LIM=2, bLIM=0.2, INCR=0.2, promoter='M'),
@@ -48,7 +48,7 @@ def STDPARAMETERS():
         #          LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
         parameter("param_endgameWeight", 0, 12, 0.2,
-                  LIM=3, bLIM=0.0, INCR=0.2, promoter="E"),
+                  LIM=3, bLIM=0.0, INCR=0.1, promoter="E"),
 
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
@@ -62,9 +62,11 @@ def STDPARAMETERS():
         parameter("param_seekinvasion", 0, 15, 0.2,
                   LIM=1, bLIM=0, INCR=0.1, promoter='I'),
         parameter("param_freepiecevalue", 0, 6, 0.8,
-                  LIM=1, bLIM=0.0, INCR=0.2, promoter='F'),
+                  LIM=1, bLIM=0.0, INCR=0.1, promoter='F'),
         parameter("param_offensevalue", 0, 6, 0.8,
-                  LIM=1, bLIM=0.0, INCR=0.2, promoter='O')
+                  LIM=1, bLIM=0.0, INCR=0.1, promoter='O'),
+        parameter("param_limitDefender", 0, 6, 0.3,
+                  LIM=1, bLIM=0.2, INCR=0.1, promoter='L')
     ]
 
 def ScoreParameters():

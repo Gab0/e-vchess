@@ -10,7 +10,7 @@ def PurgeMachines(population, machine_dir):
 
         if file.endswith(".mac"):
             remove("%s/%s" % (machine_dir, file))
-    remove("%s/machines.list" % machine_dir)
+    #remove("%s/machines.list" % machine_dir)
 
     #population = populate([], 1, 0)
     setmachines(population)
@@ -44,7 +44,7 @@ def bareDeleteMachine(machine_dir, machine_name):
         #raise
         print("Failed to delete %s" % filename)
         return 0
-    MachineListLocation = "%s/machines.list" % machine_dir
+    '''MachineListLocation = "%s/machines.list" % machine_dir
     MachineList = open(MachineListLocation, 'r').readlines()
     for L in range(len(MachineList)):
         if machine_name in MachineList[L]:
@@ -54,7 +54,7 @@ def bareDeleteMachine(machine_dir, machine_name):
     WriteToList = open(MachineListLocation, 'w')
     for line in MachineList:
         WriteToList.write(line)
-    WriteToList.close()
+    WriteToList.close()'''
     
 # linux only;
 def rebuildMachineList(machine_dir):

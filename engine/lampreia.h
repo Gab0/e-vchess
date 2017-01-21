@@ -18,6 +18,9 @@
 #include <ctype.h>
 #include <math.h>
 
+#include <sys/types.h>
+#include <dirent.h>
+
 #define DUMP(B) if(B!=NULL){free(B);B=NULL;}
 
 #define onboard(i,j) (i >=0 && i < 8 && j >= 0 && j < 8)
@@ -160,6 +163,7 @@ struct param {
   float scoreFlutuabilityContinuator;
   float freepiecevalue;
   float offensevalue;
+  float limitDefender;
 };
 
 extern struct move movehistory[512];
@@ -299,7 +303,7 @@ int think (struct move *out, int PL, int DEEP, int verbose);
 
 Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				  long Alpha, long Beta, int AllowCutoff);
-Host Device float scoremod (int DEEP, int method);
+
 Device int canNullMove (int DEEP, struct board *board, int K, int P);
 
 Global void kerneliterate(struct board *workingboard,

@@ -458,5 +458,6 @@ Global void setBrainStandardValues(void) {
 
   Brain.freepiecevalue = 0;
   Brain.offensevalue = 0;
+  Brain.limitDefender = 0.2;
 }
 

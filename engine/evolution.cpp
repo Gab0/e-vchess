@@ -21,16 +21,18 @@ int loadmachine (int verbose, char *MachineDir) {
        int V = 1;//verbose;
        
        int Nmachines = 0;
-       int Nchosenmachine = 0 ;
+       int selected_machine_index = 0;
        char ch= '0';
        int i=0;
-       
+
+
        
        if (selectTOPmachines)
 	 sprintf(MachineDir, "%s/top_machines", MachineDir);
 
-
+       // to read entire machine dir, and randomize one to load;
        if (strstr(specificMachine, ".mac") == NULL) {
+	 /*
        sprintf(filename, "%s/machines.list", MachineDir);
   
        
@@ -62,11 +64,45 @@ int loadmachine (int verbose, char *MachineDir) {
        
        printf("MACname > %s\n", line);
        strtok(line, "\n");
-       sprintf(filename, "%s/%s", MachineDir, line);
+       sprintf(filename, "%s/%s", MachineDir, line);*/
+	 
+	 int MACINDEX=0;
+	 char **machinelist;
+	 machinelist = (char **)malloc(10000 * sizeof(char *));
+	 F (i, 128)
+	   machinelist[i] = (char *)malloc(32 * sizeof(char));
+	 struct dirent *dp;
+	 DIR *openDIR = opendir(MachineDir);
+	 if(openDIR != NULL) {
+	   while((dp = readdir(openDIR)) != NULL)
+	     if (strstr(dp->d_name, ".mac") != NULL)
+	       {
+		 machinelist[MACINDEX] = dp->d_name;
+		 MACINDEX++;
+		 //printf("%s\n", dp->d_name);
+	       }
+	   closedir(openDIR);
+	 }
+
+	 srand ( rndseed() );
+	 selected_machine_index = rand() % MACINDEX;
+
+	 Vb printf("number of machines on list: %i    (%ith was chosen)\n",
+		   MACINDEX, selected_machine_index);
+       
+	 sprintf(filename, "%s/%s", MachineDir, machinelist[selected_machine_index]);
+	 MachineListFile = fopen(filename, "r");
+       
+       
+
+	 //       F(i, 128)
+	 // free(machinelist[i]);
+	 free(machinelist);
+
+	 
        }
 
-       // loading user-defined machine!
-
+       // to load specific user-defined machine;
        else {
 	 sprintf(filename, "%s/%s", MachineDir, specificMachine);
  	 printf("Loading user defined machine.\n");
@@ -128,13 +164,12 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_seekInvasion", &BRAIN.seekInvasion);
 	   readparam(line, V, "param_offensevalue", &BRAIN.offensevalue);
 	   readparam(line, V, "param_freepiecevalue", &BRAIN.freepiecevalue);
+	   readparam(line, V, "param_limitDefender", &BRAIN.limitDefender);
 
        }
 	 printf("\n");
        fclose(MachineFile);
-       if (line)
-           free(line);
-       
+      
        
        //machinepath = filename;
 

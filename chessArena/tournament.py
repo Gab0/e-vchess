@@ -230,7 +230,7 @@ class Tournament():
                     # NORMAL METHOD, WAIT FOR ROUND TO FINISH.
                         continue
                     
-                elif GAMELENGHT[G] > 96:
+                elif GAMELENGHT[G] > 46:
                     self.TABLEBOARD[G].online = 0
 
                     PIECES = [0,0]
@@ -350,12 +350,12 @@ class Tournament():
                     for mac in self.Competitors:
                         if iTABLE.MACnames[k] == mac.filename:
                             score[k] = mac.TournamentScore
-                TableInfoMA = "{%i} %s %.1f" % (
+                TableInfoMA = "{%.1f} %s %.1f" % (
                     score[0],
                     iTABLE.MACnames[0],
                     SCORE[I][0])
-                TableInfoMB = "%.1f %s {%i}" % (
-                    SCORE[I][1],
+                TableInfoMB = "%.1f %s {%.1f}" % (
+                   SCORE[I][1],
                     iTABLE.MACnames[1],
                     score[1])
 
