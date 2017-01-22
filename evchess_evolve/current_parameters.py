@@ -14,7 +14,7 @@ def STDPARAMETERS():
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
         parameter("param_seekatk", 0, 12, 0.5,
-                  bLIM=0.1, INCR=0.1, LIM=1.2, promoter='A'),
+                  bLIM=0.5, INCR=0.1, LIM=1.2, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 1,
                   bLIM= 1, LIM=10, promoter='m'),

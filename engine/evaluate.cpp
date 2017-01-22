@@ -214,10 +214,11 @@ Device int evaluateAttack(//struct board *evalboard,
       
       else
 	AttackerDefenderBalanceValue = 0;
+      
 	  // the following line boosts playing strenght by 100 ELO (?)      
 	  AttackerDefenderBalanceValue -= sqrt(BoardMaterialValue AO) * AttackerDefenderMatrix[1-P]AT * BRAIN.balanceoffense;
 	  
-	  AttackerDefenderBalanceValue = max(AttackerDefenderBalanceValue, 0);
+	  AttackerDefenderBalanceValue = min(AttackerDefenderBalanceValue, 0);
 	  score += AttackerDefenderBalanceValue * BRAIN.offensevalue;
 	  
       if (Verbose && AttackerDefenderBalanceValue > 100)

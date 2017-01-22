@@ -185,6 +185,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	
 	  selectBestMoves(finalboardsArray, moves->k, BEST, T);
 	  
+	  if (finalboardsArray[BEST[Z]]->gameEnd)
+	    if (finalboardsArray[BEST[Z]]->score > 10)
+	      break;
+		
 	  CURRENT_ITER++;
 	  //	MAXIMUM_ITER--;
 	  //	printf("bestline = %i\n", BEST[0]);
@@ -200,6 +204,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 		    {
 		      continue;
 		    }
+
 		
 	      }	    
 	  
@@ -326,15 +331,16 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
       invert(DisposableBuffer->score);
       moves.movements[i].score = DisposableBuffer->score;// + moves.k * 10;
 
-      if (moves.movements[i].score > score) {
-	if (PersistentBufferOnline)
-	  DUMP(PersistentBuffer);
-	PersistentBuffer = DisposableBuffer;
-	score = moves.movements[i].score;
-	DisposableBuffer=NULL;
-	PersistentBufferOnline = 1;
+      if (moves.movements[i].score > score)
+	{
+	  if (PersistentBufferOnline)
+	    DUMP(PersistentBuffer);
+	  PersistentBuffer = DisposableBuffer;
+	  score = moves.movements[i].score;
+	  DisposableBuffer=NULL;
+	  PersistentBufferOnline = 1;
 	
-      }
+	}
 
       Alpha = max( Alpha, moves.movements[i].score);
 	

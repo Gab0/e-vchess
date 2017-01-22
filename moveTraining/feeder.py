@@ -11,7 +11,7 @@ from time import sleep
 
 
 
-
+from evchess_evolve import core
 from chessArena.enginewrapper import Engine
 
 from chessArena.settings import Settings
@@ -292,7 +292,8 @@ class trainingDataFeeder():
 
     def rollThruMachines(self):
         Approved = {}
-        machinelist = open(self.machineDIR + '/machines.list').readlines()
+        POP = core.loadmachines(DIR=self.machineDIR)
+        machinelist = [x.filename for x in POP]
         for machine in machinelist:
             machine = machine.replace('\n', '')
             print(".%s." % machine)
