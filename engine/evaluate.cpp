@@ -178,11 +178,12 @@ Device int evaluateAttack(//struct board *evalboard,
   int AttackerDefenderBalanceValue = 0;
   int score=0;
   int Z=0;
-  
+  int deltaAttacker = 0;
   int FreePiece=0;
   F(Z, moves->kad)
     {
       AttackerDefenderBalanceValue = 0;
+
       //printf("%c .%i...%i.........\n", moves->defenders[Z][0], moves->defenders[Z][1], moves->defenders[Z][2]);
       
       DefenderIndex = getindex(moves->defenders[Z][0], Pieces[1-P], 6);
@@ -190,11 +191,13 @@ Device int evaluateAttack(//struct board *evalboard,
 	{
 	  continue;
 	}
-
-      if (AttackerDefenderMatrix[P]AT > AttackerDefenderMatrix[1-P]AT || BoardMaterialValue AT > BoardMaterialValue AO)
+      
+      deltaAttacker = AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT;
+      if (deltaAttacker > 0 || BoardMaterialValue AT > BoardMaterialValue AO)
 	{
-	  AttackerDefenderBalanceValue = max( log(BoardMaterialValue AT)
-					      * pow(AttackerDefenderMatrix[P]AT - AttackerDefenderMatrix[1-P]AT, BRAIN.seekatk), 0);
+	  AttackerDefenderBalanceValue = log(BoardMaterialValue AT)
+					      * pow( max((deltaAttacker), 1), BRAIN.parallelAttacker)
+	    * BRAIN.seekatk;
 	  
 
 	  
@@ -215,12 +218,13 @@ Device int evaluateAttack(//struct board *evalboard,
       else
 	AttackerDefenderBalanceValue = 0;
       
-	  // the following line boosts playing strenght by 100 ELO (?)      
-	  AttackerDefenderBalanceValue -= sqrt(BoardMaterialValue AO) * AttackerDefenderMatrix[1-P]AT * BRAIN.balanceoffense;
-	  
-	  AttackerDefenderBalanceValue = min(AttackerDefenderBalanceValue, 0);
-	  score += AttackerDefenderBalanceValue * BRAIN.offensevalue;
-	  
+      // the following line boosts playing strenght by 100 ELO (?)      
+      AttackerDefenderBalanceValue -= sqrt(log(BoardMaterialValue AO)) * max(0, -deltaAttacker) * BRAIN.balanceoffense;
+      //AttackerDefenderBalanceValue = max(AttackerDefenderBalanceValue, 0);      
+      
+
+      score += AttackerDefenderBalanceValue * BRAIN.offensevalue;
+      
       if (Verbose && AttackerDefenderBalanceValue > 100)
 	printf("loaded attacker/defender caulculus! s=%i;\n", AttackerDefenderBalanceValue);
 

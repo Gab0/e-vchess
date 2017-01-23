@@ -165,6 +165,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_offensevalue", &BRAIN.offensevalue);
 	   readparam(line, V, "param_freepiecevalue", &BRAIN.freepiecevalue);
 	   readparam(line, V, "param_limitDefender", &BRAIN.limitDefender);
+	   readparam(line, V, "param_parallelAttacker", &BRAIN.parallelAttacker);
 
        }
 	 printf("\n");

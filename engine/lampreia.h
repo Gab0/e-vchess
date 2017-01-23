@@ -164,6 +164,7 @@ struct param {
   float freepiecevalue;
   float offensevalue;
   float limitDefender;
+  float parallelAttacker;
 };
 
 extern struct move movehistory[512];
