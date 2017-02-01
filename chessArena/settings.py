@@ -34,4 +34,4 @@ class Settings():
         self.standard_popsize = 64 
         self.TournamentPoolSize = 16
 
-        self.ChromosomeSize =100
+        self.ChromosomeSize = 100

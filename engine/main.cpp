@@ -20,7 +20,7 @@ const float BoardMiddleScoreWeight[8] = {0, 0.33, 0.66, 1, 1, 0.66, 0.33, 0};
 const float BoardInvaderScoreWeight[8] = {0, 0, 0, 0, 0.16, 0.27, 0.35, 0.43};
 bool computer_turn = false;
 
-char *output = (char *)malloc(364 * sizeof(char));
+char *output = (char *)malloc(465 * sizeof(char));
 
 int machineplays = 1;
 Device int GPUmachineplays = 1;
@@ -35,7 +35,7 @@ char *infoAUX = (char *)malloc(256 * sizeof(char));
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
 
 struct move movehistory[512];
-char movehistoryboard[512][64];
+struct board boardhistory[512];
 int hindex; 
 //variable params for intelligent evolution (standards initialized);
 
@@ -114,11 +114,9 @@ int main(int argc, char** argv) {
 	if (strstr(argv[i], "-l") != NULL)
 	  toloadmachine = true;
             
-        if (strstr(argv[i], "-MD") != NULL) {
-	  toloadmachine = true;
-	  
+        if (strstr(argv[i], "-MD") != NULL) 
 	  machinepath = argv[i+1];
-	}
+	
         
         if (strstr(argv[i], "--showinfo") != NULL) Show_Info = true;
         
@@ -195,6 +193,11 @@ int main(int argc, char** argv) {
     //if (strstr(inp, "moves") !=NULL) read_movelines(inp);
     
     if (strstr(inp, "show") !=NULL) show_board(board.squares);
+
+    if (strstr(inp, "castling") !=NULL)
+	show_castling_status(&board);
+
+
     
     if (strstr(inp, "quit") !=NULL) {//sleep(1);
       break;}
@@ -261,13 +264,13 @@ int main(int argc, char** argv) {
 				  BoardMaterialValue, AttackerDefenderMatrix,
 				  1-eP, eP, 0);
 	
-	Ps += evaluateAttack(&moves,
+	Ps += evaluateAttack(&board,&moves,
 			     BoardMaterialValue, AttackerDefenderMatrix,
 			     eP, eP, 1);
 	
 	legal_moves(&board, &moves, 1-eP, 0);
 	
-	Es += evaluateAttack(&moves,
+	Es += evaluateAttack(&board,&moves,
 			     BoardMaterialValue, AttackerDefenderMatrix,
 			     1-eP, eP, 1);
 	printf("A=%i; s=%i;   Attacker score = %i    Defender score = %i.\n",
@@ -332,7 +335,6 @@ int main(int argc, char** argv) {
     
     if (read_movelines(inp, 0)) {
       computer(thinkVerbose);
-        
 
     }
 
@@ -458,7 +460,8 @@ Global void setBrainStandardValues(void) {
 
   Brain.freepiecevalue = 0;
   Brain.offensevalue = 0;
-  Brain.limitDefender = 0.2;
+  Brain.limitDefender = 0;
   Brain.parallelAttacker = 0;
+  Brain.castlebonus = 0;
 }
 

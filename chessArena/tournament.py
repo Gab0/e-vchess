@@ -201,6 +201,8 @@ class Tournament():
         while True:
             STATUS = [ "-" for i in ACTIVE ]
             for G in range(len(ROUND)):
+                machineFilenames = [ x.filename for x in ROUND[G] ]
+
                 try:
                     self.TABLEBOARD[G]
                 except IndexError:
@@ -210,8 +212,13 @@ class Tournament():
                     raise
 
                 if self.TABLEBOARD[G].initialize:
+                    print("intializing")
                     continue
-                
+
+                if not self.TABLEBOARD[G].online:
+                    self.TABLEBOARD[G].startEngines([settings.enginebin, '-MD', settings.machineDIR+'/top_machines', '--deep', '4'])
+                    continue
+
                 elif not ACTIVE[G]:
                     # CREATE NEW GAME ON THE FLY.
                     if self.TypeOfTournament == "killemall":
@@ -225,13 +232,14 @@ class Tournament():
                         ACTIVE[G] = True
 
                         ROUND[G] = self.DefineGames(1)[0][0]
-                        
+                        machineFilenames = [ x.filename for x in ROUND[G] ]
+                        self.TABLEBOARD[G].newmatch(specificMachines=machineFilenames)
                     else:
                     # NORMAL METHOD, WAIT FOR ROUND TO FINISH.
                         continue
                     
                 elif GAMELENGHT[G] > 46:
-                    self.TABLEBOARD[G].online = 0
+                    self.TABLEBOARD[G].onGame = 0
 
                     PIECES = [0,0]
                     for p in range(64):
@@ -255,7 +263,7 @@ class Tournament():
                     if not wonbyadvantage:
                         self.TABLEBOARD[G].result = 0.5
                         
-                if not self.TABLEBOARD[G].online:
+                if not self.TABLEBOARD[G].onGame:
                     R = self.TABLEBOARD[G].result
                     if R != None:
                         nameTAG = "[%s x %s]" % (self.TABLEBOARD[G].MACnames[0],
@@ -274,21 +282,18 @@ class Tournament():
                             DRAWS[G] += 1
 
                         self.TABLEBOARD[G].result = None
+                        self.TABLEBOARD[G].endgame()
                         
                         # print(SCORE)
 
-                    if not abs(SCORE[G][0] - SCORE[G][1]) > 1\
+                    if abs(SCORE[G][0] - SCORE[G][1]) <= 1\
                        and not DRAWS[G] > 0:
                         GAMELENGHT[G]=0
-                        """ print("Starting Game at Table " +\
-                               %i [%s x %s]" % (G, ROUND[G][0],ROUND[G][1]))"""
+                        print("Starting Game at Table  +\
+                               %i [%s x %s]" % (G, machineFilenames[0], machineFilenames[1]))
+                        self.TABLEBOARD[G].newmatch(specificMachines=machineFilenames)
+                        #ACTIVE[G] = True
 
-                        engineCommand = [ copy(self.EngineCommand) for k in range(2) ]
-                        engineCommand[0] += [ROUND[G][0].filename]
-                        engineCommand[1] += [ROUND[G][1].filename]
-                        self.TABLEBOARD[G].endgame()
-                        self.TABLEBOARD[G].newmatch(
-                            specificMachines=engineCommand)
 
                     else:
                         ACTIVE[G] = False

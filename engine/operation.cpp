@@ -43,12 +43,13 @@ Host Device bool is_in(char val, char arr[], int size)
 Device int append_move(struct board *board, struct movelist *moves,
 		       int from, int to, int special, int P) {
 
-
-
     
   moves->movements[moves->k].passant=0;
   moves->movements[moves->k].passantJ[0]=board->passantJ;
   moves->movements[moves->k].passantJ[1]=-1;
+
+  moves->movements[moves->k].passant_player[0] = board->passant_player;
+  moves->movements[moves->k].passant_player[1] = -1;
   moves->movements[moves->k].iscastle = 0;
 
   //special movement position considerations (when i>7)
@@ -65,12 +66,44 @@ Device int append_move(struct board *board, struct movelist *moves,
     moves->movements[moves->k].casualty = board->squares[ to ];
     moves->movements[moves->k].promoteto = 0;
     moves->movements[moves->k].iscastle = 0;
-    moves->movements[moves->k].lostcastle = 0;
+    
+    moves->movements[moves->k].lostcastle[0] = 0;
+    moves->movements[moves->k].lostcastle[1] = 0;   
     
 
     //loss of castling rights
-      if ((SQR_I(from)==0 && P==1)||(SQR_I(from)==7 && P==0))
+    if (moves->movements[moves->k].piece == Pieces[P][5])
       {
+      if (from == 60 || from == 4)
+	if (board->castle[P][1]==1)
+	  moves->movements[moves->k].lostcastle[P] = 2;
+      }
+	else
+	  if (moves->movements[moves->k].piece == Pieces[P][1])
+	    {
+	      if (board->castle[P][0])
+		if ( (from == 0) || (from == 56) )
+		  moves->movements[moves->k].lostcastle[P] = 1;
+	      
+	      	if (board->castle[P][2])
+		  if( (from == 7) || (from == 63) )
+		    moves->movements[moves->k].lostcastle[P] = 3;
+	    }
+    
+    // loss of castling rights for opponent
+    if (moves->movements[moves->k].casualty == Pieces[1-P][5])
+      {
+	      if (board->castle[1-P][0])
+		if ( (to == 0) || (to == 56) )
+		  moves->movements[moves->k].lostcastle[P] = 1;
+	      
+	      	if (board->castle[1-P][2])
+		  if( (to == 7) || (from == to) )
+		    moves->movements[moves->k].lostcastle[P] = 3;
+      }
+    /*if ((SQR_I(from)==0 && P==1)||(SQR_I(from)==7 && P==0))
+      {
+	
 	if(SQR_J(from)==0 && board->castle[P][0]==1)
 	  moves->movements[moves->k].lostcastle = 1;
 	
@@ -79,7 +112,10 @@ Device int append_move(struct board *board, struct movelist *moves,
 	
 	if(SQR_J(from)==7 && board->castle[P][2]==1)
 	  moves->movements[moves->k].lostcastle = 3;
-      }
+	  //asprintf(&output, "loss of castling %i %i.\n", SQR_I(from), SQR_J(from));
+	  //write(2, output, strlen(output));  
+
+	  }*/
         
     
   if (special)
@@ -99,7 +135,7 @@ Device int append_move(struct board *board, struct movelist *moves,
       moves->movements[moves->k].casualty = 'x';
       
       moves->movements[moves->k].iscastle = 1;
-      moves->movements[moves->k].lostcastle = 2;
+      moves->movements[moves->k].lostcastle[P] = 2;
       //moves->movements[moves->k].piece = pieces[P][5];
     }
 
@@ -115,13 +151,13 @@ Device int append_move(struct board *board, struct movelist *moves,
     if(special == 2 )
       { 
 	moves->movements[moves->k].passantJ[1]= SQR_J(from);
+	moves->movements[moves->k].passant_player[1]= P;
       }
 
     
     if (special == 4)
       {
 	moves->movements[moves->k].promoteto = pieces[P][4];
-
       }
   }    
 
@@ -232,10 +268,24 @@ Host Device int check_move_check (struct board *tg_board, struct move *move, int
     int KI=0, KJ=0;
     
     int verbose = 0;
+    
     //if (movement[1][0] == 5 && movement[1][1]==7) verbose = 1;
+
+    //DETECT IF MOVEMENT DO & UNDO HAS BEEN MADE CORRECTLY;
+    /*char GABARITO[64];
+    int oldpassantJ=tg_board->passantJ;
+    int oldcastle[2][3];
+    int WQ=0;
+    F(WQ, 64)
+      GABARITO[WQ] = tg_board->squares[WQ];
+    F(i,2)F(j,3)
+      oldcastle[i][j] = tg_board->castle[i][j];
+    
+    */
     
     move_piece(tg_board, move, 1);
-    
+
+
     forsquares
       if (tg_board->squares[ SQR(i, j) ] == Pieces[P][5])
 	{
@@ -263,6 +313,30 @@ Host Device int check_move_check (struct board *tg_board, struct move *move, int
       }
 
     move_piece(tg_board, move, -1);
+
+    /*
+     F(WQ, 64)
+      if (GABARITO[WQ] != tg_board->squares[WQ])
+	{
+	  asprintf(&output, "ERROR ON CHECK MOVE CHECK @%i      OJ=%i   NJ=%i\n", tg_board->MovementCount, oldpassantJ, tg_board->passantJ);
+	  write(2, output, strlen(output));
+	  show_board(GABARITO);			  
+	  show_board(tg_board->squares);
+	  print_movement(move, 1);
+	  show_moveline(tg_board, tg_board->MovementCount-3, tg_board->MovementCount);
+	  exit(0);
+	  }
+	  F(i,2)F(j,3)
+	   if(oldcastle[i][j] != tg_board->castle[i][j])
+	     {
+	       asprintf(&output, "ERROR ON CASTLING PROPERTIES lc%i    %i %i   %i should be %i\n",
+			move->lostcastle, i, j, tg_board->castle[i][j], oldcastle[i][j]);
+
+	       write(2, output, strlen(output));
+	       exit(0); 
+	       }
+    */
+    
     return check;
 }
 
@@ -290,7 +364,7 @@ Host Device struct board *makeparallelboard (struct board *model) {
     _board->score = model->score;
     _board->betaCut = model->betaCut;
     _board->gameEnd = model->gameEnd;
-    
+    _board->passant_player = model->passant_player;
     
     for(i=0;i<2;i++) for(j=0;j<3;j++) _board->castle[i][j] = model->castle[i][j];
     
@@ -313,6 +387,7 @@ Host Device void cloneboard (struct board *model, struct board *target) {
   target->MovementCount = model->MovementCount;
   target->betaCut = model->betaCut;
   target->gameEnd = model->gameEnd;
+  target->passant_player = model->passant_player;
   
   for(i=0;i<2;i++) for(j=0;j<3;j++) target->castle[i][j] = model->castle[i][j];
 
@@ -398,11 +473,16 @@ Host Device void replicate_move(struct move *target, struct move *source)
   target->promoteto = source->promoteto;
   
   target->iscastle = source->iscastle;
-  target->lostcastle = source->lostcastle;
+  
+  target->lostcastle[0] = source->lostcastle[0];
+  target->lostcastle[1] = source->lostcastle[1];
   
   target->passant = source->passant;
   target->passantJ[0] = source->passantJ[0];
   target->passantJ[1] = source->passantJ[1];
+
+  target->passant_player[0] = source->passant_player[0];
+  target->passant_player[1] = source->passant_player[1];
   
   target->score = source->score;
 }

@@ -83,7 +83,15 @@ int loadmachine (int verbose, char *MachineDir) {
 	       }
 	   closedir(openDIR);
 	 }
-
+	 
+	 // EMPTY DIR!
+	 if (!MACINDEX)
+	   {
+	     free(reading);
+	     free(filename);
+	     return 1;
+	   }
+	 
 	 srand ( rndseed() );
 	 selected_machine_index = rand() % MACINDEX;
 
@@ -166,6 +174,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_freepiecevalue", &BRAIN.freepiecevalue);
 	   readparam(line, V, "param_limitDefender", &BRAIN.limitDefender);
 	   readparam(line, V, "param_parallelAttacker", &BRAIN.parallelAttacker);
+	   readparam(line, V, "param_castlebonus", &BRAIN.castlebonus);
 
        }
 	 printf("\n");
@@ -215,7 +224,9 @@ void dump_history() {
 
         printf("%i     [%i]\n", i, machineplays);
         print_movement(&movehistory[i],1);
-        show_board(movehistoryboard[i]);
+        show_board(boardhistory[i].squares);
+	show_castling_status(&boardhistory[i]);
+
     }
     
     
@@ -230,4 +241,20 @@ void chesslog(char *location, const char content[]) {
     fclose(logfile);
             
             
+}
+
+void show_castling_status(struct board *board)
+{
+
+  asprintf(&output, "WHITE R%i  K%i  R%i        BLACK r%i    k%i    r%i\n",
+	   board->castle[0][0],
+	   board->castle[0][1],
+	   board->castle[0][2],
+	   board->castle[1][0],
+	   board->castle[1][1],
+	   board->castle[1][2]);
+	write(2, output, strlen(output));
+
+
+
 }

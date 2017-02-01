@@ -29,18 +29,20 @@ class Engine():
             #raise
             print("broken pipe!")
 
-    def receive(self, method="lines"):
-
+    def receive(self, method="lines", channel=1):
+        channels = {1: self.engine.stdout,
+                    2: self.engine.stderr}
+        
         if method == "lines":
-            self.engine.stdout.flush()
-            data = self.engine.stdout.readlines()
+            channels[channel].flush()
+            data = channels[channel].readlines()
             data = [ x.decode('utf-8', 'ignore') for x in data ]
             if self.recordComm:
                 for c in data:
                     self.recordedData += c
         else:
-            self.engine.stdout.flush()
-            data = self.engine.stdout.read().decode('utf-8', 'ignore')
+            channels[channel].flush()
+            data = channels[channel].read().decode('utf-8', 'ignore')
             if self.recordComm:
                 self.recordedData +=data
 

@@ -200,14 +200,12 @@ class Arena():
                 ))
             for t in range(self.looplimit + 1):
                 if self.Cycle:
-                    if self.TABLEBOARD[t].online:
+                    if not self.TABLEBOARD[t].online:
+                        self.TABLEBOARD[t].startEngines()
+                        continue
+                    if self.TABLEBOARD[t].onGame:
                         self.TABLEBOARD[t].readmove()
                     else:
-                        # maybe this is the cause of the 'memory leak'? if we
-                        # recreate the table instance so it stops growing larger on size
-                        # after each sucessfull game.
-                        #self.TABLEBOARD[t] = 0
-                        #self.TABLEBOARD[t] = Table(self, master=self.root)
                         opening = self.selectChessOpening()
                         self.TABLEBOARD[t].newmatch(specificOpening=None)
 
@@ -245,6 +243,7 @@ class Arena():
         for table in self.TABLEBOARD:
             if table.online == 1:
                 table.endgame()
+                table.shutdown()
 
     def killunused(self):
         for T in range(len(self.TABLEBOARD)):

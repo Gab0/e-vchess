@@ -33,7 +33,9 @@
 #define FLIP(x) x=(1-x)
 #define invert(x) x=(-x)
 
-
+#define fpow(x, e) static_cast<float>(pow(x, e))
+#define fsqrt(x) static_cast<float>(sqrt(x))
+  
 #define SQR(i, j) ((j) + (i*8)) 
 #define SQR_I(x) (x / 8)
 #define SQR_J(x) (x % 8)
@@ -88,7 +90,7 @@ struct move {
   int to;
     
   int iscastle;
-  int lostcastle;
+  int lostcastle[2];
     
   long score;
     
@@ -97,6 +99,7 @@ struct move {
   char casualty;
     
   int passantJ[2];
+  int passant_player[2];
   int passant;
 };
 
@@ -119,6 +122,7 @@ struct board;
      int castle[2][3];
       
      int passantJ;
+     int passant_player;
      int whoplays;
      
      long score;
@@ -165,10 +169,11 @@ struct param {
   float offensevalue;
   float limitDefender;
   float parallelAttacker;
+  float castlebonus;
 };
 
 extern struct move movehistory[512];
-extern char movehistoryboard[512][64];
+extern board boardhistory[512];
 extern int hindex;   
 
 using namespace std;
@@ -244,7 +249,7 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 Host Device void undo_move(struct board *tg_board, struct move *movement);
 Device void attackers_defenders (struct movelist *moves);
 void h_move_pc (struct board *board,char movement[][2]);
-int history_append(struct move *move);
+void history_append(struct move *move);
 int history_rollback(int times);
 //void castle (struct board *board, int doundo, int PL, int side);
 Host Device int findking (char board[64], char YorX, int player);
@@ -286,7 +291,7 @@ Host Device void movement_to_string(struct move *move, char *target);
 Host Device int variableComparation(long A, long B, int startPlayer, int endPlayer);
 
 //functions from interface.cpp;##################################################
-int parse_move (struct move *target, char *s, int P);
+int parse_move (struct movelist *target, char *s, int P);
 void print_movement (struct move *move, int full);
 int read_movelines (char txt[128], int verbose);
 int fehn2board (char str[]);
@@ -295,10 +300,9 @@ void eval_info_group_move(struct move *primary, struct move *secondary,
 			  int DEEP, time_t startT, int P);
 void stdoutWrite(const char * text);
 void show_moveline(struct board *finalboard, int bottom_span, time_t startT);
-
 void show_movelist(struct movelist *moves);
-
 void show_board_matrix (int Matrix[64]);
+
 //functions from brain.cpp;######################################################
 int think (struct move *out, int PL, int DEEP, int verbose);
 
@@ -314,25 +318,27 @@ Global void kerneliterate(struct board *workingboard,
 Global void Testkernel(int *Test);
 Device void Testdevice(int *Test);
 Global void evalkernel(long *VALUE, struct board *board, struct movelist *moves);
-Device int satellite_evaluation (struct move *movement);
+Device int castling_evaluation(struct board *board, struct move *movement);
 
 Device int compare_movements (struct move *move_A, struct move *move_B);
 Device int check_fivemove_repetition (void);
 
-
+Device void IterateMovement (struct board *ResultBoard, struct board *InputBoard, struct move *movement, int DEEP, long Alpha, long Beta, int AllowCutoff );
 //functions from evaluate.cpp;###################################################
 
 Device int evaluateMaterial(struct board *evalboard,
 			    int BoardMaterialValue[64],  int AttackerDefenderMatrix[2][64], 
 			    int P, int Attacker, int Verbose);
 
-Device int evaluateAttack(//struct board *evalboard,
+Device int evaluateAttack(struct board *evalboard,
 			  struct movelist *moves,
 			  int BoardMaterialValue[64],
 			  int AttackerDefenderMatrix[2][64],
 			  int P, int Attacker, int Verbose);
 
 Host void GenerateAttackerDefenderMatrix(char squares[64], int AttackerDefenderMatrix[2][64]);
+
+Device int EvaluateKingSecurity(struct board *evalboard, int i, int j, int P);
 
 //functions from brain_fast.cpp;#################################################
 int think_fast(struct move *out, int PL, int DEEP, int verbose);
@@ -342,6 +348,7 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 //functions from evolution.cpp;
 unsigned long long rndseed();
 int loadmachine (int verbose, char *dir);
+void show_castling_status(struct board *board);
 //int applyresult (int result);
 
 void readparam(char *line, int verbose, const char *keyword, float *Parameter);

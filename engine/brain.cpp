@@ -89,7 +89,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     
 
   for (i=0;i<moves->k;i++) {
-
+    
     move_piece(_board, &moves->movements[i], 1);    
     finalboardsArray[i] = thinkiterate(_board, Brain.DEEP-1, verbose,
 			       -Beta, -Alpha, AllowCutoff);      
@@ -111,20 +111,21 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	  moves->movements[i].score = 0;
 	}
     move_piece(_board, &moves->movements[i], -1);
-    
-  }
 
+    castling_evaluation(finalboardsArray[i], &moves->movements[i]);
+
+  }
+  
   int T = 5;
   T = min(T, moves->k);
   int BEST[5];
-
-
+  
+  
   selectBestMoves(finalboardsArray, moves->k, BEST, T);
-
-
+  
+  
   if (BRAIN.xDEEP)
     {
-      
       int MINIMUM_ITER = 5;
       int CURRENT_ITER=0;
       int MAXIMUM_ITER = 12;
@@ -133,20 +134,21 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
       int Z = 0;
       int ZI = 0;
       int Thinking = 1;
+      long oldscore = 0;
       while ( Thinking )
 	{
 	  F(Z, T)
 	    {
 	      ZI = BEST[Z];
-	      
-	      if (finalboardsArray[ZI]->gameEnd)
+	      oldscore = finalboardsArray[ZI]->score;
+	      if (!finalboardsArray[ZI]->gameEnd)
 	      {
-		continue;
-	      }
+
+
 	      
 	      undo_lastMove(finalboardsArray[BEST[Z]], 2);
 	      BufferBoard = finalboardsArray[BEST[Z]];
-	      
+
 	      
 	      
 	      
@@ -168,27 +170,37 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 		  //	printf("other player\n");
 		  invert(finalboardsArray[BEST[Z]]->score);
 		}
+
+	      DUMP(BufferBoard);
 	      
+	      }     
 	      
-	      
+	      else
+		{
+
+	    if (finalboardsArray[BEST[Z]]->score > 10)
+	      {
+		//asprintf(&output, "breaking %i\n", Z);
+		//write(2, output, strlen(output));
+		break;
+
+	      }
+		}
 	      
 	      if (Show_Info) show_moveline(finalboardsArray[ZI], CurrentMovementIndex, startT);
 	      
 	      maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
 	      
-	      if ( abs(finalboardsArray[ZI]->score - BufferBoard->score) > BRAIN.scoreFlutuabilityContinuator * 1000)
+	      if ( abs(finalboardsArray[ZI]->score - oldscore) > BRAIN.scoreFlutuabilityContinuator * 1000)
 		if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
 		  MINIMUM_ITER = max(MINIMUM_ITER++, MAXIMUM_ITER);
 	      
-	      DUMP(BufferBoard);
+
 	    }
 	
 	  selectBestMoves(finalboardsArray, moves->k, BEST, T);
 	  
-	  if (finalboardsArray[BEST[Z]]->gameEnd)
-	    if (finalboardsArray[BEST[Z]]->score > 10)
-	      break;
-		
+
 	  CURRENT_ITER++;
 	  //	MAXIMUM_ITER--;
 	  //	printf("bestline = %i\n", BEST[0]);
@@ -275,7 +287,8 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     Vb printf("NullMove!\n"); 
     )*/
   //If in checkmate/stalemate situation;
-  if (!moves.k) {
+  if (!moves.k)
+    {
              
     if (ifsquare_attacked(_board->squares,
 			  findking(_board->squares, 'Y', PLAYER), 
@@ -290,7 +303,7 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
     _board->gameEnd = 1;
     return _board;
          
-  }
+    }
     
 
 
@@ -323,13 +336,18 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 
     
     for(i=0;i<moves.k;i++) {
-       
+
+
+      //IterateMovement(DisposableBuffer, _board, &moves.movements[i], DEEP, Alpha, Beta, AllowCutoff);
       move_piece(_board, &moves.movements[i], 1);  
 
       DisposableBuffer = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
 
       invert(DisposableBuffer->score);
-      moves.movements[i].score = DisposableBuffer->score;// + moves.k * 10;
+      
+      castling_evaluation(DisposableBuffer, &moves.movements[i]);
+      
+      moves.movements[i].score = DisposableBuffer->score;
 
       if (moves.movements[i].score > score)
 	{
@@ -385,16 +403,16 @@ Device struct board *thinkiterate(struct board *feed, int DEEP, int verbose,
 				   1-PLAYER, PLAYER, 0);
 
     
-    player_score += evaluateAttack(&moves,
-				     BoardMaterialValue, AttackerDefenderMatrix,
-				     PLAYER, PLAYER, 0);
+    player_score += evaluateAttack(_board, &moves,
+				   BoardMaterialValue, AttackerDefenderMatrix,
+				   PLAYER, PLAYER, 0);
     
     legal_moves(_board, &moves, 1-PLAYER, 0);
     
 
-    enemy_score += evaluateAttack(&moves,
-				    BoardMaterialValue, AttackerDefenderMatrix,
-				  1-PLAYER, PLAYER, 0);
+    enemy_score += evaluateAttack(_board, &moves,
+				  BoardMaterialValue, AttackerDefenderMatrix,
+    				  1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);
     
     _board->score = player_score - enemy_score;
@@ -420,16 +438,29 @@ Device int canNullMove (int DEEP, struct board *board, int K, int P) {
 }
 
 
-Device int satellite_evaluation (struct move *movement) {
-  int Result = 0;
-  if (!Brain.moveFocus) return 0;
+Device int castling_evaluation(struct board *board, struct move *movement) {
+  int current_player = board->whoplays;
+  int P =0;
+  if (BRAIN.castlebonus)
 
-  if (movement->lostcastle && !movement->iscastle)
-    Result -= 10 * Brain.moveFocus;
+    if (movement->iscastle)
+      board->score += 100 * BRAIN.castlebonus;
+  
+  F(P, 2)  
+    if (movement->lostcastle[P])
+      {
+	{
+	if ( (movement->lostcastle[P] == 1 || movement->lostcastle[P] == 3) && !board->castle[P][1] )
+	  continue;
+	if ( movement->lostcastle[P] == 2 && (!board->castle[P][0] && !board->castle[P][2]))
+	  continue;
+	
+	board->score -= 100 * BRAIN.castlebonus * (1 - 2*abs(current_player-P));
+	}
+    }
 
-  if (movement->iscastle) Result += 50 * Brain.moveFocus;
-
-  return Result;
+  
+  return 1;
 }
 
 Device int check_fivemove_repetition (void) {
@@ -454,3 +485,22 @@ Device int compare_movements (struct move *move_A, struct move *move_B) {
     
   return 1;
 }
+
+Device void IterateMovement (struct board *ResultBoard, struct board *InputBoard, struct move *movement, int DEEP, long Alpha, long Beta, int AllowCutoff )
+{
+
+  int verbose = 0;
+
+  castling_evaluation(ResultBoard, movement);
+      move_piece(InputBoard, movement, 1);  
+
+      ResultBoard = thinkiterate(InputBoard, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
+
+      invert(ResultBoard->score);
+      
+
+      
+
+}
+
+			     

@@ -194,14 +194,14 @@ Device long thinkiterate_fast(struct board *_board, int DEEP, int verbose,
 				   1-PLAYER, PLAYER, 0);
 
     
-    player_score += evaluateAttack(&moves,
+    player_score += evaluateAttack(_board,&moves,
 				     BoardMaterialValue, AttackerDefenderMatrix,
 				     PLAYER, PLAYER, 0);
     
     legal_moves(_board, &moves, 1-PLAYER, 0);
     
 
-    enemy_score += evaluateAttack(&moves,
+    enemy_score += evaluateAttack(_board,&moves,
 				    BoardMaterialValue, AttackerDefenderMatrix,
 				  1-PLAYER, PLAYER, 0);
     //show_board(_board->squares);

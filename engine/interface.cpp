@@ -45,19 +45,34 @@ int fehn2board (char str[]) {
     
     fstring = strtok(NULL, " ");
     //read castling righst section.
-    for (i=0;i<2;i++) for (j=0;j<3;j++) {
-        board.castle[i][j]=0;
+    /*    for (i=0;i<2;i++) for (j=0;j<3;j++) {
+        //board.castle[i][j]=1;
         board.castle[i][1]=1;
-    }
+	}*/
     
     
     for (z=0;z<strlen(fstring);z++) {
-        if (fstring[z] == 'Q') board.castle[0][0]=1;
-        if (fstring[z] == 'K') board.castle[0][1]=1;
-        if (fstring[z] == 'q') board.castle[1][0]=1;
-        if (fstring[z] == 'k') board.castle[1][1]=1;
+      if (fstring[z] == 'Q')
+	{
+	  board.castle[0][0]=1;
+	  board.castle[0][1]=1;
+	}
+      if (fstring[z] == 'K')
+	{
+	board.castle[0][2]=1;
+	board.castle[0][1]=1;
+	}
+      if (fstring[z] == 'q')
+	{
+	  board.castle[1][0]=1;
+	  board.castle[1][1]=1;
+	}
+      if (fstring[z] == 'k')
+	{
+	  board.castle[1][1]=1;
+	  board.castle[1][2]=1;
+	}
     }
-
     //read en-passant info;
     fstring = strtok(NULL, " ");
 
@@ -72,6 +87,7 @@ int fehn2board (char str[]) {
     board.MovementCount *= 2;
     board.MovementCount += board.whoplays;
     
+    board.passant_player = -1;
     hindex = 0;
     //board.MovementCount = 0;
     
@@ -79,20 +95,19 @@ int fehn2board (char str[]) {
 }
 int read_movelines (char txt[128], int verbose) {
     char *movement = strtok(txt, " ");
-    struct move move;
+    struct movelist user_move;
+    user_move.k = 0;
     int x=0;
 
     //movement = strtok(NULL, " "); 
 
         while ( movement != NULL) {
 
-            if (parse_move(&move, movement, 1-machineplays)) {
-	      Vb printf("moving from input: %i%i %i%i\n", expand_play(move));
-                move.casualty = board.squares[ move.to ]; 
-                move.piece = board.squares[ move.from ]; 
-                move_piece(&board, &move, 1);
+            if (parse_move(&user_move, movement, 1-machineplays)) {
 
-                history_append(&move);
+                move_piece(&board, &user_move.movements[x], 1);
+
+                history_append(&user_move.movements[x]);
                 x++;
             }
         movement = strtok(NULL, " ");        
@@ -115,8 +130,20 @@ void print_movement (struct move *move, int full) {
 
     if (full)
       {
-      printf("piece= %c.\n", move->piece);
-      printf("from = %i.\n", move->from);
+	asprintf(&output,		 
+		 "piece= %c.\nfrom = %i.\nto = %i.\niscastle = %i.\nlostcastle = w%i b%i.\npassant = %i.\npassantJ = %i %i.\ncasualty = %c.\n",
+		 move->piece,
+		 move->from,
+		 move->to,
+		 move->iscastle,
+		 move->lostcastle[0],
+		 move->lostcastle[1],
+		 move->passant,
+		 move->passantJ[0],
+		 move->passantJ[1],
+		 move->casualty);
+	write(2, output, strlen(output));
+      /*printf("from = %i.\n", move->from);
       printf("to = %i.\n", move->to);
       
       printf("iscastle = %i.\n", move->iscastle);
@@ -125,15 +152,15 @@ void print_movement (struct move *move, int full) {
       printf("passantJ = %i %i.\n", move->passantJ[0], move->passantJ[1]);
       if (!move->promoteto) printf("promoteto = 0\n");
       else printf("promoteto = %c.\n", move->promoteto);
-      printf("casualty = %c.\n", move->casualty);
+      printf("casualty = %c.\n", move->casualty);*/
     }
     
     
     
 }
-int parse_move (struct move *target, char *s, int P) {
+int parse_move (struct movelist *target, char *s, int P) {
 
-    
+  int special_feature = 0;
 
     if (!isalpha(s[0]) || !isalpha(s[2])) return 0;
     if (!isdigit(s[1]) || !isdigit(s[3])) return 0;
@@ -143,54 +170,44 @@ int parse_move (struct move *target, char *s, int P) {
     
     char FROM[2] = { s[0], s[1] };
     char TO[2] = { s[2], s[3] };
-        target->iscastle=0;
-        target->lostcastle=0;
+
+    
         //printf("%c%c %c%c\n", s[0],s[1],s[2],s[3]);
         pos2cord(FROM);
         pos2cord(TO);
-	target->from = SQR(FROM[0],FROM[1]);
-	target->to = SQR(TO[0], TO [1]);
-        //printf("%i%i %i%i\n", target->from[0],target->from[1],target->to[0],target->to[1]);
-	target->piece = board.squares[ target->from ];
-        
-        if(s[4]=='q') {
-            if (s[1]<s[3])target->promoteto='Q';
-            if (s[1]>s[3])target->promoteto='q';
 
-        }
+	int from = SQR(FROM[0], FROM[1]);
+	int to = SQR(TO[0], TO[1]);
+        if(s[4]=='q') 
+	  special_feature = 4;
         
-        else target->promoteto=0;
+
         
         //compute castling features of move.
         if (FROM[1] == 4){
             if (FROM[0] == 0 || FROM[0] == 7)
                 if (TO[1] == 6 || TO[1] == 2)
 		  if (board.squares[ SQR(FROM[0], FROM[1]) ] == pieces[P][5])
-		    {
-		      target->iscastle=1; //printf("castle.\n");
-		    }
+		    special_feature = 3;
+
         
         }
         
-        //compute enpassant features of move.
-        //initialize variables.
-        target->passant=0;
-        target->passantJ[0] = board.passantJ;
-        target->passantJ[1] = -1;
         //set possibility, on double pawn movement.
-        if (board.squares[ target->from ]==pieces[1-machineplays][0])
+        if (board.squares[ from ] == pieces[1-machineplays][0])
             if (FROM[0]==1||FROM[0]==6)
                 if (TO[0]==3||TO[0]==4)
-                    target->passantJ[1] = FROM[1];
+		  special_feature = 2;
+	
         //read EP capture.
         if (TO[1] == board.passantJ)
 	  if (board.squares[ SQR(FROM[0], TO[1]) ]==pieces[machineplays][0])
-	    if (board.squares[ target->from ] == pieces[1-machineplays][0])
+	    if (board.squares[ from ] == pieces[1-machineplays][0])
                     if ((FROM[0]==3&&machineplays)||(FROM[0]==4&&!machineplays))
-                            target->passant=1;
+		      special_feature = 1;
                 
         
-
+	append_move(&board, target, SQR(FROM[0], FROM[1]), SQR(TO[0], TO[1]), special_feature, flip(machineplays));
         return 1;
         
     
@@ -260,6 +277,10 @@ void stdoutWrite(const char * text) {
 }
 
 
+void stderrWrite(const char * text) {
+  asprintf(&output, text);
+  write(2, output, strlen(output));
+}
 
 void show_movelist(struct movelist *moves) {
   int i=0;

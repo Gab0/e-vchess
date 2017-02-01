@@ -17,7 +17,6 @@ from chessArena.settings import Settings
 settings = Settings()
 
 class Table(Frame):
-
     def __init__(self, arena, master=None, forceNoGUI=False):
 
         if settings.GUI and not forceNoGUI:
@@ -26,8 +25,13 @@ class Table(Frame):
         else:
             self.GUI = 0
 
+        self.Color = {'nogame': 'brown',
+                      'game': 'grey'}
         self.board = chess.Board()
+        
         self.online = 0
+        self.initialize = 0
+        
         self.movelist = []
 
         self.arena = arena
@@ -60,7 +64,8 @@ class Table(Frame):
         if forceNoGUI:
             self._w = "chessArena table #%i" % self.number
 
-        self.initialize = 0
+        self.onGame = 0
+        
 
     # Threads for engine loading has been cast aside; Performance gain
     # is negible in face of greater RAM comsumption.
@@ -78,16 +83,66 @@ class Table(Frame):
                 self.startThread.start()
             except RuntimeError:
                 print('Error starting match.')
+                
+    def newmatch(self, specificMachines=["any", "any"], specificOpening=None):
+        
+        self.MACnames = ['zero', 'zero']
+        self.MACcontent = []
+        try:
+            for M in [0, 1]:
+                self.MACHINE[M].send("load %s" % specificMachines[M])
+            sleep(0.2)
+            for M in [0, 1]:
+                for line in self.MACHINE[M].receive():
+                    L = line
+                    # print(L)
+                    if "machinepath>> " in L:
+                        self.MACnames[M] = L.split('\n')[0].split('/')[-1].split('.')[-2]
 
-    def newmatch(self, specificMachines=None, specificOpening=None):
-        if self.initialize:
-            return
+
+            if specificOpening:
+                for M in self.MACHINE:
+                    M.send("position %s" % specificOpening)
+                self.board.set_board_fen(specificOpening)
+            else:
+                self.MACHINE[1].send("new")
+                self.MACHINE[0].send("new")
+                
+            self.MACHINE[0].send("white")
+            SideToPlay = 1 - int(self.board.turn)
+            self.turn = SideToPlay
+            self.MACHINE[SideToPlay].send("go")
+
+        except BrokenPipeError:
+            print("broken pipe @ " + str(self.number) + " while starting match.")
+            #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
+            try:
+                if self.startuplog[0]:
+                    self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
+                if self.startuplog[1]:
+                    self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
+            except:
+                print("Startuplog logging failed.")
+                pass
+            
+        if self.GUI:
+            self.Maximize["background"] = self.Color['game']
+            self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
+            if self.visible:
+                self.visor.delete('1.0', END)
+                self.visor.insert('1.0', self.board)
+            self.switch["command"]
+            self.setlimit["text"] = "0"
+        self.LoadMachineData()
+        self.onGame = 1
+        
+    def startEngines(self, Command=settings.engineARGS):
 
         # while len(self.MACHINE) > 0:
         #    self.MACHINE[0].kill()
 
         self.MACHINE = []
-        self.MACcontent = []
+
 
         self.rounds_played = 0
 
@@ -95,36 +150,9 @@ class Table(Frame):
         if self.GUI:
             self.Maximize["background"] = "purple"
 
-        if specificMachines:
-            MachineDirectory = "machines/top_machines/"
-        else:
-            MachineDirectory = "machines/"
 
-        try:
-            if specificMachines:
-                CURRENTengineARGS = specificMachines[0]
-                # print(' '.join(CURRENTengineARGS))
-            else:
-                CURRENTengineARGS = settings.engineARGS
-
-            self.MACHINE.append(
-                Engine(CURRENTengineARGS))
-
-            if specificMachines:
-                CURRENTengineARGS = specificMachines[1]
-            else:
-                CURRENTengineARGS = settings.engineARGS
-
-            self.MACHINE.append(
-                Engine(CURRENTengineARGS))
-        except Exception as e:
-            raise
-            self.log('exception', '#1')
-            print("Initializing failed.")
-            print(e.strerror)
-
-            self.endgame()
-            return
+        for W in range(2):
+            self.MACHINE.append(Engine(Command))
 
         sleep(0.02)
         if self.GUI:
@@ -142,84 +170,34 @@ class Table(Frame):
             return
 
         if self.GUI:
-            self.Maximize["background"] = "brown"
+            self.Maximize["background"] = self.Color['nogame']
         # self.Pout(self.Wmachine.stdout.readlines())
         # self.Pout(self.Bmachine.stdout.readlines())
 
         sleep(0.1)
         self.startuplog = []
-        try:
-            for i in [0, 1]:
-                for line in self.MACHINE[i].receive():
-                    L = line
-                    # print(L)
-                    if "MACname > " in L:
-                        self.MACnames[i] = L[10:-1]
 
-                    if "opening machine:" in L:
-                        self.MACnames[i] = L.split('/')[-1][:-1]
-
-            if specificOpening:
-                for M in self.MACHINE:
-                    M.send("position %s" % specificOpening)
-                self.board.set_board_fen(specificOpening)
-            else:
-                self.MACHINE[1].send("new")
-                self.MACHINE[0].send("new")
-                
-            self.MACHINE[0].send("white")
-            SideToPlay = 1 - int(self.board.turn)
-            self.turn = SideToPlay
-            self.MACHINE[SideToPlay].send("go")
-
-        except BrokenPipeError:
-            print("broken pipe @ " + str(self.number) + " while starting.")
-            #self.log("broken pipe %s %s", "setup." % (self.MACnames[0],self.MACnames[1]))
-            try:
-                if self.startuplog[0]:
-                    self.log(self.startuplog[0].decode('utf-8'), 'BLACK')
-                if self.startuplog[1]:
-                    self.log(self.startuplog[1].decode('utf-8'), 'WHITE')
-            except:
-                print("Startuplog logging failed.")
-                pass
-
-            self.initialize = 0
-            return
-
-        if self.GUI:
-            self.Maximize["background"] = "brown"
-
-        if not self.LoadMachineData(MachineDirectory):
-            return
-
-        if self.GUI:
-            self.Maximize["background"] = "grey"
-            self.Mnames["text"] = self.MACnames[0] + " X " + self.MACnames[1]
-            if self.visible:
-                self.visor.delete('1.0', END)
-                self.visor.insert('1.0', self.board)
-            self.switch["command"]
-            self.setlimit["text"] = "0"
-
+        #if not self.LoadMachineData(MachineDirectory):
+        #    return
+        
         self.online = 1
         #self.turn = 0
         self.initialize = 0
 
         self.startThread = 0
 
-    def LoadMachineData(self, MachineLocation):
+    def LoadMachineData(self, DIR=settings.machineDIR):
         del self.MACcontent
         self.MACcontent = []
         for NAME in self.MACnames:
             try:
-                self.MACcontent.append(machine(NAME, DIR=MachineLocation))
+                self.MACcontent.append(machine('%s.mac' % NAME, DIR=DIR))
                 self.MACcontent[-1].Load()
 
                 
             except FileNotFoundError:
                 self.log(
-                    "filename not found ( %s %s ). " % (MachineLocation,MachinePath) +
+                    "filename not found ( %s %s ). " % (DIR, DIR) +
                     "Maybe coudn't be read properly by arena.", "")
                 self.MACcontent.append(machine('zero'))
         return 1
@@ -350,7 +328,7 @@ class Table(Frame):
                 sleep(1)
                 try:
                     Hdump = self.MACHINE[
-                        self.turn].receive(method="word")
+                        self.turn].receive(method="word", channel=2)
 
                     if self.arena:
                         FLOG = open('log/log_illegal%i.txt' %
@@ -400,7 +378,7 @@ class Table(Frame):
         if self.GUI and self.arena:
             if self.number <= self.arena.looplimit:
                 self.setlimit["background"] = "green"
-                self.Maximize['background'] = "grey"
+                self.Maximize['background'] = self.Color['game']
             else:
                 self.setlimit["background"] = "red"
 
@@ -410,34 +388,15 @@ class Table(Frame):
         self.flagged_toend = 0
         self.Damaged = 0
 
-        for machine in self.MACHINE:
-            # here is where the memory error probably occours;
-            # switching to a soft kill for the machine;
-            #print("killing %s" % machine.pid)
-            try:
-                #machine.stdin.write(bytearray('quit\n', 'utf-8'))
-                # machine.stdin.flush()
-                # machine.join()
-                machine.destroy()
-
-            except OSError:
-                self.log("Cannot allocate memory!", 0)
-                # machine.join()
-                # machine.endgame()
-                #machine.online = 0
-
-            # machine.terminate()
-        self.MACHINE = []
-
         self.board = chess.Board()
 
-        self.online = 0
+        self.onGame = 0
         self.initialize = 0
         if self.GUI:
             self.switch["text"] = "off"
             self.switch["command"] = self.turnon
             self.Mnames["text"] = "idle"
-            self.Maximize["background"] = "light grey"
+            self.Maximize["background"] = self.Color['nogame']
             if self.visible:
                 self.visor.delete('1.0', END)
 
@@ -482,8 +441,6 @@ class Table(Frame):
         for MAC in self.MACHINE:
             MAC.send("result %s" % result)
 
-        self.online = 0
-
         self.endgame()
 
     def setWidgets(self):
@@ -522,7 +479,10 @@ class Table(Frame):
         if self.GUI:
             self.switch["text"] = "on"
             self.switch["command"] = self.endgame
-
+    def shutdown(self):
+        for M in self.MACHINE:
+            M.destroy()
+        self.MACHINE = []
     def Vrefresh(self):
         if self.visible:
             self.visor.delete('1.0', END)
@@ -591,10 +551,8 @@ class Table(Frame):
 
         print(" -- ")
 
-    # def log_wrongmove(self):
-
     def sendELO(self, winner):
-        self.LoadMachineData("machines/")
+        self.LoadMachineData()
 
         Draw = False
 
@@ -629,9 +587,12 @@ class Table(Frame):
             for macIndex in range(len(self.MACcontent)):
                 if self.MACcontent[macIndex].checkExistence():
                     self.MACcontent[macIndex].write()
-                        
+
+                else:
+                    print("%s/%s not found!" % (self.MACcontent[macIndex].DIR, self.MACcontent[macIndex].filename) )
         except Exception as E:
-            #raise
+            raise
+            print("FAIL TO SEND ELO %s" % E)
             self.log('sending ELO failed.', E)
 
     def DUMPmovehistory(self, reason):

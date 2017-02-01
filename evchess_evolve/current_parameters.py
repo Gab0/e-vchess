@@ -13,8 +13,8 @@ def STDPARAMETERS():
 
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
-        parameter("param_seekatk", 0, 12, 0.5,
-                  bLIM=0.5, INCR=0.1, LIM=2, promoter='A'),
+        parameter("param_seekatk", 0, 12, 0.3,
+                  bLIM=0.2, INCR=0.1, LIM=0.5, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 1,
                   bLIM= 1, LIM=10, promoter='m'),
@@ -53,7 +53,7 @@ def STDPARAMETERS():
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
 
-        parameter("param_kingPanic", 0, 14, 0.0,
+        parameter("param_kingPanic", 0, 25, 0.0,
                   LIM=0.3, bLIM=0, INCR=0.1, promoter='P'),
 
         parameter("param_pawnIssue", 0, 15, 0.5,
@@ -66,7 +66,9 @@ def STDPARAMETERS():
         parameter("param_offensevalue", 0, 6, 0.8,
                   LIM=1, bLIM=0.0, INCR=0.1, promoter='O'),
         parameter("param_limitDefender", 0, 6, 0.3,
-                  LIM=1, bLIM=0.2, INCR=0.1, promoter='L')
+                  LIM=0.4, bLIM=0.2, INCR=0.1, promoter='L'),
+        parameter("param_castlebonus", 0, 6, 0.6, 
+                  LIM=1.5, bLIM=0.2, INCR=0.1, promoter='T')
     ]
 
 def ScoreParameters():

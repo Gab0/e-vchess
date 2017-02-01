@@ -23,39 +23,50 @@ void setup_board (int setup) {
    
     
     board.passantJ=-1;
+    board.passant_player=-1;
+
     //erase_moves(&board, 1);
     board.MovementCount=0;
-    }
+    hindex=0;
+}
 
-void show_board (char squares[64]) {
+void show_board (char squares[64])
+{
   int i=0, j=0, X=0;
-    char BoardDraw[18];
 
-    fprintf(stderr, "\n");
-    for(i=0;i<8;i++){
-      for(j=0;j<8;j++){
+  output[X] = '\n';
+  X++;
+  for(i=0;i<8;i++){
+    for(j=0;j<8;j++){
 	  
-	BoardDraw[X] = squares[SQR(i, j)];
-	X++;
-	if (j!=7) {BoardDraw[X] = ' ';
-	  X++;}
-      }
+      output[X] = squares[ SQR(i, j) ];
+      X++;
+      if (j!=7)
+	{
+	  output[X] = ' ';
+	  X++;
+	}
 
-      fprintf(stderr, "%s\n", BoardDraw);
-      X=0;
-      //BoardDraw[X] = '\n'; X++;
-      //BoardDraw[X] = '\n'; X++;
-    
+	  
     }
-    //if (full){
-   //     printf("")
-   // }
+    output[X] = '\n';
+    X++;
+    //fprintf(stderr, "%s\n", BoardDraw);
+    write(2, output, X);
+    X=0;
+    //BoardDraw[X] = '\n'; X++;
+    //BoardDraw[X] = '\n'; X++;
     
-   // BoardDraw[X] = '\n';
-   // fprintf(stderr, "%s", BoardDraw);
+  }
+  //if (full){
+  //     printf("")
+  // }
+    
+  // BoardDraw[X] = '\n';
+  // fprintf(stderr, "%s", BoardDraw);
 
     
-    }
+}
 
 Host Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
     
@@ -68,13 +79,9 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
     
     int zeta = 0;
     
-    int pawn_vector = -1;
-    pawn_vector += 2*PL;
-    
+    int pawn_vector = -1 + 2*PL;
     
     int promote = PL;
-
-    
 
     forsquares
       {
@@ -91,7 +98,8 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
 	  if (board->passantJ==j+1||board->passantJ==j-1)
                     if (board->passantJ>-1)
 		      if ( (i==3&&!PL) || (i==4&&PL) ) 
-			if (board->squares[ SQR(i, board->passantJ) ] == Pieces[1-PL][0]) 
+			if (board->squares[ SQR(i, board->passantJ) ] == Pieces[1-PL][0])
+			  if (board->passant_player == flip(PL))
 			  append_move(board, moves, SQR(i,j), SQR( (i + pawn_vector), board->passantJ ), 1, PL);
 	  
           
@@ -114,12 +122,12 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
 
 
 		if (i == 6-5*PL) // PL == 1 -> i == 1; PL == 0 -> i == 6
-		  if (board->squares[ SQR((i+ 2*pawn_vector), j) ] == 'x')//  && onboard(i + (2*pawn_vector), j))
+		  if (board->squares[ SQR((i+2*pawn_vector), j) ] == 'x')
 		    if (board->squares[ SQR((i+pawn_vector), j) ] == 'x')
 		      {
 			append_move(board, moves, SQR(i, j), SQR( (i+4*PL-2), j), 2, PL);
 		      }
-	} 
+	  }
 	
 	
 	
@@ -170,12 +178,11 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
 	 movement_generator(board,moves,1, 'X', i, j, PL);
 
 	 if (j == 4)
-	   if (i == flip(PL) *  7)
-	     if (board->castle[PL][1]==1 && !ifsquare_attacked(board->squares, i, j, 1-PL, 0, 0)) 
+	   if (i == (flip(PL)) *  7)
 	       {
 	     
 		 if (cancastle(board, PL, -1))
-		   append_move(board, moves, SQR(i,j), SQR(i, 2), 3, PL);
+		   append_move(board, moves, SQR(i, j), SQR(i, 2), 3, PL);
 
 		 if (cancastle(board, PL, 1))
 		   append_move(board, moves, SQR(i, j), SQR(i, 6), 3, PL);
@@ -210,10 +217,12 @@ Host Device int mpc(char squares[64], int i, int j, int player) {
   else return 0;
 }
 
-Host Device void move_piece(struct board *tg_board, struct move *movement, int MoveUnmove) {
+Host Device void move_piece(struct board *tg_board, struct move *movement, int MoveUnmove)
+{
   
   if (movement->casualty==0)
     movement->casualty='x';
+  int cP;
   
   int from;
   int to;
@@ -236,24 +245,19 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 
     if (movement->promoteto!=0 && MoveUnmove > 0)
       tg_board->squares[ to ] = movement->promoteto;
-
-
-
-    
-
     
     if(movement->iscastle)
       {
 	if (MoveUnmove > 0)
 	  {
-	    if (SQR_J(movement->to) < 4)
+	    if (SQR_J(to) < 4)
 	      {
 		tg_board->squares[ to + 1 ] =
 		  tg_board->squares[ SQR( SQR_I(to), 0) ];
 		tg_board->squares[ SQR( SQR_I(to), 0) ] = 'x';
 	      }
         
-	    if (SQR_J(movement->to) > 4)
+	    if (SQR_J(to) > 4)
 	      {
 		tg_board->squares[ to - 1 ] =
 		  tg_board->squares[ SQR( SQR_I(to), 7) ];
@@ -262,24 +266,23 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 
 	  }
 	else
-	  {// ATTENTION;
-	    if (SQR_J(movement->from) < 4)
+	  {// ATTENTION; (solved?)
+	    if (SQR_J(from) < 4)
 	      {
-		tg_board->squares[ SQR(SQR_I(from), 0) ] =
-		  tg_board->squares[ SQR(SQR_I(to), (SQR_J(from)+1)) ];
-				     tg_board->squares[ from + 1 ] = 'x';
+		tg_board->squares[ SQR(SQR_I(from), 0) ] = 
+		  tg_board->squares[ from + 1 ];
+		tg_board->squares[ from + 1 ] = 'x';
 	      }
-        
-	    if (SQR_J(movement->from) > 4)
+	    
+	    if (SQR_J(from) > 4)
 	      {
 		tg_board->squares[ SQR(SQR_I(from), 7) ] =
-		  tg_board->squares[ SQR(SQR_I(to), (SQR_J(from)-1)) ];
+		  tg_board->squares[ from -1 ];
 		tg_board->squares[ from - 1 ] = 'x';
 	      } 
 
 	  }
 
-	
       }
     
     if (movement->passant)
@@ -295,19 +298,25 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 
     int AffectCastling = 0;
     
-    if (MoveUnmove > 0)
-      AffectCastling = 0;
-    else
+    if (MoveUnmove == -1)
       AffectCastling = 1;
-   
-    if (movement->lostcastle)
+
+    F(cP,2)
+    if (movement->lostcastle[cP])
       {
+	//int P=0;
+	// SWAP THIS
+	//if (SQR_I(from) == 0) P=1;
+	//if (is_in(movement->piece, Pieces[1], 6)) P=1;
 
-      tg_board->castle[ (7-SQR_I(from))/7 ][movement->lostcastle-1] = AffectCastling;
-
+	//	if (movement->lostcastle == 2)
+	  
+	FLIP(tg_board->castle[cP][ movement->lostcastle[cP]-1 ]);
 
       }
-    tg_board->passantJ=movement->passantJ[flip(AffectCastling)];
+    
+    tg_board->passantJ = movement->passantJ[1-AffectCastling];
+    tg_board->passant_player = movement->passant_player[1-AffectCastling];
 
    FLIP(tg_board->whoplays);
     
@@ -401,34 +410,29 @@ Device void attackers_defenders (struct movelist *moves)
 	{
 	  
 	  //print_movement(&moves->movements[M], 1);
-	  
 	  moves->attackers[moves->kad][0] = moves->movements[M].piece;
 	  moves->attackers[moves->kad][1] = moves->movements[M].from;
-	  
 	  
 	  moves->defenders[moves->kad][0] = moves->movements[M].casualty;
 	  moves->defenders[moves->kad][1] = moves->movements[M].to;
 
-        
 	  moves->kad++;
         }
     } 
 }
 
 
-int history_append(struct move *move)
+void history_append(struct move *move)
 {
     int i=0,j=0;
     
     replicate_move(&movehistory[hindex], move);
-    
-    for (i=0;i<8;i++) 
-        for (j=0;j<8;j++) 
-            movehistoryboard[hindex][SQR(i, j)] = board.squares[SQR(i, j)];
+
+    cloneboard(&board, &boardhistory[hindex]);
                     
-        hindex++;
-        return 0;
-    }
+    hindex++;
+    
+}
     
 
 
@@ -467,32 +471,31 @@ Host Device int findking (char board[64], char YorX, int player) {
 Host Device int cancastle (struct board *board, int P, int direction) {
     if (!board->castle[P][1]) return 0;
     if (!allow_castling) return 0;
-    
+
     int ROW = 7*(1-P);
-    
+    if (ifsquare_attacked(board->squares, ROW, 4, 1-P,0,0)) return 0;    
 
     
     if (board->castle[P][0] && direction==-1)
       {
-	if (board->squares[ SQR(ROW, 0) ] == Pieces[P][1]  &&
-	    board->squares[ SQR(ROW, 1) ] == 'x' && !ifsquare_attacked(board->squares,ROW,1,1-P,0,0) &&
-	    board->squares[ SQR(ROW, 2) ] == 'x' && !ifsquare_attacked(board->squares,ROW,2,1-P,0,0) &&
-	    board->squares[ SQR(ROW, 3) ] == 'x' && !ifsquare_attacked(board->squares,ROW,3,1-P,0,0))
+	if (board->squares[ SQR(ROW, 0) ] == Pieces[P][1])
 	  {
+	  if(board->squares[ SQR(ROW, 1) ] == 'x' && !ifsquare_attacked(board->squares,ROW,1,1-P,0,0) &&
+	     board->squares[ SQR(ROW, 2) ] == 'x' && !ifsquare_attacked(board->squares,ROW,2,1-P,0,0) &&
+	     board->squares[ SQR(ROW, 3) ] == 'x' && !ifsquare_attacked(board->squares,ROW,3,1-P,0,0))
 	    return 1;
 	  }
+
       }
     
             
-            
-    
-    
     
     if (board->castle[P][2] && direction==1)
       {
-	if (board->squares[ SQR(ROW, 7) ] == Pieces[P][1] &&
-	    board->squares[ SQR(ROW, 5) ] == 'x' && !ifsquare_attacked(board->squares,ROW,5,1-P,0,0) &&
+	if (board->squares[ SQR(ROW, 7) ] == Pieces[P][1])
+	  if (board->squares[ SQR(ROW, 5) ] == 'x' && !ifsquare_attacked(board->squares,ROW,5,1-P,0,0) &&
 	    board->squares[ SQR(ROW, 6) ] == 'x' && !ifsquare_attacked(board->squares,ROW,6,1-P,0,0))
+
 	  {
 	    return 1;
 	}
