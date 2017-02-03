@@ -17,7 +17,9 @@ settings = Settings()
 from chessArena.table import Table
 
 xDeepValue = 0
-yDeepValue = 0 
+yDeepValue = 0
+
+
 class Tournament():
 
     def __init__(self, scr, RUN, DELETE):
@@ -30,9 +32,9 @@ class Tournament():
 
         self.verboseBoards = False
 
-        signal.signal(signal.SIGINT, self.SIGINTFinishAndQuit) 
-
-        self.Competitors = loadmachines(DIR=settings.TOPmachineDIR)
+        signal.signal(signal.SIGINT, self.SIGINTFinishAndQuit)
+        
+        self.Competitors = loadmachines(DIR=settings.HoFmachineDIR)
         shuffle(self.Competitors)
         self.Competitors = self.Competitors[:settings.TournamentPoolSize]
         
@@ -47,14 +49,14 @@ class Tournament():
 
         print("%i competitors." % len(self.Competitors))
         self.EngineCommand = [settings.enginebin,
-                              '-MD', settings.TOPmachineDIR,
+                              '-MD', settings.HoFmachineDIR,
                               '--deep', '4',
                               '--xdeep', str(xDeepValue),
-                              '--ydeep', str(yDeepValue),
-                              '--specific']
+                              '--ydeep', str(yDeepValue)]
 
-        self.TABLEBOARD = [Table(None, forceNoGUI=True)
-                          for k in range(self.MaxTableboardSize)]
+
+        self.TABLEBOARD = [ Table(None, forceNoGUI=True)
+                            for k in range(self.MaxTableboardSize) ]
         if RUN:
             self.TypeOfTournament = RUN
             print("\n\n")
@@ -122,10 +124,11 @@ class Tournament():
 
             print("Deleting %s; %i points." % (Worst[0], Worst[1]))
 
-            bareDeleteMachine(settings.TOPmachineDIR, Worst[0])
+            bareDeleteMachine(settings.HoFmachineDIR, Worst[0])
             self.Competitors = [
                     x for x in self.Competitors if x.filename != Worst[0] ]
             self.TotalDead += 1
+            
     def ProperTournament(self):
 
         self.TournamentRounds = self.DefineGames(len(self.Competitors))
@@ -168,7 +171,7 @@ class Tournament():
                 except:
                     print("Tried to kill %s but it's already deleted." % deadmac.filename)
                     return
-                bareDeleteMachine(settings.TOPmachineDIR, deadmac.filename)
+                bareDeleteMachine(settings.HoFmachineDIR, deadmac.filename)
                 
                 print("%s dies." % deadmac.filename)
                 self.TotalDead += 1
@@ -216,10 +219,10 @@ class Tournament():
                     continue
 
                 if not self.TABLEBOARD[G].online:
-                    self.TABLEBOARD[G].startEngines([settings.enginebin, '-MD', settings.machineDIR+'/top_machines', '--deep', '4'])
+                    self.TABLEBOARD[G].startEngines(self.EngineCommand)
                     continue
 
-                elif not ACTIVE[G]:
+                elif not self.TABLEBOARD[G].onGame:
                     # CREATE NEW GAME ON THE FLY.
                     if self.TypeOfTournament == "killemall":
 
@@ -322,15 +325,8 @@ class Tournament():
             I += 1
 
             if not True in ACTIVE:
-                for T in self.TABLEBOARD:
-                    for M in T.MACHINE:
-                        M.destroy()
                 return SCORE
             
-
-
-
-        
     def showStatus(self, I, RoundIndex, TotalRounds, SCORE,
                    ACTIVE, DRAWS, ROUND, elapsed):
         if self.stdscr:

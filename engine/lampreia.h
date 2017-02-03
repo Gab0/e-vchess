@@ -195,7 +195,7 @@ IFGPU(extern __device__ struct param GBrain;)
 
 extern bool loadedmachine;
 
-extern bool selectTOPmachines;
+extern bool HallOfFameMode;
 extern const float BoardMiddleScoreWeight[8];
 extern const float BoardInvaderScoreWeight[8];
 

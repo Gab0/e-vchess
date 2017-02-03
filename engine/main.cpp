@@ -45,7 +45,7 @@ int hindex;
 int i;
 char *infomoveTABLE[2048];
 
-bool selectTOPmachines = false;
+bool HallOfFameMode = false;
 
 int  infomoveINDEX;
 bool show_time_elapsed;
@@ -105,8 +105,8 @@ int main(int argc, char** argv) {
      for (i=0;i<argc;i++) {
         
             
-       if (strstr(argv[i], "-TOP") != NULL || strstr(argv[i], "-t") != NULL)
-	  selectTOPmachines = true;
+       if (strstr(argv[i], "--HOF") != NULL || strstr(argv[i], "-h") != NULL)
+	  HallOfFameMode = true;
 	
 	if (strstr(argv[i], "--specific") != NULL)
 	  sprintf(specificMachine, "%s", argv[i+1]);
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
         if (strstr(argv[i], "--deep") != NULL) 
-	  BRAIN.DEEP = (int)atoi(argv[i+1]);
+  BRAIN.DEEP = (int)atoi(argv[i+1]);
 
 	if (strstr(argv[i], "--xdeep") != NULL)
 	  BRAIN.xDEEP = (int)atoi(argv[i+1]);

@@ -2,13 +2,16 @@
 
 from evchess_evolve.current_parameters import STDPARAMETERS
 from evchess_evolve.parameter import parameter
-from evchess_evolve.core import machine_dir
 
 from random import choice, randrange
 import os
+
+from chessArena.settings import Settings
+settings = Settings()
+
 class machine():
 
-    def __init__(self, fname, DIR=machine_dir):
+    def __init__(self, fname, DIR=settings.machineDIR):
         self.DIR = DIR
         self.filename = fname
         self.wasmodified = 0
@@ -27,7 +30,7 @@ class machine():
         self.Chromosomes = []
         
         self.ELO = 1000
-        self.onTOP = 0
+        self.onHoF = 0
 
         self.stat_games = 0
         self.stat_wins = 0
@@ -64,8 +67,8 @@ class machine():
             if parameter.name == split_line[0]:
                 parameter.read(split_line)
 
-        if 'TOP' in split_line:
-            self.onTOP = 1
+        if 'HoF' in split_line:
+            self.onHoF = 1
 
         if 'stat_elo' in split_line:
             self.ELO = int(split_line[2])
@@ -83,8 +86,8 @@ class machine():
             Fo.write("CHR = %s" % CHR)
             Fo.write('\n')
 
-        if self.onTOP:
-            Fo.write('TOP\n')
+        if self.onHoF:
+            Fo.write('HoF\n')
 
         Fo.write('stat_elo = %i\n' % self.ELO)
 

@@ -18,19 +18,22 @@ else:
     engineargs = ['--deep', '4']
     
 if '--alternative-folder' in sys.argv:
-    A_machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
+    _machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
+elif 'hof' in sys.argv:
+    _machineDIR = Settings.HoFmachineDIR
 else:
-    A_machineDIR = Settings.machineDIR
-    
+    _machineDIR = Settings.machineDIR
 
 if "create" in sys.argv:
     x = trainingDataCreator('moveTraining/database2015.pgn')
 elif "createsimple" in sys.argv:
     x = trainingDataCreator(SimpleDatabase = "newdatabase")
+elif "refresh" in sys.argv:
+    x = trainingDataCreator(SimpleDatabase="manualdbBACKUP", NewMovements="newfen")
 else:
     posLOG = open("pos_log", 'a', 1)
     for N in range(64):
-        SESSION = trainingDataFeeder('manualdb', engineargs, A_machineDIR)
+        SESSION = trainingDataFeeder('manualdb', engineargs, _machineDIR)
         result = SESSION.Result
         FullTestLen = len(SESSION.TrialPositions.keys())
         print("Total test lenght: %i" % FullTestLen)
@@ -38,22 +41,21 @@ else:
         
         #posLOG.write(json.dumps(result, indent=2)+"\n")
         ApprovedMachines = list(result.keys())
-        posLOG.write("\nPassed Tests: %i @ %s, run #%i.\n" % ( SESSION.PassedTests, A_machineDIR, N))
+        posLOG.write("\nPassed Tests: %i @ %s, run #%i.\n" % ( SESSION.PassedTests, _machineDIR, N))
         posLOG.write('\n'.join(["%s: %i" % (W, result[W]) for W in ApprovedMachines if result[W] > 0 ]))
-        pop = core.loadmachines(DIR=A_machineDIR)
+        pop = core.loadmachines(DIR=_machineDIR)
         if result:
             for scoreNumber in range(1, round(max([result[x] for x in result]))):
                 for MAC in ApprovedMachines:
                     if scoreNumber < result[MAC] < scoreNumber +1:
                         print("%s: %i" % (MAC, result[MAC]))
 
-        
             BestScoreOnGroup = max([result[x] for x in ApprovedMachines])
             NumberOfBestScorers = sum([1 for x in ApprovedMachines if result[x] == BestScoreOnGroup])
             for IND in range(len(pop)):
                 NAME = pop[IND].filename
                 if NAME not in ApprovedMachines or result[NAME] < 0:
-                    management.bareDeleteMachine(A_machineDIR, NAME)
+                    management.bareDeleteMachine(_machineDIR, NAME)
                     pop[IND] = None
             pop = [ x for x in pop if x ]
             
@@ -72,6 +74,6 @@ else:
             
         core.mutatemachines(2,pop)
 
-        core.setmachines(pop, DIR=A_machineDIR)
+        core.setmachines(pop, DIR=_machineDIR)
 
             

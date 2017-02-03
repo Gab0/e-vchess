@@ -7,13 +7,13 @@ import copy
 
 from shutil import copyfile
 
-# machine directory.
-machine_dir = "machines"
-
 from evchess_evolve.machine import machine
 from evchess_evolve.management import bareDeleteMachine
 from evchess_evolve import chromossome
 from os import listdir
+
+from chessArena.settings import Settings
+settings = Settings()
 
 def populate(population, popsize, Randomize, ID=""):
     NEWINDS = []
@@ -28,7 +28,7 @@ def populate(population, popsize, Randomize, ID=""):
     return population
 
 
-def loadmachines(DIR=machine_dir):
+def loadmachines(DIR=settings.machineDIR):
     population = []
     k = 0
     '''
@@ -54,10 +54,10 @@ def recover_popfromfolder(N):  # Linux only.
     entirety = []
     k = 0
     X = 0
-    for file in os.listdir(machine_dir):
+    for file in os.listdir(settings.machineDIR):
         if file.endswith(".mac"):
             X += 1
-            Fo = open(machine_dir + '/' + file, "r+")
+            Fo = open(settings.machineDIR + '/' + file, "r+")
             entirety.append(machine(file))
 
             for line in Fo.readlines():
@@ -108,20 +108,12 @@ def mutatemachines(Aggro, population):
 
     return population
 
-def setmachines(population, DIR=machine_dir):
+def setmachines(population, DIR=settings.machineDIR):
     for i in range(len(population)):
         if population[i].DIR != DIR:
             print("overriding %s directory." % population[i].filename)
             population[i].DIR = DIR
         population[i].write()
-
-    '''if os.path.isfile("%s/machines.list" % DIR):
-        os.remove("%s/machines.list" % DIR)
-    Fo = open("%s/machines.list" % DIR, "w+")
-    for i in range(len(population)):
-        Fo.write(population[i].filename + "\n")
-
-    Fo.close'''
 
 
 def deltheworst_clonethebest(population, action, MODlimit, ID=None):
@@ -159,7 +151,7 @@ def deltheworst_clonethebest(population, action, MODlimit, ID=None):
                 try:
                     delname = population[CURRENT_SCORE[0]].filename
                     print("subject deleted. %s" % delname)
-                    bareDeleteMachine(machine_dir, delname)
+                    bareDeleteMachine(settings.machineDIR, delname)
                 except AttributeError:
                     print("ERROR on Delete the Worst/Clone the Best")
                     pass
@@ -204,7 +196,7 @@ def create_hybrid(population):
 
 
 def select_best_inds(population, NUMBER):
-    TOP = [None for x in range(NUMBER)]
+    HoF = [None for x in range(NUMBER)]
 
     SCORE = 0
     for i in range(NUMBER):
@@ -212,16 +204,16 @@ def select_best_inds(population, NUMBER):
         for individual in population:
             SCR = individual.ELO
             if SCR > SCORE:
-                if i and SCR > TOP[i-1].ELO:
+                if i and SCR > HoF[i-1].ELO:
                     continue
-                if i and individual.filename in [x.filename for x in TOP[:i]]:
+                if i and individual.filename in [x.filename for x in HoF[:i]]:
                     continue
-                TOP[i] = individual
+                HoF[i] = individual
                 SCORE = SCR
 
-    TOP = [x for x in TOP if x]
+    HoF = [x for x in HoF if x]
 
-    return TOP
+    return HoF
 
 
 def crossover(population, indexA, indexB):
@@ -261,8 +253,7 @@ def replicate_best_inds(population, NUMBER, ID=None):
 
 
 def clone_from_template(ID=None):
-    #TemplatePool = open('%s/top_machines/machines.list' % machine_dir, 'r')
-    TemplatePool = os.listdir("%s/top_machines" % machine_dir)
+    TemplatePool = os.listdir("%s/halloffame" % settings.machineDIR)
     POOL = []
 
     for line in TemplatePool.readlines():
@@ -271,7 +262,7 @@ def clone_from_template(ID=None):
 
     X = random.randrange(len(POOL))
 
-    model = open('%s/top_machines/%s' % (machine_dir, POOL[X]), 'r')
+    model = open('%s/%s' % (settings.HoFmachineDIR, POOL[X]), 'r')
 
     CHILD = machine(NewMacName(ID=ID, Tail="&"))
     for line in model.readlines():
@@ -321,7 +312,7 @@ def EliminateEquals(population, Range, delete=True):
                 population[T] = 0
     if delete:
         for Name in blacklist:
-            bareDeleteMachine(machine_dir, Name)
+            bareDeleteMachine(settings.machineDIR, Name)
                                  
     return list(filter((0).__ne__, population))
 
@@ -354,11 +345,10 @@ def Triangulate_value(values):
 def sendtoHallOfFame(MACHINE):
 
     copyfile(MACHINE.DIR + '/' + MACHINE.filename,
-             MACHINE.DIR + '/top_machines/' + MACHINE.filename)
-    '''Fo = open(MACHINE.DIR + '/top_machines/machines.list', 'a+')
-    Fo.write(MACHINE.filename + '\n')'''
-    print('machine %s sent to top.' % MACHINE.filename)
-    MACHINE.onTOP = 1
+             settings.HoFmachineDIR + MACHINE.filename)
+
+    print('machine %s sent to hall of fame.' % MACHINE.filename)
+    MACHINE.onHoF = 1
     MACHINE.write()
 
 

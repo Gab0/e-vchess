@@ -24,8 +24,7 @@ void setup_board (int setup) {
     
     board.passantJ=-1;
     board.passant_player=-1;
-
-    //erase_moves(&board, 1);
+    board.gameEnd=0;
     board.MovementCount=0;
     hindex=0;
 }
@@ -38,7 +37,7 @@ void show_board (char squares[64])
   X++;
   for(i=0;i<8;i++){
     for(j=0;j<8;j++){
-	  
+      
       output[X] = squares[ SQR(i, j) ];
       X++;
       if (j!=7)
@@ -46,25 +45,13 @@ void show_board (char squares[64])
 	  output[X] = ' ';
 	  X++;
 	}
-
-	  
     }
     output[X] = '\n';
     X++;
-    //fprintf(stderr, "%s\n", BoardDraw);
     write(2, output, X);
     X=0;
-    //BoardDraw[X] = '\n'; X++;
-    //BoardDraw[X] = '\n'; X++;
-    
-  }
-  //if (full){
-  //     printf("")
-  // }
-    
-  // BoardDraw[X] = '\n';
-  // fprintf(stderr, "%s", BoardDraw);
 
+  }
     
 }
 
@@ -226,12 +213,14 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
   
   int from;
   int to;
+  int player=0;
   if (MoveUnmove > 0)
     {
       from = movement->from;
       to = movement->to;
 
       tg_board->squares[ from ] = 'x';
+      player = tg_board->whoplays;
     }
   else
     {
@@ -239,6 +228,7 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
       from = movement->to;
 
       tg_board->squares[ from ] = movement->casualty;
+      player = 1-tg_board->whoplays;
     }
 
     tg_board->squares[ to ] = movement->piece;
@@ -255,15 +245,20 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 		tg_board->squares[ to + 1 ] =
 		  tg_board->squares[ SQR( SQR_I(to), 0) ];
 		tg_board->squares[ SQR( SQR_I(to), 0) ] = 'x';
+		FLIP(tg_board->castle[player][0]);
 	      }
-        
+	    
 	    if (SQR_J(to) > 4)
 	      {
 		tg_board->squares[ to - 1 ] =
 		  tg_board->squares[ SQR( SQR_I(to), 7) ];
 		tg_board->squares[ SQR( SQR_I(to), 7) ] = 'x';
-	      }
-
+		FLIP(tg_board->castle[player][2]);
+	      }	
+	    	
+		
+	    	
+	    
 	  }
 	else
 	  {// ATTENTION; (solved?)
@@ -272,6 +267,7 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 		tg_board->squares[ SQR(SQR_I(from), 0) ] = 
 		  tg_board->squares[ from + 1 ];
 		tg_board->squares[ from + 1 ] = 'x';
+		FLIP(tg_board->castle[player][0]);
 	      }
 	    
 	    if (SQR_J(from) > 4)
@@ -281,7 +277,9 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 		tg_board->squares[ from - 1 ] = 'x';
 	      } 
 
+	    FLIP(tg_board->castle[player][2]);
 	  }
+	
 
       }
     
@@ -301,19 +299,19 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
     if (MoveUnmove == -1)
       AffectCastling = 1;
 
-    F(cP,2)
-    if (movement->lostcastle[cP])
-      {
-	//int P=0;
-	// SWAP THIS
-	//if (SQR_I(from) == 0) P=1;
-	//if (is_in(movement->piece, Pieces[1], 6)) P=1;
-
-	//	if (movement->lostcastle == 2)
+    F(cP, 2)
+      if (movement->lostcastle[cP])
+	{
+	  //int P=0;
+	  // SWAP THIS
+	  //if (SQR_I(from) == 0) P=1;
+	  //if (is_in(movement->piece, Pieces[1], 6)) P=1;
 	  
-	FLIP(tg_board->castle[cP][ movement->lostcastle[cP]-1 ]);
-
-      }
+	  //	if (movement->lostcastle == 2)
+	  
+	  FLIP(tg_board->castle[cP][ movement->lostcastle[cP] - 1 ]);
+	  
+	}
     
     tg_board->passantJ = movement->passantJ[1-AffectCastling];
     tg_board->passant_player = movement->passant_player[1-AffectCastling];
@@ -326,68 +324,7 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
     
     
 }
-    // LEGACY FUNCTION;
-    /*Host Device void undo_move(struct board *tg_board, struct move *movement) {
-    
-    
-    char to[2] = {movement->from[0], movement->from[1]};
-    char from[2] = {movement->to[0], movement->to[1]};
-    
 
-     
-    if(movement->casualty==0) movement->casualty='x';
-    
-    
-    tg_board->squares[ SQR(to[0], to[1]) ] = tg_board->squares[ SQR(from[0], from[1]) ];
-    tg_board->squares[ SQR(from[0], from[1]) ] = movement->casualty;
- 
-    
-
-    
-    if(movement->promoteto!=0)
-      {
-      if (movement->from[0]==6) tg_board->squares[ SQR(to[0], to[1]) ] = 'p';
-      if (movement->from[0]==1) tg_board->squares[ SQR(to[0], to[1]) ] = 'P';
-      }
-    
-    if(movement->iscastle){
-        if (movement->from[1] < 4)
-	  {
-	    tg_board->squares[ SQR(from[0], 0) ] = tg_board->squares[ SQR(to[0], (from[1]+1)) ];
-	    tg_board->squares[ SQR(from[0], (from[1]+1)) ] = 'x';
-	  }
-        
-        if (movement->from[1] > 4)
-	  {
-	    tg_board->squares[ SQR(from[0], 7) ] = tg_board->squares[ SQR(to[0], (from[1]-1)) ];
-	    tg_board->squares[ SQR(from[0], (from[1]-1)) ] = 'x';
-	  } 
-    }
-    
-    if(movement->passant)
-      {
-        tg_board->squares[ SQR(to[0], from[1]) ] = movement->casualty;
-	tg_board->squares[ SQR(from[0], from[1]) ] = 'x';
-      }
-    
-    int cP=-1;
-    if(to[0]==7) cP = 0;
-    if(to[0]==0) cP = 1;
-    
-    if (cP > -1)
-      {
-        if(movement->lostcastle==1) tg_board->castle[cP][0] = 1;
-        if(movement->lostcastle==2) tg_board->castle[cP][1] = 1;
-        if(movement->lostcastle==3) tg_board->castle[cP][2] = 1;
-      }
-    
-    tg_board->passantJ=movement->passantJ[0];
-    
-    flip(tg_board->whoplays);
-    tg_board->MovementCount--;
-
-    
-    }*/
 
 Host Device void undo_lastMove(struct board *board, int Number) {
   int N=0;
@@ -421,7 +358,6 @@ Device void attackers_defenders (struct movelist *moves)
     } 
 }
 
-
 void history_append(struct move *move)
 {
     int i=0,j=0;
@@ -434,9 +370,6 @@ void history_append(struct move *move)
     
 }
     
-
-
-
 int history_rollback(int times) {
     int i=0;
     
@@ -448,8 +381,6 @@ int history_rollback(int times) {
     }
    return 0; 
 }
-
-
 
 Host Device int findking (char board[64], char YorX, int player) {
     char KING = Pieces[player][5];

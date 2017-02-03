@@ -27,8 +27,8 @@ int loadmachine (int verbose, char *MachineDir) {
 
 
        
-       if (selectTOPmachines)
-	 sprintf(MachineDir, "%s/top_machines", MachineDir);
+       if (HallOfFameMode)
+	 sprintf(MachineDir, "%s/halloffame", MachineDir);
 
        // to read entire machine dir, and randomize one to load;
        if (strstr(specificMachine, ".mac") == NULL) {

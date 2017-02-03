@@ -18,7 +18,9 @@ int fehn2board (char str[]) {
 
     //read boardmap section.
     setup_board(0);
-    printf("%s /%i\n",fstring, strlen(fstring));
+    
+    //printf("%s /%i\n",fstring, strlen(fstring));
+    
     for (z=0;z<strlen(fstring);z++) {
     
      number = fstring[z]-'0';

@@ -9,7 +9,7 @@ class Settings():
 
         # paths to the directories where machines are stored.
         self.machineDIR = "machines"
-        self.TOPmachineDIR = self.machineDIR + "/top_machines"  # % machineDIR
+        self.HoFmachineDIR = self.machineDIR + "/halloffame"  # % machineDIR
 
         # path and arguments to run those chess engines.
         self.engineARGS = [self.enginebin, "-MD", self.machineDIR, "--deep", "3", "--xdeep", "0"]

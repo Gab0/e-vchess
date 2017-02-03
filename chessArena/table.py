@@ -392,6 +392,7 @@ class Table(Frame):
 
         self.onGame = 0
         self.initialize = 0
+
         if self.GUI:
             self.switch["text"] = "off"
             self.switch["command"] = self.turnon

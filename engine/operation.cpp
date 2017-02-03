@@ -45,37 +45,34 @@ Device int append_move(struct board *board, struct movelist *moves,
 
     
   moves->movements[moves->k].passant=0;
+  
   moves->movements[moves->k].passantJ[0]=board->passantJ;
   moves->movements[moves->k].passantJ[1]=-1;
 
   moves->movements[moves->k].passant_player[0] = board->passant_player;
   moves->movements[moves->k].passant_player[1] = -1;
+  
   moves->movements[moves->k].iscastle = 0;
 
-  //special movement position considerations (when i>7)
+  moves->movements[moves->k].piece = board->squares[ from ];
 
-  
-
-    //printf(">>%i     %i %i\n", SQR(i,j),i,j);
-    moves->movements[moves->k].piece = board->squares[ from ];
-    //printf(">>%c\n", moves->movements[moves->k].piece);
-    moves->movements[moves->k].from = from;
-    moves->movements[moves->k].to = to;
+  moves->movements[moves->k].from = from;
+  moves->movements[moves->k].to = to;
 
     
-    moves->movements[moves->k].casualty = board->squares[ to ];
-    moves->movements[moves->k].promoteto = 0;
-    moves->movements[moves->k].iscastle = 0;
+  moves->movements[moves->k].casualty = board->squares[ to ];
+  moves->movements[moves->k].promoteto = 0;
+  moves->movements[moves->k].iscastle = 0;
     
-    moves->movements[moves->k].lostcastle[0] = 0;
-    moves->movements[moves->k].lostcastle[1] = 0;   
+  moves->movements[moves->k].lostcastle[0] = 0;
+  moves->movements[moves->k].lostcastle[1] = 0;   
     
 
     //loss of castling rights
     if (moves->movements[moves->k].piece == Pieces[P][5])
       {
       if (from == 60 || from == 4)
-	if (board->castle[P][1]==1)
+	if (board->castle[P][1])
 	  moves->movements[moves->k].lostcastle[P] = 2;
       }
 	else
@@ -95,11 +92,11 @@ Device int append_move(struct board *board, struct movelist *moves,
       {
 	      if (board->castle[1-P][0])
 		if ( (to == 0) || (to == 56) )
-		  moves->movements[moves->k].lostcastle[P] = 1;
+		  moves->movements[moves->k].lostcastle[1-P] = 1;
 	      
 	      	if (board->castle[1-P][2])
 		  if( (to == 7) || (from == to) )
-		    moves->movements[moves->k].lostcastle[P] = 3;
+		    moves->movements[moves->k].lostcastle[1-P] = 3;
       }
     /*if ((SQR_I(from)==0 && P==1)||(SQR_I(from)==7 && P==0))
       {

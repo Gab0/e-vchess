@@ -29,7 +29,7 @@ class trainingDataFeeder():
             try:
                 self.TrialPositions = self.loadScoredDatabase()
             except:
-                raise
+                #raise
                 self.TrialPositions = self.loadRawSimpleDatabase()
             if not self.TrialPositions:
                 return
@@ -178,7 +178,7 @@ class trainingDataFeeder():
         dataFile.write(data)
 
         
-    def launchTest(self, mortal=4):
+    def launchTest(self, mortal=3):
         SCORE = 0
         POS = list(self.TrialPositions.keys())
         for G in range(len(POS)):
@@ -193,6 +193,7 @@ class trainingDataFeeder():
                             ScoredTest = False'''
 
             print("sending %s" % self.TrialPositions[POS[G]]["pos"])
+            print("---[ %i/%i ]---" % (G+1, len(POS)) + " *" * mortal)
             self.subject.send("position %s" % self.TrialPositions[POS[G]]["pos"])#####################
             sleep(1.2)
             self.subject.send("go")
@@ -224,8 +225,6 @@ class trainingDataFeeder():
                                     scoreProbe[Z][1] = thinkingMoveScore
                                     scoreProbe[Z][0] = scoreReading[4]
 
-                                        
-                                        
                                     break
                                 else:
                                     raise
@@ -242,7 +241,7 @@ class trainingDataFeeder():
                     self.TrialPositions[POS[G]]["num_tried"] += 1
                     if move in expected_movements:
                         MOVE_RANK = expected_movements.index(move)
-                        print("good! %s! at position %i" % (expected_movements[MOVE_RANK], MOVE_RANK+1))
+                        print("PASS! %s! at position %i" % (expected_movements[MOVE_RANK], MOVE_RANK+1))
                         if ScoredTest:
                             self.PassedTests += 1
                             SCORE += 5 - MOVE_RANK
@@ -256,8 +255,8 @@ class trainingDataFeeder():
                         self.PassedTests += 1
                         self.TrialPositions[POS[G]]["num_succeeded"] += 1
                     else:
-                        SCORE -= 10
-                        print("bad! got %s while expecting %s." % (move, ' '.join(expected_movements)))
+                        SCORE -= 25
+                        print("FAIL! got %s while expecting %s." % (move, ' '.join(expected_movements)))
                         if move == scoreProbe[1][0]:
                             print("but the second move from engine got it right. half point scored")
                             if ScoredTest:
@@ -268,10 +267,10 @@ class trainingDataFeeder():
                         #        SCORE += 0.5
                         
                         # check if it is possible to win the series;
-                        '''if mortal:
+                        if mortal:
                             mortal -= 1
                             if not mortal:
-                                return SCORE'''
+                                return SCORE
 
                         if SCORE + (len(POS) - G) * 10 < 0:
                             print("bailing with score=%i" % SCORE)

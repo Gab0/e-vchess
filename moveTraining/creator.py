@@ -8,13 +8,18 @@ import re
 import io
 
 class trainingDataCreator():
-    def __init__(self, PGN_dataBase=None, SimpleDatabase=None):
+    def __init__(self, PGN_dataBase=None, SimpleDatabase=None, NewMovements=None):
         self.database_size = 32
-
+        self.DatabaseName = SimpleDatabase
         self.PGN_dataBase = PGN_dataBase
-        if self.PGN_dataBase:
+        self.NewMovements=NewMovements
+        if self.NewMovements:
+            self.load_SimpleDatabase(SimpleDatabase)
+            self.refreshDatabase()
+            return
+        elif self.PGN_dataBase:
             self.loadPGN_database()
-        if SimpleDatabase:
+        elif SimpleDatabase:
             self.load_SimpleDatabase(SimpleDatabase)
         self.runDataCollector()
         
@@ -72,7 +77,24 @@ class trainingDataCreator():
         self.database_size = len(self.SimpleDatabase)
 
         print("loaded simple database of len %i" % self.database_size)
-        
+
+    def refreshDatabase(self):
+        FenList = []
+        NewMovements = open(self.NewMovements, 'r').readlines()
+        #self.load_SimpleDatabase(self.SimpleDatabase)
+        FENsInDatabase = [x[0] for x in self.SimpleDatabase]
+        for NEW in NewMovements:
+            NEW = NEW.split('|')[0].replace('\n', '')
+            if NEW not in FENsInDatabase:
+                FenList.append(NEW)
+        if FenList:
+            self.database_size = len(FenList)
+            self.runDataCollector(FenList)
+
+        NewMovements = open(self.NewMovements, 'w')
+        NewMovements.write('\n')
+                
+            
     
     def fenToFile(self, FEN):
         fname = 'posfeed.fen'
@@ -80,8 +102,8 @@ class trainingDataCreator():
         F.write(FEN)
         
     def SaveBoard_ExpectedMovement(self, Board, Movement):
-        ListName = 'database'
-        F = open(ListName, 'a')
+        
+        F = open(self.DatabaseName, 'a')
         DATA = "%s" % Board
         for W in Movement:
             if W[0]:
@@ -89,8 +111,8 @@ class trainingDataCreator():
         DATA += '\n'
 
         F.write(DATA)
-        
-    def runDataCollector(self):
+
+    def runDataCollector(self, FenList=None):
         self.ModelEngine = Engine(["stockfish"])
         
         self.ModelEngine.send("uci")
@@ -99,9 +121,12 @@ class trainingDataCreator():
         self.ModelEngine.send("setoption name MultiPV value %i" % NUMBER_OF_TOP_MOVES)
         
         sleep(3)
+        #print(FenList)
         for K in range(self.database_size):
             if self.PGN_dataBase:
                 FEN = self.fetchBoardFromDatabase()
+            elif FenList:
+                FEN = FenList[K]
             elif self.SimpleDatabase:
                 FEN = self.SimpleDatabase[K]
             else:

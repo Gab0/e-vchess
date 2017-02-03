@@ -22,7 +22,7 @@ from evchess_evolve.core import populate, loadmachines, mutatemachines,\
 
 from makegraphic import show_mem_graphic
 #from evchess_evolve.management import *
-
+import signal
 # DEBUG, MEMORY SCAN MODULES;
 #import objgraph
 #import resource
@@ -35,9 +35,12 @@ from makegraphic import show_mem_graphic
 
 settings = Settings()
 class Arena():
-
+    def cleanExit(self, signal, frame):
+        self.killemall()
+        exit(0)
+        
     def __init__(self, GraphicInterface=True, GO=False):
-
+        signal.signal(signal.SIGINT, self.cleanExit)
         self.Cycle = False
         self.looplimit = 0
         self.GraphicInterface = GraphicInterface
@@ -271,7 +274,7 @@ class Arena():
         DELTAind = originalPOPLEN // 16
 
         if "T" in LEVEL:
-            halloffame = loadmachines(DIR=settings.TOPmachineDIR)
+            halloffame = loadmachines(DIR=settings.HoFmachineDIR)
             halloffame = [mac.filename for mac in halloffame]
 
             currentbestinds = select_best_inds(population, 18)
