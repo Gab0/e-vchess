@@ -1,157 +1,148 @@
-{
-  "0": {
+[
+  {
     "pos": "r2q1rk1/pbp1npp1/1p2pn1p/8/P1p5/1P1P3P/3KPPP1/RN2QBNR w - - 0 12",
     "movement": [
       "b3c4",
-      "d2c1",
+      "b1c3",
+      "d2d1",
       "d2c2",
-      "g1f3",
-      "e1c1"
+      "b1a3"
     ],
-    "num_succeeded": 95,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "1": {
+  {
     "pos": "rn2qrk1/pb3ppp/1p3n2/8/P2p1P2/N1p4P/Q3P1P1/R3KBNR w KQ - 2 16",
     "movement": [
       "g1f3",
-      "a3b5",
-      "a1d1",
       "a3c4",
-      "a2c2"
-    ],
-    "num_succeeded": 24,
-    "num_tried": 95
-  },
-  "2": {
-    "pos": "r3kb1r/1p2p1p1/2npp3/p6p/Pq2N3/1P2B2P/2PQ1PP1/R3K1NR b KQkq - 0 15",
-    "movement": [
-      "g7g6",
-      "b4d2",
-      "d6d5",
-      "g7g5",
-      "e6e5"
+      "a3b5",
+      "f4f5",
+      "a3c2"
     ],
     "num_succeeded": 0,
-    "num_tried": 95
+    "num_tried": 0
   },
-  "3": {
+  {
+    "pos": "r3kb1r/1p2p1p1/2npp3/p6p/Pq2N3/1P2B2P/2PQ1PP1/R3K1NR b KQkq - 0 15",
+    "movement": [
+      "b4e4"
+    ],
+    "num_succeeded": 0,
+    "num_tried": 0
+  },
+  {
     "pos": "4r3/2p1b3/1rnqkpp1/QB1pP2p/P7/2P5/2P2PPP/1RB2RK1 b - - 0 22",
     "movement": [
-      "f6e5",
       "d6e5",
+      "f6e5",
       "d6d7",
       "d6c5",
-      "d6d8"
+      "b6b5"
     ],
-    "num_succeeded": 95,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "4": {
+  {
     "pos": "r5k1/ppnr1pp1/2p1p2p/P3q3/1PPP4/6P1/4NP2/4RK1R w - - 0 25",
     "movement": [
-      "d4e5",
-      "a5a6",
-      "h1h6",
-      "e1c1",
-      "h1h4"
+      "d4e5"
     ],
-    "num_succeeded": 95,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "5": {
+  {
     "pos": "r2qk2r/1pp3p1/2b1p2p/p2pPn2/Pb1Q1P2/7P/1PP3P1/RNB2KNR w kq - 5 14",
     "movement": [
-      "d4d3",
       "d4f2",
-      "g1f3",
-      "g1e2",
-      "c2c3"
+      "d4d3"
     ],
-    "num_succeeded": 95,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "6": {
+  {
     "pos": "n3k3/P7/6r1/4p2p/8/3R1N2/4r2P/6RK b - - 2 39",
     "movement": [
       "g6g1",
-      "e5e4",
       "g6a6",
-      "e8f7",
-      "g6g4"
+      "e5e4"
     ],
-    "num_succeeded": 95,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "7": {
+  {
     "pos": "1r4k1/p1p2pp1/b1q1p2p/2BpP3/P2Q3P/2P5/1r2PPP1/R3KB1R w KQ - 3 20",
     "movement": [
-      "c5b4",
       "f2f3",
-      "f2f4",
+      "c5b4",
       "a1d1",
-      "g2g4"
+      "f2f4",
+      "a1c1"
     ],
-    "num_succeeded": 40,
-    "num_tried": 95
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "8": {
+  {
     "pos": "r2q1knr/1pp1p2p/7n/p2p1P2/3P4/2PQ1N2/PP2B1P1/R3K2R b KQ - 1 17",
     "movement": [
       "h6f7",
+      "d8c8",
       "a8a6",
       "d8d7",
-      "d8c8",
-      "c7c6"
+      "e7e6"
     ],
-    "num_succeeded": 38,
-    "num_tried": 65
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "9": {
+  {
     "pos": "rnb1kbnr/3p1p2/1p2pqp1/pNp4p/2B1P3/2PPQ3/PP3PPP/R1B1K1NR b KQkq - 1 8",
     "movement": [
       "f8h6",
       "b8c6",
       "d7d5",
-      "d7d6",
+      "e6e5",
       "c8a6"
     ],
-    "num_succeeded": 27,
-    "num_tried": 55
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "10": {
+  {
     "pos": "r1bq1bnr/1ppppkp1/8/7p/p3P3/5Q2/PPPP1PPP/RNB1K2R b KQ - 1 8",
     "movement": [
       "g8f6",
-      "f7e8",
-      "f7g6",
-      "f7e6"
+      "f7e8"
     ],
-    "num_succeeded": 49,
-    "num_tried": 49
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "11": {
+  {
     "pos": "r3kb1r/ppp2ppp/4q3/4n3/2P1p2P/PNN5/1P1PQPP1/R1B1K2R w KQkq - 3 14",
     "movement": [
-      "c3e4",
-      "e2e4",
+      "c3d5",
+      "b3d4",
       "e1g1",
-      "e1f1",
-      "b3d4"
+      "c3e4",
+      "e1f1"
     ],
-    "num_succeeded": 49,
-    "num_tried": 49
+    "num_succeeded": 0,
+    "num_tried": 0
   },
-  "12": {
+  {
     "pos": "r5k1/p4ppp/Qp3n2/4q3/5P2/2K3nP/8/R5N1 w - - 4 33",
     "movement": [
-      "f4e5",
-      "c3b3",
-      "c3c2",
-      "c3c4",
-      "c3d3"
+      "f4e5"
     ],
-    "num_succeeded": 49,
-    "num_tried": 49
+    "num_succeeded": 0,
+    "num_tried": 0
+  },
+  {
+    "pos": "rn1qkb1r/ppp2ppp/4p3/3p4/6nP/2N5/PPPPPPP1/R1BQKB1R w KQkq - 0 6",
+    "movement": [
+      "e2e4",
+      "d2d4",
+      "e2e3"
+    ],
+    "num_succeeded": 0,
+    "num_tried": 0
   }
-}
+]

@@ -1,6 +1,4 @@
 #!/bin/python
-
-
 from moveTraining.creator import trainingDataCreator
 from moveTraining.feeder import trainingDataFeeder
 
@@ -11,12 +9,15 @@ Settings = settings.Settings()
 import sys
 import json
 import random
+import optparse
 
 if '--full' in sys.argv:
     engineargs = ['--xdeep', '1', '--deep', '4']
 else:
     engineargs = ['--deep', '4']
-    
+
+parser = optparse.OptionParser()
+parser.add_option('--mutate', action='store_true', dest='Mutate', default=False)
 if '--alternative-folder' in sys.argv:
     _machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
 elif 'hof' in sys.argv:
@@ -24,12 +25,13 @@ elif 'hof' in sys.argv:
 else:
     _machineDIR = Settings.machineDIR
 
+(options, args) = parser.parse_args()
 if "create" in sys.argv:
     x = trainingDataCreator('moveTraining/database2015.pgn')
-elif "createsimple" in sys.argv:
-    x = trainingDataCreator(SimpleDatabase = "newdatabase")
+elif "reeval" in sys.argv:
+    x = trainingDataCreator(Database = "manualdb")
 elif "refresh" in sys.argv:
-    x = trainingDataCreator(SimpleDatabase="manualdbBACKUP", NewMovements="newfen")
+    x = trainingDataCreator(Database="manualdb", NewMovements="newfen")
 else:
     posLOG = open("pos_log", 'a', 1)
     for N in range(64):
@@ -69,11 +71,9 @@ else:
         stock_popsize=16
         while len(pop) < stock_popsize/2 and pop:
             pop += core.Mate(pop,2,ID="pos")
-
-        pop = core.populate(pop, stock_popsize-len(pop), 1)
-            
-        core.mutatemachines(2,pop)
-
-        core.setmachines(pop, DIR=_machineDIR)
+        if options.Mutate:
+            pop = core.populate(pop, stock_popsize-len(pop), 1)
+            core.mutatemachines(2,pop)
+            core.setmachines(pop, DIR=_machineDIR)
 
             
