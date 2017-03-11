@@ -168,6 +168,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_endgameWeight", &BRAIN.endgameWeight);
 	   readparam(line, V, "param_opponentAddMaterialValue", &BRAIN.opponentAddMaterialValue);
 	   readparam(line, V, "param_kingPanic", &BRAIN.kingPanic);
+
 	   readparam(line, V, "param_pawnIssue", &BRAIN.pawnIssue);
 	   readparam(line, V, "param_seekInvasion", &BRAIN.seekInvasion);
 	   readparam(line, V, "param_offensevalue", &BRAIN.offensevalue);
@@ -175,25 +176,29 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_limitDefender", &BRAIN.limitDefender);
 	   readparam(line, V, "param_parallelAttacker", &BRAIN.parallelAttacker);
 	   readparam(line, V, "param_castlebonus", &BRAIN.castlebonus);
+	   
+	   readparam(line, V, "param_kingAreaPanic", &BRAIN.kingAreaPanic);
+	   readparam(line, V, "param_kingAreaTower", &BRAIN.kingAreaTower);
+	   readparam(line, V, "param_kingAreaSecure", &BRAIN.kingAreaSecure);
 
-       }
+	 }
 	 printf("\n");
-       fclose(MachineFile);
+	 fclose(MachineFile);
       
        
-       //machinepath = filename;
+	 //machinepath = filename;
+	 
+	 printf("machinepath>> %s\n", filename);
+	 
+	 loadedmachine = true;
+	 
+	 if (againstHUMAN)
+	   chesslog(MachineDir, machinepath);
 
-       printf("machinepath>> %s\n", filename);
-       
-       loadedmachine = true;
-       
-       if (againstHUMAN) 
-	 chesslog(MachineDir, machinepath);
-
-       free(reading);
-       free(filename);
-       return 0;
-   
+	 free(reading);
+	 free(filename);
+	 return 0;
+	 
     
 }
 

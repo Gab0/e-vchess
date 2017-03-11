@@ -100,7 +100,6 @@ Device int evaluateMaterial(struct board *evalboard,
 		PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	    }
 
-
 	  pawnEffectiveHeight = powf(pawnEffectiveHeight, 1.2);
 	  
 	  if (AttackerDefenderMatrix[P][ cSQR ] > AttackerDefenderMatrix[1-P][ cSQR ])
@@ -189,7 +188,7 @@ Device int evaluateAttack(struct board *evalboard,
   float score=0;
   
   int Z=0;
-  int deltaAttacker = 0;
+  int deltaAttacker=0;
   int FreePiece=0;
 
   float multiplier=0;
@@ -297,12 +296,12 @@ Device int EvaluateKingSecurity(struct board *evalboard, int i, int j, int P)
   float KingSecurityScore = 0;
 
   xrayAttackers = ifsquare_attacked(evalboard->squares, i, j, 1-P, 1, 0);
-  KingSecurityScore -= 5 * powf(xrayAttackers, BRAIN.kingPanic);
+  KingSecurityScore -= 20 * powf(xrayAttackers, BRAIN.kingPanic);
   
   if (i==0 || i==7)
   if ((j<4 && cSQR < 63 && evalboard->squares[cSQR+1] == Pieces[P][1]) ||
       (j>4 && cSQR > 0 && evalboard->squares[cSQR-1] == Pieces[P][1]))
-    KingSecurityScore += 300 * BRAIN.kingPanic;
+    KingSecurityScore += 50 * BRAIN.kingAreaTower;
 
   F (K, lenSafespace)
     {
@@ -312,9 +311,9 @@ Device int EvaluateKingSecurity(struct board *evalboard, int i, int j, int P)
 	  if (evalboard->squares[ SS ] != 'x')
 	    {
 	      if (is_in(evalboard->squares[ SS ], Pieces[P], 6))
-		SafespaceScore += 100 * BRAIN.kingPanic;
+		SafespaceScore += 100 * BRAIN.kingAreaSecure;
 	      else
-		SafespaceScore -= 200 * BRAIN.kingPanic;
+		SafespaceScore -= 200 * BRAIN.kingAreaPanic;
 	    }
 	}
       else

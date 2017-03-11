@@ -102,7 +102,10 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     
     if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
     //if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
-      
+    move_piece(_board, &moves->movements[i], -1);
+
+    castling_evaluation(finalboardsArray[i], &moves->movements[i]);
+    
     if (FivemoveRepetitionRisk)
       if (compare_movements(&moves->movements[i], &movehistory[hindex-4]))
 	{
@@ -110,9 +113,7 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	  write(1, output, strlen(output));
 	  moves->movements[i].score = 0;
 	}
-    move_piece(_board, &moves->movements[i], -1);
 
-    castling_evaluation(finalboardsArray[i], &moves->movements[i]);
 
   }
   
@@ -463,26 +464,29 @@ Device int castling_evaluation(struct board *board, struct move *movement) {
   return 1;
 }
 
-Device int check_fivemove_repetition (void) {
+Device int check_fivemove_repetition (void)
+{
   
   int k=0,v=0;
-  F(k,3){
-    v = -k * 4;
-    if (hindex > k * 4 + 4){
-      if (!compare_movements(&movehistory[hindex-k], &movehistory[hindex-k-4]))
+  F(k,2)
+    {
+      //v = -k * 4;
+      if (hindex > k + 2)
+	{
+	  if (!compare_movements(&movehistory[hindex-k], &movehistory[hindex-k-2]))
+	    return 0;
+	}
+      else
 	return 0;
     }
-    else return 0;
-  }
   return 1;
-
-}
-Device int compare_movements (struct move *move_A, struct move *move_B) {
-  int i=0;
   
-    if (move_A->from != move_B->from) return 0;
-    if (move_A->to != move_B->to) return 0;
-    
+}
+
+Device int compare_movements (struct move *move_A, struct move *move_B)
+{
+  if (move_A->from != move_B->from) return 0;
+  if (move_A->to != move_B->to) return 0;
   return 1;
 }
 

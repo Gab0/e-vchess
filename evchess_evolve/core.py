@@ -40,11 +40,11 @@ def loadmachines(DIR=settings.machineDIR):
     Fo.close()'''
     
     mLIST = listdir(DIR)
-    for file in mLIST:
-        file = file.strip("\n")
+    for File in mLIST:
+        File = File.strip("\n")
 
-        if file.endswith(".mac"):
-            population.append(machine(file, DIR=DIR))
+        if File.endswith(".mac"):
+            population.append(machine(File, DIR=DIR))
             population[-1].Load()
 
     return population
@@ -343,10 +343,7 @@ def Triangulate_value(values):
 
 
 def sendtoHallOfFame(MACHINE):
-
-    copyfile(MACHINE.DIR + '/' + MACHINE.filename,
-             settings.HoFmachineDIR + MACHINE.filename)
-
+    MACHINE.DIR = settings.HoFmachineDIR
     print('machine %s sent to hall of fame.' % MACHINE.filename)
     MACHINE.onHoF = 1
     MACHINE.write()

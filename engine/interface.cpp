@@ -46,11 +46,11 @@ int fehn2board (char str[]) {
       board.whoplays = 0;
     
     fstring = strtok(NULL, " ");
-    //read castling righst section.
-    /*    for (i=0;i<2;i++) for (j=0;j<3;j++) {
-        //board.castle[i][j]=1;
-        board.castle[i][1]=1;
-	}*/
+    //read castling rights;
+    F(i, 2)
+      F(j, 3)
+        board.castle[i][1]=0;
+
     
     
     for (z=0;z<strlen(fstring);z++) {

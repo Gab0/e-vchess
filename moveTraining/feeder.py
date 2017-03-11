@@ -43,6 +43,7 @@ class trainingDataFeeder():
         self.subject = Engine([Settings.enginebin, '--showinfo'] + engineargs)
         sleep(3)
         #self.launchTest()
+
         self.rollThruMachines()
         self.saveDatabase(self.TrialPositions)
 
@@ -253,11 +254,11 @@ class trainingDataFeeder():
                         if mortal:
                             mortal -= 1
                             if not mortal:
-                                return SCORE
+                                return SCORE, False
 
                         if SCORE + (len(POS) - G) * 10 < 0:
                             print("bailing with score=%i" % SCORE)
-                            return SCORE
+                            return SCORE, False
 
                     print("\n*********************\n")
                     self.TotalTests += 1
@@ -270,19 +271,20 @@ class trainingDataFeeder():
             #Response = self.subject.stdout.readlines()
 
             self.TotalTests += 1
-        return SCORE
+        return SCORE, True
 
     def rollThruMachines(self):
         Approved = {}
         POP = core.loadmachines(DIR=self.machineDIR)
+        print("Rolling thru %i machines." % len(POP))
         machinelist = [x.filename for x in POP]
         for machine in machinelist:
             machine = machine.replace('\n', '')
             print(".%s." % machine)
             self.subject.send("load %s" % machine)
             sleep(0.3)
-            SCORE = self.launchTest()
-            if SCORE:
+            SCORE, Success = self.launchTest()
+            if Success:
                 Approved.update({machine: SCORE})
 
 

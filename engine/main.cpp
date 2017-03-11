@@ -14,8 +14,10 @@ const int MovementDiagonalLinear[2][4][2] =
 
 char pieces[2][6] = {{'P','R','N','B','Q','K'},
                      {'p','r','n','b','q','k'}};
+
 Device char GPUpieces[2][6] = {{'P','R','N','B','Q','K'},
                                {'p','r','n','b','q','k'}};
+
 const float BoardMiddleScoreWeight[8] = {0, 0.33, 0.66, 1, 1, 0.66, 0.33, 0};
 const float BoardInvaderScoreWeight[8] = {0, 0, 0, 0, 0.16, 0.27, 0.35, 0.43};
 bool computer_turn = false;
@@ -30,8 +32,7 @@ bool fastmode = false;
 bool loadedmachine = false;
 char *specificMachine = (char *)malloc(64 * sizeof(char));
 
-
-char *infoAUX = (char *)malloc(256 * sizeof(char));
+char *infoAUX = (char *) malloc(256 * sizeof(char));
 char *infoMOVE = (char *) malloc(sizeof(char)*128);
 
 struct move movehistory[512];
@@ -41,7 +42,6 @@ int hindex;
 
 
 /*//////variable params for intelligent evolution*/
-
 int i;
 char *infomoveTABLE[2048];
 
@@ -88,24 +88,24 @@ int main(int argc, char** argv) {
 
     
   setBrainStandardValues();
-    int i=0;
-    signal(SIGINT, SIG_IGN);    
-    signal(SIGTERM, SIG_IGN); 
-    signal(SIGCHLD, SIG_IGN);
-    
-   
-    asprintf(&machinepath, "../machines");
-    
-    printf("lampreia chess engine %s\n", Version);
-    printf("author afrogabs\n\n");
-    
-    char *inp;
-
+  int i=0;
+  signal(SIGINT, SIG_IGN);    
+  signal(SIGTERM, SIG_IGN); 
+  signal(SIGCHLD, SIG_IGN);
+  
+  
+  asprintf(&machinepath, "../machines");
+  
+  printf("lampreia chess engine %s\n", Version);
+  printf("author afrogabs\n\n");
+  
+  char *inp;
+  
     if (argc > 1) 
-     for (i=0;i<argc;i++) {
+      for (i=0;i<argc;i++) {
+	
         
-            
-       if (strstr(argv[i], "--HOF") != NULL || strstr(argv[i], "-h") != NULL)
+	if (strstr(argv[i], "--HOF") != NULL || strstr(argv[i], "-h") != NULL)
 	  HallOfFameMode = true;
 	
 	if (strstr(argv[i], "--specific") != NULL)
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 	
 	if (strstr(argv[i], "-l") != NULL)
 	  toloadmachine = true;
-            
+	
         if (strstr(argv[i], "-MD") != NULL) 
 	  machinepath = argv[i+1];
 	
@@ -123,29 +123,27 @@ int main(int argc, char** argv) {
         if (strstr(argv[i], "--XHUMAN") != NULL) againstHUMAN = true;
         
         if (strstr(argv[i], "--deep") != NULL) 
-  BRAIN.DEEP = (int)atoi(argv[i+1]);
-
+	  BRAIN.DEEP = (int)atoi(argv[i+1]);
+	
 	if (strstr(argv[i], "--xdeep") != NULL)
 	  BRAIN.xDEEP = (int)atoi(argv[i+1]);
-
+	
 	if (strstr(argv[i], "--ydeep") != NULL)
 	  Brain.yDEEP = (int) atoi(argv[i+1]);
 	
-	if (strstr(argv[i], "--tverbose") != NULL) thinkVerbose = true;
+	if (strstr(argv[i], "--tverbose") != NULL)
+	  thinkVerbose = true;
+	
+	if (strstr(argv[i], "--fast") != NULL)
+	  fastmode = true;
+	if (strstr(argv[i], "--time") != NULL)
+	  show_time_elapsed = true;
+	
+      }  
 
-	if (strstr(argv[i], "--fast") != NULL) fastmode = true;
-	if (strstr(argv[i], "--time") != NULL) show_time_elapsed = true;
-
-        }  
-    
-        
-    
     fflush(stdout);
-    
- 
-    
+
     if (toloadmachine) loadmachine(0, machinepath);
-    
 
     #ifdef __CUDACC__
     cudaMemcpyToSymbol(GBrain, &Brain, sizeof(struct param),0, cudaMemcpyHostToDevice);
@@ -155,7 +153,6 @@ int main(int argc, char** argv) {
     show_info = Show_Info;
     #endif
 
-    
     char testfehn[128] = "fen 5bkr/pp4p1/2p1Q3/3p3p/1P1P1P2/8/R1KBP1PP/5B1R w KQkq - 1 1";
 
     printf("DEEP=%i   xDEEP=%i   yDEEP=%i\n\n", Brain.DEEP, Brain.xDEEP, BRAIN.yDEEP);
@@ -163,7 +160,7 @@ int main(int argc, char** argv) {
     if (fastmode)
       printf("fastmode on\n");
     
-    inp =(char *)malloc(128*sizeof(char));
+    inp = (char *)malloc(128*sizeof(char));
 
     //for (i=0;i<2018;i++) infomoveTABLE[i] = (char*)malloc(16 * sizeof(char));
     
@@ -176,12 +173,6 @@ int main(int argc, char** argv) {
     read(0, inp, 128);
     for (i=0;i<128;i++) if (inp[i] == '\n') inp[i]= ' ';
       
-    /*printf("line received ");    
-    for (i=0;i<128;i++) printf("%c",inp[i]);
-    for (i=0;i<128;i++) inp[i]='0';
-    printf("\n");
-     */  
-    //board.MovementCount=0;
     if (strstr(inp, "isready") != NULL) {printf("readyok\n"); fflush(stdout);}
    
     if (strstr(inp, "quit") != NULL) return 0;
@@ -195,12 +186,10 @@ int main(int argc, char** argv) {
     if (strstr(inp, "show") !=NULL) show_board(board.squares);
 
     if (strstr(inp, "castling") !=NULL)
-	show_castling_status(&board);
-
-
+      show_castling_status(&board);
     
-    if (strstr(inp, "quit") !=NULL) {//sleep(1);
-      break;}
+    if (strstr(inp, "quit") !=NULL) 
+      break;
     
     if (strstr(inp, "new") != NULL) setup_board(1);
 
@@ -463,5 +452,8 @@ Global void setBrainStandardValues(void) {
   Brain.limitDefender = 0;
   Brain.parallelAttacker = 0;
   Brain.castlebonus = 0;
+  Brain.kingAreaPanic = 0;
+  Brain.kingAreaSecure = 0;
+  Brain.kingAreaTower = 0;
 }
 

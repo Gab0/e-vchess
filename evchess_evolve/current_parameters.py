@@ -1,5 +1,6 @@
 from evchess_evolve.parameter import parameter
 
+standardINCR = 0.05
 
 def STDPARAMETERS():
     return [
@@ -14,7 +15,7 @@ def STDPARAMETERS():
         #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
 
         parameter("param_seekatk", 0, 12, 0.3,
-                  bLIM=0.2, INCR=0.1, LIM=0.5, promoter='A'),
+                  bLIM=0.2, INCR=standardINCR, LIM=0.5, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 1,
                   bLIM= 1, LIM=10, promoter='m'),
@@ -26,16 +27,16 @@ def STDPARAMETERS():
 
 
         parameter("param_parallelAttacker", 0, 12, 0.3,
-                  LIM=1.5, bLIM=0, INCR=0.1, promoter='c'),
+                  LIM=1.5, bLIM=0, INCR=standardINCR, promoter='c'),
 
         parameter("param_balanceoffense", 0, 6, 0.8,
-                  LIM=1, bLIM=0.0, INCR=0.2, promoter='o'),
+                  LIM=1, bLIM=0.0, INCR=standardINCR, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0.4,
-                  LIM=1.6, bLIM=0.4, INCR=0.2, promoter='B'),
+                  LIM=1.6, bLIM=0.4, INCR=standardINCR, promoter='B'),
 
         parameter("param_MODmobility", 0, 15, 2.0,
-                  LIM=2, bLIM=0.2, INCR=0.2, promoter='M'),
+                  LIM=2, bLIM=0.2, INCR=standardINCR, promoter='M'),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
 
@@ -47,28 +48,37 @@ def STDPARAMETERS():
         #parameter("param_boardcontrol", 0, 12, 0,
         #          LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
-        parameter("param_endgameWeight", 0, 12, 0.2,
-                  LIM=3, bLIM=0.0, INCR=0.1, promoter="E"),
+        #parameter("param_endgameWeight", 0, 12, 0.2,
+        #          LIM=3, bLIM=0.0, INCR=0.1, promoter="E"),
 
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
 
         parameter("param_kingPanic", 0, 25, 0.0,
-                  LIM=0.3, bLIM=0, INCR=0.1, promoter='P'),
+                  LIM=0.6, bLIM=0, INCR=standardINCR, promoter='P'),
+        
+        parameter("param_kingAreaPanic", 0, 25, 0.0,
+                  LIM=0.6, bLIM=0, INCR=standardINCR, promoter='a'),
+        
+        parameter("param_kingAreaTower", 0, 25, 0.0,
+                  LIM=0.6, bLIM=0, INCR=standardINCR, promoter='t'),
+        
+        parameter("param_kingAreaSecure", 0, 25, 0.0,
+                  LIM=0.6, bLIM=0, INCR=standardINCR, promoter='s'),
 
         parameter("param_pawnIssue", 0, 15, 0.5,
-                  LIM=0.5, bLIM=0, INCR=0.1, promoter='W'),
+                  LIM=0.5, bLIM=0, INCR=standardINCR, promoter='W'),
         
         parameter("param_seekinvasion", 0, 15, 0.2,
-                  LIM=1, bLIM=0, INCR=0.1, promoter='I'),
+                  LIM=1, bLIM=0, INCR=standardINCR, promoter='I'),
         parameter("param_freepiecevalue", 0, 6, 0.8,
-                  LIM=1, bLIM=0.0, INCR=0.1, promoter='F'),
+                  LIM=1, bLIM=0.0, INCR=standardINCR, promoter='F'),
         parameter("param_offensevalue", 0, 6, 0.8,
-                  LIM=1, bLIM=0.0, INCR=0.1, promoter='O'),
+                  LIM=1, bLIM=0.0, INCR=standardINCR, promoter='O'),
         parameter("param_limitDefender", 0, 6, 0.3,
-                  LIM=0.4, bLIM=0.2, INCR=0.1, promoter='L'),
+                  LIM=0.4, bLIM=0.2, INCR=standardINCR, promoter='L'),
         parameter("param_castlebonus", 0, 6, 0.6, 
-                  LIM=1.5, bLIM=0.2, INCR=0.1, promoter='T')
+                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='T')
     ]
 
 def ScoreParameters():
@@ -104,4 +114,5 @@ Evaluation mechanism recreated, now done in two steps. after extensive training 
 
 AVG ELO 1205 21/dez
 
+Added six more parameters, AVG ELO 1500 28/02
 """

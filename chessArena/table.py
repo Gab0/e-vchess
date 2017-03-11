@@ -329,7 +329,6 @@ class Table(Frame):
                 try:
                     Hdump = self.MACHINE[
                         self.turn].receive(method="word", channel=2)
-
                     if self.arena:
                         FLOG = open('log/log_illegal%i.txt' %
                                     self.arena.ROUND, 'w+')
@@ -339,10 +338,8 @@ class Table(Frame):
                         FLOG.write(Hdump)
                         FLOG.write(str(self.board))
                         FLOG.close()
-
                 except AttributeError:
                     pass
-
                 self.endgame()
                 return 0
 
@@ -350,7 +347,6 @@ class Table(Frame):
             # for line in self.movereadbuff:
             #    self.log(line,'<<<<< %i' % len(self.movereadbuff))
             self.consec_failure += 1
-
             if self.consec_failure % 25 == 0:
                 try:
                     #self.log("requested FEN > ","%s" % str(self.board.fen()))
@@ -366,7 +362,7 @@ class Table(Frame):
                     self.endgame()
             if self.GUI:
                 self.setlimit["text"] = str(self.consec_failure)
-
+                
             if self.consec_failure > 27:
                 print("restarting due to inactivity.")
                 if self.arena:

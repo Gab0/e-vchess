@@ -88,7 +88,7 @@ struct move {
   
   int from;
   int to;
-    
+  
   int iscastle;
   int lostcastle[2];
     
@@ -105,37 +105,37 @@ struct move {
 
 struct movelist;
 struct movelist {
-    struct move movements[128];
-    char attackers[64][3];
-    char defenders[64][3];
-    
-    int k;
-    int kad;
-    
-    int mobility;
+  struct move movements[128];
+  char attackers[64][3];
+  char defenders[64][3];
+  
+  int k;
+  int kad;
+  
+  int mobility;
 };
 
 struct board;
-   struct board {
-     char squares[64];
-      
-     int castle[2][3];
-      
-     int passantJ;
-     int passant_player;
-     int whoplays;
-     
-     long score;
-     
-     int MovementCount;
-     int betaCut;
-
-     int gameEnd;
-     struct move movements[384];
-   }; 
-   
+struct board {
+  char squares[64];
   
-   
+  int castle[2][3];
+  
+  int passantJ;
+  int passant_player;
+  int whoplays;
+  
+  long score;
+     
+  int MovementCount;
+  int betaCut;
+  
+  int gameEnd;
+  struct move movements[384];
+   }; 
+
+
+
 struct param;
 struct param {
   int DEEP;
@@ -170,6 +170,9 @@ struct param {
   float limitDefender;
   float parallelAttacker;
   float castlebonus;
+  float kingAreaPanic;
+  float kingAreaSecure;
+  float kingAreaTower;
 };
 
 extern struct move movehistory[512];

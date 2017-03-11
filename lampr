@@ -23,7 +23,7 @@ case  "$1" in
 		      python ${BASEDIR}/launch_tournament.py -t
 		  done;;
 
-"list") ls ${BASEDIR}/machines/top_machines;;
+"list") ls ${BASEDIR}/machines/halloffame;;
 "make") cd ${BASEDIR}/engine && ./make.sh;;
 
 "memusage") cd ${BASEDIR}/ && python makegraphic.py show;;

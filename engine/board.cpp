@@ -12,16 +12,15 @@
 
 void setup_board (int setup) {
   int i=0, j=0;
-    char setup_position[128] = "fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-   if (setup)
-     fehn2board(setup_position);
-
-    
-   else 
-     forsquares 
-       board.squares[ SQR(i, j) ] = 'x';
-   
-    
+  char setup_position[128] = "fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  
+  if (setup)
+    fehn2board(setup_position);
+  
+  else 
+    forsquares 
+      board.squares[ SQR(i, j) ] = 'x';
+  
     board.passantJ=-1;
     board.passant_player=-1;
     board.gameEnd=0;
@@ -32,7 +31,7 @@ void setup_board (int setup) {
 void show_board (char squares[64])
 {
   int i=0, j=0, X=0;
-
+  
   output[X] = '\n';
   X++;
   for(i=0;i<8;i++){
@@ -50,44 +49,44 @@ void show_board (char squares[64])
     X++;
     write(2, output, X);
     X=0;
-
-  }
     
+  }
+  
 }
 
 Host Device int legal_moves (struct board *board, struct movelist *moves, int PL, int verbose) {
-    
-    moves->k=0;
-    moves->kad=0;
-    
-    int EP = 1-PL;
-    int i = 0;
-    int j = 0;
-    
-    int zeta = 0;
-    
-    int pawn_vector = -1 + 2*PL;
-    
-    int promote = PL;
-
-    forsquares
-      {
-	promote = 0;
-	if (!is_in(board->squares[ SQR(i, j) ], Pieces[PL], 6)) continue;
-
-	if (board->squares[SQR(i, j)] == Pieces[PL][0])
-	  {
+  
+  moves->k=0;
+  moves->kad=0;
+  
+  int EP = 1-PL;
+  int i = 0;
+  int j = 0;
+  
+  int zeta = 0;
+  
+  int pawn_vector = -1 + 2*PL;
+  
+  int promote = PL;
+  
+  forsquares
+    {
+      promote = 0;
+      if (!is_in(board->squares[ SQR(i, j) ], Pieces[PL], 6)) continue;
+      
+      if (board->squares[SQR(i, j)] == Pieces[PL][0])
+	{
 	  
 	  if ( (i==6&&PL==1) || (i==1&&PL==0) )
 	    promote = 4;
 	  
           
 	  if (board->passantJ==j+1||board->passantJ==j-1)
-                    if (board->passantJ>-1)
-		      if ( (i==3&&!PL) || (i==4&&PL) ) 
-			if (board->squares[ SQR(i, board->passantJ) ] == Pieces[1-PL][0])
-			  if (board->passant_player == flip(PL))
-			  append_move(board, moves, SQR(i,j), SQR( (i + pawn_vector), board->passantJ ), 1, PL);
+	    if (board->passantJ>-1)
+	      if ( (i==3&&!PL) || (i==4&&PL) ) 
+		if (board->squares[ SQR(i, board->passantJ) ] == Pieces[1-PL][0])
+		  if (board->passant_player == flip(PL))
+		    append_move(board, moves, SQR(i,j), SQR( (i + pawn_vector), board->passantJ ), 1, PL);
 	  
           
 	  if ((is_in(board->squares[ SQR((i+pawn_vector), (j+1)) ], Pieces[EP], 6)) && onboard((i+pawn_vector), (j+1)))
@@ -99,35 +98,35 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
           
 	  if ((is_in(board->squares[ SQR((i+pawn_vector), (j-1)) ], Pieces[EP], 6)) && onboard((i+pawn_vector), j-1))
 	    append_move(board, moves, SQR(i, j), SQR( (i+pawn_vector), (j-1)), promote, PL);
-                                       
+	  
 	  
           
 	  if (board->squares[ SQR((i+pawn_vector), j) ] == 'x' && onboard((i+pawn_vector),j) )
 	    append_move(board, moves, SQR(i, j), SQR( (i+pawn_vector), j), promote, PL);
-		
+	  
+	  
 
-
-
-		if (i == 6-5*PL) // PL == 1 -> i == 1; PL == 0 -> i == 6
-		  if (board->squares[ SQR((i+2*pawn_vector), j) ] == 'x')
-		    if (board->squares[ SQR((i+pawn_vector), j) ] == 'x')
-		      {
-			append_move(board, moves, SQR(i, j), SQR( (i+4*PL-2), j), 2, PL);
-		      }
-	  }
+	  
+	  if (i == 6-5*PL) // PL == 1 -> i == 1; PL == 0 -> i == 6
+	    if (board->squares[ SQR((i+2*pawn_vector), j) ] == 'x')
+	      if (board->squares[ SQR((i+pawn_vector), j) ] == 'x')
+		{
+		  append_move(board, moves, SQR(i, j), SQR( (i+4*PL-2), j), 2, PL);
+		}
+	}
 	
-	
-	
+      
+      
 	//tower movements.        
-	if (board->squares[ SQR(i, j) ] == Pieces[PL][1])
-	  {
-	    //printf("%c\n",board->squares[ SQR(i, j) ]);
+      if (board->squares[ SQR(i, j) ] == Pieces[PL][1])
+	{
+	  //printf("%c\n",board->squares[ SQR(i, j) ]);
 	    movement_generator(board, moves, 0, '+', i, j, PL);
-	  }
-        
+	}
+      
       // HORSE movements. note -(k_atk-2) is a mathematical expression to equal 0 if k_atk=2, or 1 if k_atk=1 
-     if (board->squares[SQR(i, j)] == Pieces[PL][2])
-       {
+      if (board->squares[SQR(i, j)] == Pieces[PL][2])
+	{
        zeta = 0;
          int HT[4][2] = {{1,2},{-1,2},{1,-2},{-1,-2}};
          int k_atk = 0;
@@ -144,46 +143,46 @@ Host Device int legal_moves (struct board *board, struct movelist *moves, int PL
          }
      }
      
-     //bishop movements
-     if(board->squares[SQR(i, j)] == Pieces[PL][3])
+      //bishop movements
+      if(board->squares[SQR(i, j)] == Pieces[PL][3])
        {
 	 movement_generator(board, moves, 0, 'X', i, j, PL);
        }
-     
-     //queen movements
-     if (board->squares[SQR(i, j)] == Pieces[PL][4])
-       {
-       	 movement_generator(board,moves,0, '+', i, j, PL);
-	 movement_generator(board,moves,0, 'X', i, j, PL);
-       }
-     
-     //king movements
-     if (board->squares[SQR(i, j)] == Pieces[PL][5])
-       {
-             
-	 movement_generator(board,moves,1, '+', i, j, PL);
-	 movement_generator(board,moves,1, 'X', i, j, PL);
-
-	 if (j == 4)
-	   if (i == (flip(PL)) *  7)
-	       {
-	     
-		 if (cancastle(board, PL, -1))
-		   append_move(board, moves, SQR(i, j), SQR(i, 2), 3, PL);
-
-		 if (cancastle(board, PL, 1))
-		   append_move(board, moves, SQR(i, j), SQR(i, 6), 3, PL);
-	     
-	       }
+      
+      //queen movements
+      if (board->squares[SQR(i, j)] == Pieces[PL][4])
+	{
+	  movement_generator(board,moves,0, '+', i, j, PL);
+	  movement_generator(board,moves,0, 'X', i, j, PL);
+	}
+      
+      //king movements
+      if (board->squares[SQR(i, j)] == Pieces[PL][5])
+	{
+	  
+	  movement_generator(board,moves,1, '+', i, j, PL);
+	  movement_generator(board,moves,1, 'X', i, j, PL);
+	  
+	  if (j == 4)
+	    if (i == (flip(PL)) *  7)
+	      {
+		
+		if (cancastle(board, PL, -1))
+		  append_move(board, moves, SQR(i, j), SQR(i, 2), 3, PL);
+		
+		if (cancastle(board, PL, 1))
+		  append_move(board, moves, SQR(i, j), SQR(i, 6), 3, PL);
+		
+	      }
 	 
-       }	
-      }
+	}	
+    }
     
-
-    
-    attackers_defenders(moves);
-    
-    return 0;
+  
+  
+  attackers_defenders(moves);
+  
+  return 0;
 }
 
 Host Device int mpc(char squares[64], int i, int j, int player) {
@@ -326,7 +325,8 @@ Host Device void move_piece(struct board *tg_board, struct move *movement, int M
 }
 
 
-Host Device void undo_lastMove(struct board *board, int Number) {
+Host Device void undo_lastMove(struct board *board, int Number)
+{
   int N=0;
   for (N=0; N<Number;N++)
     move_piece(board,
@@ -370,10 +370,12 @@ void history_append(struct move *move)
     
 }
     
-int history_rollback(int times) {
+int history_rollback(int times)
+{
     int i=0;
     
-    for (i=0;i<times;i++) {
+    for (i=0;i<times;i++)
+      {
     hindex--;
     print_play_cord(movehistory[hindex]);
     move_piece(&board, &movehistory[hindex], -1);

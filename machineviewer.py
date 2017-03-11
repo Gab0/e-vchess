@@ -337,7 +337,7 @@ class Application(Frame):
         self.machinemenu.add_command(
             label="Randomize Machine", command=lambda: self.machines[self.N].randomize())
         self.machinemenu.add_command(
-            label="Send to TOP", command=lambda: sendtoHallOfFame(self.machines[self.N]))
+            label="Send to HoF", command=lambda: sendtoHallOfFame(self.machines[self.N]))
         self.machinemenu.add_command(
             label="DELETE machine", command=self.delete_machine)
         self.machinemenu.add_separator()
@@ -508,7 +508,7 @@ class Application(Frame):
 
     def changeToHallOfFameMode(self):
         if self.DIR == settings.machineDIR:
-            self.DIR = settings.TOPmachineDIR
+            self.DIR = settings.HoFmachineDIR
 
             self.logoframe['bg'] = 'gold'
         else:
