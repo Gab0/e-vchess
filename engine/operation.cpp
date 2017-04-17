@@ -188,6 +188,96 @@ Host Device int ifsquare_attacked (char squares[64], int TGi, int TGj,
     
     int operationalxray = xray;
     
+    int rolling=0;
+    F(z, 10)
+      {
+      if (z==0||z==5) continue;
+      i=0;
+      j=0;
+      rolling=0;
+      xray = operationalxray;
+      while (xray >= 0)
+	{
+ 	  while ((onboard(aim_y, aim_x) && squares[ SQR(aim_y, aim_x) ] == 'x') || !rolling )
+	  {
+	    i++;
+	    aim_y=target[0] + i * matrix[z][0];
+	    
+	    j++;
+	    aim_x=target[1] + j * matrix[z][1];
+
+	    rolling=1;
+	  }
+        
+        //Vb printf("checking %i%i\n", aim_y,aim_x);
+	xray--;
+        
+        if (onboard(aim_y,aim_x) and xray==-1) {
+
+	  offender = getindex(squares[ SQR(aim_y, aim_x) ], Pieces[AttackingPlayer], 6);
+	  if (offender > -1)
+	    {
+	      if (offender==1||offender==4) if (z==2||z==4||z==6||z==8) result++; 
+                    
+	      if (offender==3||offender==4) if (z==1||z==3|z==7||z==9) result++;
+            
+	      if (offender==5) if (i==1) result++;
+
+	      if (offender==0) if (i==1) if (1-AttackingPlayer==0) if (z==1||z==3) result++;
+            
+	      if (offender==0) if (i==1) if (1-AttackingPlayer==1) if (z==7||z==9) result++;
+
+	    }
+
+
+
+
+	}
+    }
+    }
+
+    if (!operationalxray)
+      {
+    char Knight = Pieces[AttackingPlayer][2];
+    for(z=0;z<2;z++) for(n=0;n<2;n++) {
+            
+        aim_y=target[0]+horse_matrix[1][n];
+        aim_x=target[1]+horse_matrix[0][z];
+        
+        if ((onboard(aim_y,aim_x)) && (squares[ SQR(aim_y, aim_x) ] == Knight)) result++;
+             
+  
+        aim_y=target[0]+horse_matrix[0][n];
+        aim_x=target[1]+horse_matrix[1][z];
+                
+        if ((onboard(aim_y,aim_x)) && (squares[ SQR(aim_y, aim_x) ] == Knight)) result++;
+      
+    }         
+      }
+    
+    return result;
+}
+
+Host Device int ifsquare_attacked_xray (char squares[64], int TGi, int TGj,
+				   int AttackingPlayer, int verbose) {
+    //show_board(squares);
+    int i = 0;
+    int j =0;
+    int offender = 0;
+    int target[2] = {TGi, TGj};
+    
+    int z=0;
+    int n=0;
+    
+    long result = 0;
+    
+    int aim_x = 0;
+    int aim_y =0;    
+    
+    int matrix[10][2]= {{0,0},{-1,-1},{-1,0},{-1,1},{0,-1},{0,0},{0,1},{1,-1},{1,0},{1,1}};
+      int xray=0;    
+    int operationalxray = xray;
+    
     
     F(z, 10)
       {
@@ -195,7 +285,7 @@ Host Device int ifsquare_attacked (char squares[64], int TGi, int TGj,
       i=0;
       j=0;
       
-      xray = operationalxray;
+
       while (xray >= 0)
 	{
 	i++;
@@ -239,21 +329,7 @@ Host Device int ifsquare_attacked (char squares[64], int TGi, int TGj,
 	}
     }
     }
-    char Knight = Pieces[AttackingPlayer][2];
-    for(z=0;z<2;z++) for(n=0;n<2;n++) {
-            
-        aim_y=target[0]+horse_matrix[1][n];
-        aim_x=target[1]+horse_matrix[0][z];
-        
-        if ((onboard(aim_y,aim_x)) && (squares[ SQR(aim_y, aim_x) ] == Knight)) result++;
-             
-  
-        aim_y=target[0]+horse_matrix[0][n];
-        aim_x=target[1]+horse_matrix[1][z];
-                
-        if ((onboard(aim_y,aim_x)) && (squares[ SQR(aim_y, aim_x) ] == Knight)) result++;
-      
-    }         
+
             
     return result;
 }

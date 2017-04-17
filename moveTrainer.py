@@ -11,21 +11,27 @@ import json
 import random
 import optparse
 
-if '--full' in sys.argv:
-    engineargs = ['--xdeep', '1', '--deep', '4']
-else:
-    engineargs = ['--deep', '4']
 
 parser = optparse.OptionParser()
 parser.add_option('--mutate', action='store_true', dest='Mutate', default=False)
-if '--alternative-folder' in sys.argv:
-    _machineDIR = sys.argv[sys.argv.index('--alternative-folder') + 1]
-elif 'hof' in sys.argv:
-    _machineDIR = Settings.HoFmachineDIR
-else:
-    _machineDIR = Settings.machineDIR
+parser.add_option('--full', action='store_true', dest='LamprExtendedThinking', default=False)
+parser.add_option('--alternative-folder', dest='AlternativeMachineFolder', default=False)
 
 (options, args) = parser.parse_args()
+
+if options.AlternativeMachineFolder:
+    _machineDIR = options.AlternativeMachineFolder
+else:
+    _machineDIR = Settings.machineDIR
+    
+if 'hof' in sys.argv:
+    _machineDIR = Settings.HoFmachineDIR
+
+
+engineargs = ['--deep', '4']
+if options.LamprExtendedThinking:
+    engineargs += ['--xdeep', '1']
+    
 if "create" in sys.argv:
     x = trainingDataCreator('moveTraining/database2015.pgn')
 elif "reeval" in sys.argv:

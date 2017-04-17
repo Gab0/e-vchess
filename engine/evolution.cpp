@@ -151,7 +151,7 @@ int loadmachine (int verbose, char *MachineDir) {
                       
            }
 
-	   readparam(line, V, "eval_randomness", &Brain.randomness);
+	   /*readparam(line, V, "eval_randomness", &Brain.randomness);
 	   readparam(line, V, "param_seekpieces", &Brain.seekpieces);
 	   readparam(line, V, "param_seekmiddle", &Brain.seekmiddle);
 	   readparam(line, V, "param_seekatk", &Brain.seekatk);
@@ -180,6 +180,8 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_kingAreaPanic", &BRAIN.kingAreaPanic);
 	   readparam(line, V, "param_kingAreaTower", &BRAIN.kingAreaTower);
 	   readparam(line, V, "param_kingAreaSecure", &BRAIN.kingAreaSecure);
+	   readparam(line, V, "param_pawnSafeMarch", &BRAIN.pawnSafeMarch);*/
+#include "include_parameterReader"
 
 	 }
 	 printf("\n");

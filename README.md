@@ -15,9 +15,9 @@ In that mode it will compute only the value of each piece on the board.
 
 ##Usage:
 
- 1) Use machineviewer.py to create a pool of 64 machines.<br>
- 2) Run chess_arena.py for 30k cycles or more, on a 64-tabled session.<br>
- 3) Run xboard or other chess interface, loading the engine with --TOP arg to load the best machines.<br>
+ 1) $./lampr populate 64   // creates a pool of 64 machines.<br>
+ 2) $./lampr arena        // runs the arena. Let it roll for 30k cycles or more, for the resultz.<br>
+ 3) $./lampr play        // To play against the engine. This is equivalent to:<br>
 	`$xboard --fcp 'evchess --TOP --MD <path to machinedir> --deep 4 --xdeep 2'`<br>or<br>
 	`$./evc play`<br>
 

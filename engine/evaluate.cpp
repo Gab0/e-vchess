@@ -100,12 +100,12 @@ Device int evaluateMaterial(struct board *evalboard,
 		PieceMaterialValue += (PieceMaterialValue / 15) * BRAIN.pawnIssue;
 	    }
 
-	  pawnEffectiveHeight = powf(pawnEffectiveHeight, 1.2);
+	  pawnEffectiveHeight = powf(BRAIN.pawnrankMOD, pawnEffectiveHeight);
 	  
 	  if (AttackerDefenderMatrix[P][ cSQR ] > AttackerDefenderMatrix[1-P][ cSQR ])
-	    pawnEffectiveHeight *= 2;
+	    pawnEffectiveHeight *= 2 * BRAIN.pawnSafeMarch;
 	  
-	  PieceMaterialValue += pawnEffectiveHeight * BRAIN.pawnrankMOD;
+	  PieceMaterialValue += pawnEffectiveHeight;// * BRAIN.pawnrankMOD;
 	  if (endgameModeOn)
 	    PieceMaterialValue += pawnEffectiveHeight * sqrt(currentMovementCount) * BRAIN.endgameWeight;
 	}

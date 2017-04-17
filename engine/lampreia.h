@@ -143,7 +143,7 @@ struct param {
   int yDEEP;
   int pvalues[6];
   
-  float randomness;
+  /*float randomness;
   float seekmiddle;
   float seekpieces;
   float deviationcalc;
@@ -173,8 +173,9 @@ struct param {
   float kingAreaPanic;
   float kingAreaSecure;
   float kingAreaTower;
+  float pawnSafeMarch;*/
+#include "include_initBrainStruct"
 };
-
 extern struct move movehistory[512];
 extern board boardhistory[512];
 extern int hindex;   

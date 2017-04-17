@@ -50,13 +50,14 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   
   if (check_fivemove_repetition()) FivemoveRepetitionRisk = 1;
   
-  if (moves->k == 0) {
-    DUMP(_board);
-    DUMP(moves);
-
-    return -1;
-    
-  }
+  if (moves->k == 0)
+    {
+      DUMP(_board);
+      DUMP(moves);
+      
+      return -1;
+      
+    }
   
   reorder_movelist(moves);
   
@@ -77,12 +78,15 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
   // non cuda move evaluating mehthod.        
 #else
   
-  if (canNullMove(DEEP, _board, moves->k, PLAYER)) {
+  if (canNullMove(DEEP, _board, moves->k, PLAYER))
+    {
     FLIP(_board->whoplays);
     BufferBoard = thinkiterate(_board, DEEP-1, verbose, -Beta, -Alpha, AllowCutoff);
     FLIP(_board->whoplays);
     invert(BufferBoard->score);
-    if (BufferBoard->score > Alpha) Alpha = BufferBoard->score;
+    
+    if (BufferBoard->score > Alpha)
+      Alpha = BufferBoard->score;
 
     DUMP(BufferBoard)
       }
@@ -99,12 +103,13 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
     //finalboardsArray[i] = BufferBoard;
 
     //BufferBoard = NULL;
-    
+    castling_evaluation(finalboardsArray[i], &moves->movements[i]);
     if (Show_Info) show_moveline(finalboardsArray[i], CurrentMovementIndex, startT);
     //if (moves->movements[i].score > Alpha) Alpha = moves->movements[i].score;
     move_piece(_board, &moves->movements[i], -1);
-
-    castling_evaluation(finalboardsArray[i], &moves->movements[i]);
+    
+    
+    
     
     if (FivemoveRepetitionRisk)
       if (compare_movements(&moves->movements[i], &movehistory[hindex-4]))
@@ -192,7 +197,9 @@ int think (struct move *out, int PL, int DEEP, int verbose) {
 	      
 	      maxdepthGone = max(finalboardsArray[BEST[Z]]->MovementCount, maxdepthGone);
 	      
-	      if ( abs(finalboardsArray[ZI]->score - oldscore) > BRAIN.scoreFlutuabilityContinuator * 1000)
+	      if ( abs(finalboardsArray[ZI]->score - oldscore) >
+		   //BRAIN.scoreFlutuabilityContinuator
+		   0.7* 1000)
 		if (finalboardsArray[ZI]->MovementCount == maxdepthGone)
 		  MINIMUM_ITER = max(MINIMUM_ITER++, MAXIMUM_ITER);
 	      

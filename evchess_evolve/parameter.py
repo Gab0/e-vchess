@@ -103,12 +103,12 @@ class parameter():
     def mutate(self, MutateProbabilityDamper, Aggro):
         if (self.marks_dumpable) or (self.locked):
             return
-
+        '''
         if self.name == 'param_TIMEweight':
             self.value = setTIMEweight(self.value)
             return
-
-        AggroModifier = random.randrange(1, Aggro) if Aggro > 1 else 1
+'''
+        AggroModifier = random.randrange(1, 2*Aggro) if Aggro > 1 else 1
         if type(self.value) == list:
             for V in range(len(self.value)):
 

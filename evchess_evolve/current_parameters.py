@@ -23,7 +23,7 @@ def STDPARAMETERS():
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
         parameter("param_pawnrankMOD", 0, 20, 3,
-                  LIM=15, bLIM=3, promoter='p'),
+                  LIM=2, bLIM=0.1, promoter='p'),
 
 
         parameter("param_parallelAttacker", 0, 12, 0.3,
@@ -48,8 +48,8 @@ def STDPARAMETERS():
         #parameter("param_boardcontrol", 0, 12, 0,
         #          LIM=3, bLIM=0, INCR=0.25, promoter='C'),
 
-        #parameter("param_endgameWeight", 0, 12, 0.2,
-        #          LIM=3, bLIM=0.0, INCR=0.1, promoter="E"),
+        parameter("param_endgameWeight", 0, 12, 0.2,
+                  LIM=3, bLIM=0.0, INCR=0.1, promoter="E"),
 
         #parameter("param_opponentAddMaterialValue", 0, 15, 0,
         #          LIM=-0.1, bLIM=-0.6, INCR=0.1, promoter="A")
@@ -69,7 +69,7 @@ def STDPARAMETERS():
         parameter("param_pawnIssue", 0, 15, 0.5,
                   LIM=0.5, bLIM=0, INCR=standardINCR, promoter='W'),
         
-        parameter("param_seekinvasion", 0, 15, 0.2,
+        parameter("param_seekInvasion", 0, 15, 0.2,
                   LIM=1, bLIM=0, INCR=standardINCR, promoter='I'),
         parameter("param_freepiecevalue", 0, 6, 0.8,
                   LIM=1, bLIM=0.0, INCR=standardINCR, promoter='F'),
@@ -78,7 +78,9 @@ def STDPARAMETERS():
         parameter("param_limitDefender", 0, 6, 0.3,
                   LIM=0.4, bLIM=0.2, INCR=standardINCR, promoter='L'),
         parameter("param_castlebonus", 0, 6, 0.6, 
-                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='T')
+                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='T'),
+        parameter("param_pawnSafeMarch", 0, 20, 0.8, 
+                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='S')
     ]
 
 def ScoreParameters():

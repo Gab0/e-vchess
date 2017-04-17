@@ -400,7 +400,7 @@ Global void setBrainStandardValues(void) {
   Brain.pvalues[4] = 900;
   Brain.pvalues[5] = 2000;
     
-  //randomness is the limit to the randomic small variability on the score, 
+  /*  //randomness is the limit to the randomic small variability on the score, 
   //in centipawns.
   Brain.randomness = 50;
   
@@ -455,5 +455,8 @@ Global void setBrainStandardValues(void) {
   Brain.kingAreaPanic = 0;
   Brain.kingAreaSecure = 0;
   Brain.kingAreaTower = 0;
+  Brain.pawnSafeMarch = 0;*/
+
+  #include "include_setToZero"
 }
 

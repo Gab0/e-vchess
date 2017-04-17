@@ -24,13 +24,16 @@ case  "$1" in
 		  done;;
 
 "list") ls ${BASEDIR}/machines/halloffame;;
-"make") cd ${BASEDIR}/engine && ./make.sh;;
+
+"make") python ${BASEDIR}/generateParameters.py && cd ${BASEDIR}/engine && ./make.sh;;
 
 "memusage") cd ${BASEDIR}/ && python makegraphic.py show;;
 
 "engine") cd ${BASEDIR}/engine && ./lampreia $2 $3 $4 $5;;
 
 "position") cd ${BASEDIR}/ && python moveTrainer.py $2 $3 $4 $5;;
+
+"populate") cd ${BASEDIR}/ && python population.py populate 64;;
 *) 
 echo ""
 echo " Invalid Option."

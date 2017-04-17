@@ -161,7 +161,7 @@ class trainingDataFeeder():
         dataFile.write(data)
 
         
-    def launchTest(self, mortal=3):
+    def launchTest(self, mortal=5):
         SCORE = 0
         POS = self.TrialPositions
         for G in range(len(POS)):
