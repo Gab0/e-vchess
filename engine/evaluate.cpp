@@ -276,9 +276,11 @@ Device int evaluateAttack(struct board *evalboard,
   
   score += FreePiece * BRAIN.freepiecevalue;
 
+  score += logf(moves->k) * BRAIN.MODmobility;
 
+  
   return static_cast<int>(score);
-  //return score;
+
     
 }
 

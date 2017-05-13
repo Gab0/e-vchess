@@ -1,7 +1,7 @@
 from evchess_evolve.parameter import parameter
 
 standardINCR = 0.05
-
+standardZero = 0
 def STDPARAMETERS():
     return [
 
@@ -10,15 +10,11 @@ def STDPARAMETERS():
 
         #parameter("param_seekpieces", 0, 30, 1, bLIM=0, INCR=0.25, LIM=3),
 
-        #parameter("param_deviationcalc", 0, 30, 0.1, INCR=0.2),
-
-        #parameter("param_evalmethod", 0, 30, 0, aP=1, bLIM=0, LIM=0),
-
         parameter("param_seekatk", 0, 12, 0.3,
-                  bLIM=0.2, INCR=standardINCR, LIM=0.5, promoter='A'),
+                  bLIM=standardZero, INCR=standardINCR, LIM=0.5, promoter='A'),
 
         parameter("param_seekmiddle", 0, 23, 1,
-                  bLIM= 1, LIM=10, promoter='m'),
+                  bLIM=standardZero, LIM=10, promoter='m'),
 
         #parameter("param_presumeOPPaggro", 0, 20, 0, LIM=0.1, bLIM=-0.1, INCR=0.03),
 
@@ -33,10 +29,10 @@ def STDPARAMETERS():
                   LIM=1, bLIM=0.0, INCR=standardINCR, promoter='o'),
 
         parameter("param_MODbackup", 0, 20, 0.4,
-                  LIM=1.6, bLIM=0.4, INCR=standardINCR, promoter='B'),
+                  LIM=1.6, bLIM=standardZero, INCR=standardINCR, promoter='B'),
 
-        parameter("param_MODmobility", 0, 15, 2.0,
-                  LIM=2, bLIM=0.2, INCR=standardINCR, promoter='M'),
+        parameter("param_MODmobility", 0, 15, 0,
+                  LIM=4, bLIM=standardZero, INCR=standardINCR, promoter='M', Enabled=False),
 
         #parameter("param_cumulative", 0, 80, 0,LIM=1, bLIM=0, INCR=0.1),
 
@@ -78,9 +74,9 @@ def STDPARAMETERS():
         parameter("param_limitDefender", 0, 6, 0.3,
                   LIM=0.4, bLIM=0.2, INCR=standardINCR, promoter='L'),
         parameter("param_castlebonus", 0, 6, 0.6, 
-                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='T'),
+                  LIM=1.5, bLIM=standardZero, INCR=standardINCR, promoter='T'),
         parameter("param_pawnSafeMarch", 0, 20, 0.8, 
-                  LIM=1.5, bLIM=0.2, INCR=standardINCR, promoter='S')
+                  LIM=1.5, bLIM=standardZero, INCR=standardINCR, promoter='S')
     ]
 
 def ScoreParameters():

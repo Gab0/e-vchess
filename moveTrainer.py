@@ -32,12 +32,25 @@ engineargs = ['--deep', '4']
 if options.LamprExtendedThinking:
     engineargs += ['--xdeep', '1']
     
+dc = trainingDataCreator(PGN_dataBase='moveTraining/database2015.pgn', Database="manualdb")
 if "create" in sys.argv:
-    x = trainingDataCreator('moveTraining/database2015.pgn')
+    dc.loadPGN_database()
 elif "reeval" in sys.argv:
-    x = trainingDataCreator(Database = "manualdb")
+    dc.reEvaluateDatabase()
 elif "refresh" in sys.argv:
-    x = trainingDataCreator(Database="manualdb", NewMovements="newfen")
+    dc.NewMovements="newfen"
+    dc.refreshDatabase()
+elif "reduce" in sys.argv:
+    OldFen = open("oldfen", 'a+')
+    for P in range(len(dc.Database)):
+        if dc.Database[P]['num_tried'] > 400:
+            if dc.Database[P]['num_succeeded'] / dc.Database[P]['num_tried'] > 0.95:
+                _pos = dc.Database[P]['pos']
+                OldFen.write("%s\n" % dc.Database[P]['pos'])
+                print("Removing\n %s" % dc.Database[P])
+                dc.Database[P] = None
+    dc.Database = [x for x in dc.Database if x]
+    dc.saveDatabase("manualdb")
 else:
     posLOG = open("pos_log", 'a', 1)
     number_iterations = 64 if options.Mutate else 1

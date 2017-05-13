@@ -161,9 +161,10 @@ class trainingDataFeeder():
         dataFile.write(data)
 
         
-    def launchTest(self, mortal=5):
+    def launchTest(self):
         SCORE = 0
         POS = self.TrialPositions
+        mortal = len(POS)//2
         for G in range(len(POS)):
             ScoredTest = True
             CurrentPosition = self.TrialPositions[G]
@@ -182,7 +183,7 @@ class trainingDataFeeder():
             self.subject.send("go")
 
             expected_movements = self.TrialPositions[G]["movement"]#.replace('\n', '')#############
-
+            
             TimeWaited = 0
             INFINITE = 999944
             ProbeSpan = 2

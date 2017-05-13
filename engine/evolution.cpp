@@ -181,6 +181,7 @@ int loadmachine (int verbose, char *MachineDir) {
 	   readparam(line, V, "param_kingAreaTower", &BRAIN.kingAreaTower);
 	   readparam(line, V, "param_kingAreaSecure", &BRAIN.kingAreaSecure);
 	   readparam(line, V, "param_pawnSafeMarch", &BRAIN.pawnSafeMarch);*/
+	   
 #include "include_parameterReader"
 
 	 }
@@ -215,7 +216,7 @@ void readparam(char *line, int verbose, const char *keyword, float *Parameter) {
                reading = strtok(NULL, " ");
                reading = strtok(NULL, " ");
                float parameter = (float)(atof(reading));
-               Vb printf("%s is %f\n",keyword,parameter);
+               Vb printf("%s is %g\n",keyword,parameter);
     
     reading = NULL;
     *Parameter = parameter;

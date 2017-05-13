@@ -5,7 +5,8 @@ import random
 class parameter():
 
     def __init__(self, name, dumpable, chanceMutate, value, aP=0,
-                 LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0, promoter=None):
+                 LIM=None, bLIM=None, INCR=1, locked=0, stdvalue=0,
+                 promoter=None, Enabled=True):
 
         self.name = name
         self.marks_dumpable = dumpable
@@ -24,6 +25,7 @@ class parameter():
         
         self.promoter = promoter
         self.locked = locked
+        self.Enabled = Enabled
 
     def read(self, split_line):
         if self.locked:

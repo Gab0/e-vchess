@@ -221,7 +221,7 @@ class Table(Frame):
             return
 
         if settings.VerboseMove:
-            print(COLOR[self.turn] + " @  table " + str(self.number))
+            print(settings.COLOR[self.turn] + " @  table " + str(self.number))
 
         if self.GUI:
             self.setlimit["background"] = "white"
@@ -354,7 +354,7 @@ class Table(Frame):
 
                 except BrokenPipeError:
                     self.log('broken pipe on bizarre inactive bug.',
-                             COLOR[self.turn])
+                             settings.COLOR[self.turn])
                     self.MACHINE[self.turn].dumpRecordedData()
                     self.DUMPmovehistory("inactivity")
                     if self.arena:

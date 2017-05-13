@@ -7,6 +7,7 @@ import chess.pgn
 import re
 import io
 import json
+
 class trainingDataCreator():
     def __init__(self, PGN_dataBase=None, Database=None, NewMovements=None):
         self.database_size = 32
@@ -14,16 +15,6 @@ class trainingDataCreator():
         self.PGN_dataBase = PGN_dataBase
         self.NewMovements=NewMovements
         
-        if self.NewMovements:
-            self.loadDatabase(Database)
-            self.refreshDatabase()
-        elif self.PGN_dataBase:
-            self.loadPGN_database()
-        elif Database:
-            self.loadDatabase(Database)
-            self.reEvaluateDatabase()
-
-        #self.runDataCollector()
         
     def generateRandomBoard(self):
         board = chess.Board()
