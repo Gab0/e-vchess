@@ -1,5 +1,5 @@
-##About:
-
+## About:
+    
  <p> lampreia is a simple chess engine, with the concept of loading a set of parameters to be used by the position evaluating function. So 
  to have the best strategic thinking and results, those parameters must be a cohesive set. A basic implementation of evolutionary algorythm is employed to get to this state, in the form of two satellite python scripts:</p>
  
@@ -13,7 +13,7 @@ In that mode it will compute only the value of each piece on the board.
  Each parameter is actually a weight for some aspect of the evaluation function, so while evolution drifts those parameters from zero,
  the engine will account those corresponding aspects of the position into consideration: number of possible moves in given position, number of attackers, king safety, and others.</p>
 
-##Usage:
+## Usage:
 
  1) $./lampr populate 64   // creates a pool of 64 machines.<br>
  2) $./lampr arena        // runs the arena. Let it roll for 30k cycles or more, for the resultz.<br>
@@ -22,7 +22,7 @@ In that mode it will compute only the value of each piece on the board.
 	`$./evc play`<br>
 
 
-##Commands:
+## Commands:
  The main script is a shortcut to useful stuff:<br>
 
     $./lampr play //Choose a machine from the hall of fame to load with xboard.
@@ -32,6 +32,6 @@ In that mode it will compute only the value of each piece on the board.
     $./lampr position //Launch the position evaluator, another method to evolve machines.
 
     
-##Dependencies:
+## Dependencies:
 
 <a href="https://github.com/niklasf/python-chess">python-chess</a><br>

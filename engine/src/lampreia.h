@@ -36,12 +36,12 @@
 #define fpow(x, e) static_cast<float>(pow(x, e))
 #define fsqrt(x) static_cast<float>(sqrt(x))
   
-#define SQR(i, j) ((j) + (i*8)) 
+#define SQR(i,j) ((j) + (i*8)) 
 #define SQR_I(x) (x / 8)
 #define SQR_J(x) (x % 8)
 
 
-#define max(a,b)	       \
+#define max(a, b)	       \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })

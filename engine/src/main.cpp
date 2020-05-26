@@ -287,7 +287,7 @@ int main(int argc, char** argv) {
       char *reading = strtok(inp, " ");
       reading = strtok(NULL, " ");
 
-      if (reading == '\0') continue;
+      if (*reading == '\0') continue;
       if (strstr(reading, ".mac") != NULL)
 	sprintf(specificMachine, "%s", reading);
       else
